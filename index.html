@@ -284,12 +284,8 @@ const DISCORD_REDIRECT  = 'https://saportbati.github.io/loadsite/';
 const DISCORD_SCOPE     = 'identify email';
 const WORKER_URL        = 'https://loadsite-api.grebenkinmatveyvyceslacovi2007.workers.dev';
 
-// GitHub подписки
-const GH_OWNER = 'SaportBati';
-const GH_REPO  = 'report1';
-const GH_FILE  = 'users_encrypted.txt';
-const GH_TOKEN = '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';
-const XOR_KEY  = 'SaportBati_SecretKey_2024';
+// XOR-ключ для расшифровки строк подписок (не секрет — только обфускация)
+const XOR_KEY = 'SaportBati_SecretKey_2024';
 
 // ═══════ BASE64 DECODE ═══════
 const B64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
@@ -331,7 +327,6 @@ function parseEntry(entry) {
 }
 
 function stripBracketPrefix(name) {
-  // Убираем "[123]" в начале ника
   return name.replace(/^\[\d+\]/, '');
 }
 
@@ -360,24 +355,18 @@ function formatTimeLeft(ts) {
 }
 
 // ═══════ FETCH SUBSCRIPTIONS ═══════
+// Запрос идёт через Cloudflare Worker — GH_TOKEN хранится только там
 async function fetchSubscriptions() {
-  const url = `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_FILE}`;
-  const res = await fetch(url, {
-    headers: {
-      'Authorization': 'token ' + GH_TOKEN,
-      'Accept': 'application/vnd.github.v3+json',
-      'User-Agent': 'LoadReport-Web'
-    }
-  });
-  if (!res.ok) throw new Error('GitHub API: ' + res.status);
+  const res = await fetch(WORKER_URL + '/subs');
+  if (!res.ok) throw new Error('Worker /subs: ' + res.status);
   const data = await res.json();
-  if (!data.content) throw new Error('Файл пустой');
-
-  // Декодируем содержимое файла (base64 → строки)
-  const fileRaw = b64decodeStr(data.content);
+  // Worker возвращает { lines: ["строка1", "строка2", ...] }
+  // где каждая строка — уже base64+XOR зашифрованная запись (как было в файле)
+  const { lines } = data;
+  if (!Array.isArray(lines)) throw new Error('Неверный формат ответа');
 
   const entries = [];
-  for (const line of fileRaw.split(/\r?\n/)) {
+  for (const line of lines) {
     const trimmed = line.trim();
     if (!trimmed) continue;
     try {
@@ -395,7 +384,6 @@ async function fetchSubscriptions() {
 function renderSubscription(nick, entries) {
   const cleanNick = stripBracketPrefix(nick).toLowerCase();
 
-  // Ищем запись — сравниваем без префиксов типа [123]
   let found = null;
   for (const raw of entries) {
     const e = parseEntry(raw);
@@ -434,7 +422,6 @@ function renderSubscription(nick, entries) {
     statusText.textContent = found.ts === 0 ? 'Активна · Безлимит' : 'Активна';
   }
 
-  // Префикс со цветом
   let prefixHTML = '<span style="color:var(--muted)">—</span>';
   if (found.prefix) {
     const col = found.color ? found.color.replace(/^#/,'') : null;
@@ -444,7 +431,6 @@ function renderSubscription(nick, entries) {
     prefixHTML = `<span class="prefix-badge" style="${style}">[${found.prefix}]</span>`;
   }
 
-  // Дата истечения
   let expireHTML;
   if (expired) {
     expireHTML = `<span style="color:var(--red)">${formatDate(found.ts)}</span>`;
@@ -477,7 +463,7 @@ function renderSubscription(nick, entries) {
   </div>`;
 }
 
-// ═══════ WORKER DB ═══════
+// ═══════ WORKER DB (пользователи) ═══════
 async function readDB() {
   try {
     const r = await fetch(WORKER_URL);
@@ -547,7 +533,6 @@ async function handleDiscordCallback() {
     if (!res.ok) throw new Error('Discord API ' + res.status);
     const dc = await res.json();
 
-    // Строим URL аватара
     let avatarUrl = null;
     if (dc.avatar) {
       const ext = dc.avatar.startsWith('a_') ? 'gif' : 'png';
@@ -634,11 +619,9 @@ async function showProfile(user) {
   document.getElementById('pEmail').textContent  = user.email || '—';
   document.getElementById('navNick').textContent = '@' + user.nick;
 
-  // АВАТАР — img тег грузит напрямую, CORS не нужен для <img>
   const avEl   = document.getElementById('avEl');
   const letter = document.getElementById('avLetter');
 
-  // Чистим старые img
   avEl.querySelectorAll('img').forEach(i => i.remove());
 
   if (user.avatar) {
@@ -661,7 +644,6 @@ async function showProfile(user) {
   document.getElementById('sDays').textContent = Math.max(1, Math.round((Date.now() - joined) / 86400000));
   buildDots();
 
-  // Загружаем подписку
   try {
     const entries = await fetchSubscriptions();
     renderSubscription(user.nick, entries);
