@@ -643,9 +643,7 @@ async function showProfile(user) {
     letter.textContent = user.nick[0].toUpperCase();
   }
 
-  const joined = new Date(user.createdAt || Date.now());
-  document.getElementById('sDays').textContent = Math.max(1, Math.round((Date.now() - joined) / 86400000));
-  buildDots();
+
 
   try {
     const entries = await fetchSubscriptions();
@@ -665,15 +663,6 @@ function logout() {
   goStep('Login');
 }
 
-function buildDots() {
-  const c = document.getElementById('dotsEl');
-  c.innerHTML = '';
-  for (let i = 0; i < 35; i++) {
-    const d = document.createElement('div');
-    const r = Math.random();
-    d.className = 'dot' + (r > .78 ? ' h' : r > .52 ? ' a' : '');
-    c.appendChild(d);
-  }
 }
 
 // ═══════ INIT ═══════
