@@ -509,7 +509,7 @@ input::placeholder{color:rgba(100,116,139,.5)}
       <!-- ─── STEP: pick nick (discord new user) ─── -->
       <div class="step" id="stepPickNick">
         <div class="ttl">Выбери ник</div>
-        <div class="sub">Почти готово! Придумай ник для профиля.</div>
+        <div class="sub">Почти готово! Введи свой игровой ник.</div>
         <div class="fg">
           <label>Ник *</label>
           <input type="text" id="dcNick" placeholder="cool_nickname" maxlength="32" onkeydown="if(event.key==='Enter')finishDiscordReg()">
@@ -568,17 +568,8 @@ const DISCORD_CLIENT_ID   = '1481633911917514853';
 const DISCORD_REDIRECT    = 'https://saportbati.github.io/loadsite/';
 const DISCORD_SCOPE       = 'identify email';
 
-// GitHub DB
-const REPO_OWNER = 'SaportBati';
-const REPO_NAME  = 'loadsite';
-const TOKEN      = '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';
-const DB_PATH    = 'users.json';
-const API_BASE   = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${DB_PATH}`;
-const HDRS       = {
-  'Authorization': `token ${TOKEN}`,
-  'Accept': 'application/vnd.github.v3+json',
-  'Content-Type': 'application/json'
-};
+// Cloudflare Worker (токен спрятан на сервере)
+const WORKER_URL = 'https://loadsite-api.grebenkinmatveyvyceslacovi2007.workers.dev';
 
 // ══════════════════════════════════════════════
 //  STATE
@@ -591,28 +582,22 @@ let pendingDiscordData = null;
 let timerInterval     = null;
 
 // ══════════════════════════════════════════════
-//  GITHUB DB
+//  DB через Worker
 // ══════════════════════════════════════════════
 async function readDB() {
   try {
-    const r = await fetch(API_BASE + '?ref=main', { headers: HDRS });
-    if (r.status === 404) return { users: [], sha: null };
-    if (!r.ok) throw new Error('GitHub ' + r.status);
-    const d = await r.json();
-    const obj = JSON.parse(atob(d.content.replace(/\n/g,'')));
-    return { users: obj.users || [], sha: d.sha };
+    const r = await fetch(WORKER_URL);
+    if (!r.ok) throw new Error('Worker ' + r.status);
+    return await r.json();
   } catch(e) { console.error(e); return { users: [], sha: null }; }
 }
 async function writeDB(users, sha) {
-  const body = {
-    message: 'update users',
-    content: btoa(unescape(encodeURIComponent(JSON.stringify({ users }, null, 2)))),
-    branch: 'main'
-  };
-  if (sha) body.sha = sha;
-  const r = await fetch(API_BASE, { method:'PUT', headers: HDRS, body: JSON.stringify(body) });
-  if (!r.ok) { const e = await r.json(); throw new Error(e.message || 'Write failed'); }
-  return r.json();
+  const r = await fetch(WORKER_URL, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ users, sha })
+  });
+  if (!r.ok) { const e = await r.json(); throw new Error(e.error || 'Write failed'); }
 }
 
 // ══════════════════════════════════════════════
