@@ -355,18 +355,30 @@ function formatTimeLeft(ts) {
 }
 
 // ═══════ FETCH SUBSCRIPTIONS ═══════
-// Запрос идёт через Cloudflare Worker — GH_TOKEN хранится только там
+// Запрос идёт через Cloudflare Worker — GH_TOKEN хранится только там.
+// Worker на GET /subs возвращает JSON с полем content (base64 файла, как GitHub API),
+// либо поле lines (массив зашифрованных строк) — поддерживаем оба варианта.
 async function fetchSubscriptions() {
   const res = await fetch(WORKER_URL + '/subs');
   if (!res.ok) throw new Error('Worker /subs: ' + res.status);
   const data = await res.json();
-  // Worker возвращает { lines: ["строка1", "строка2", ...] }
-  // где каждая строка — уже base64+XOR зашифрованная запись (как было в файле)
-  const { lines } = data;
-  if (!Array.isArray(lines)) throw new Error('Неверный формат ответа');
+
+  let rawLines = [];
+
+  if (Array.isArray(data.lines)) {
+    // Вариант 1: Worker вернул уже готовый массив строк (зашифрованных)
+    rawLines = data.lines;
+  } else if (typeof data.content === 'string') {
+    // Вариант 2: Worker вернул поле content — это base64 всего файла (как GitHub API).
+    // Декодируем файл и разбиваем на строки — точно как Lua fetchThread.
+    const fileRaw = b64decodeStr(data.content);
+    rawLines = fileRaw.split(/\r?\n/);
+  } else {
+    throw new Error('Неверный формат ответа Worker (/subs должен вернуть {content} или {lines})');
+  }
 
   const entries = [];
-  for (const line of lines) {
+  for (const line of rawLines) {
     const trimmed = line.trim();
     if (!trimmed) continue;
     try {
