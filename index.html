@@ -171,6 +171,12 @@ input::placeholder{color:rgba(100,116,139,.5)}
 .btn-buy-icon{font-size:1.1rem;animation:sparkle 2s ease-in-out infinite}
 @keyframes sparkle{0%,100%{transform:scale(1) rotate(0deg)}50%{transform:scale(1.15) rotate(8deg)}}
 
+.btn-trial{width:100%;padding:13px;background:rgba(127,255,212,0.08);border:1px solid rgba(127,255,212,0.3);border-radius:13px;display:flex;align-items:center;justify-content:center;gap:10px;color:#7fffd4;font-family:'Outfit',sans-serif;font-size:.9rem;font-weight:600;cursor:pointer;transition:all .28s;margin-top:10px;letter-spacing:.02em}
+.btn-trial:hover{background:rgba(127,255,212,0.15);border-color:rgba(127,255,212,0.55);transform:translateY(-2px);box-shadow:0 6px 28px rgba(127,255,212,0.2)}
+.btn-trial:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
+.btn-trial-icon{font-size:1rem}
+.trial-used-notice{text-align:center;padding:10px 0 2px;color:rgba(127,255,212,0.5);font-size:.8rem;letter-spacing:.05em}
+
 .free-divider{height:1px;background:linear-gradient(90deg,transparent,rgba(59,130,246,.2),transparent);margin:20px 0}
 
 /* STATS */
@@ -308,6 +314,17 @@ const WORKER_URL        = 'https://loadsite-api.grebenkinmatveyvyceslacovi2007.w
 
 const XOR_KEY = 'SaportBati_SecretKey_2024';
 
+// GitHub API — для записи пробной подписки
+const GITHUB_TOKEN = 'возьми из cloudflare'; // ← вставь свой GitHub PAT
+const GITHUB_OWNER = 'SaportBati';
+const GITHUB_REPO  = 'report1';
+const GITHUB_FILE  = 'users_encrypted.txt';
+
+// Параметры пробной подписки
+const TRIAL_SECONDS = 2 * 24 * 3600; // 2 дня
+const TRIAL_PREFIX  = 'Пробная-подписка';
+const TRIAL_COLOR   = '#7FFFD4';
+
 // ═══════ BASE64 DECODE ═══════
 const B64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
@@ -333,6 +350,76 @@ function b64decodeStr(str) {
 // ═══════ XOR ═══════
 function xorDecrypt(bytes, key) {
   return bytes.map((b, i) => b ^ key.charCodeAt(i % key.length));
+}
+
+// ═══════ BASE64 ENCODE ═══════
+function b64encodeBytes(bytes) {
+  const chars = [];
+  for (let i = 0; i < bytes.length; i += 3) {
+    const b1 = bytes[i], b2 = (bytes[i+1] !== undefined ? bytes[i+1] : 0), b3 = (bytes[i+2] !== undefined ? bytes[i+2] : 0);
+    const has2 = i+1 < bytes.length, has3 = i+2 < bytes.length;
+    const n = b1 * 65536 + b2 * 256 + b3;
+    chars.push(B64[Math.floor(n/262144)]);
+    chars.push(B64[Math.floor((n%262144)/4096)]);
+    chars.push(has2 ? B64[Math.floor((n%4096)/64)] : '=');
+    chars.push(has3 ? B64[n%64] : '=');
+  }
+  return chars.join('');
+}
+
+// ═══════ XOR ENCRYPT ═══════
+function xorEncrypt(str, key) {
+  return Array.from(str).map((c, i) => c.charCodeAt(0) ^ key.charCodeAt(i % key.length));
+}
+
+// ═══════ GITHUB READ/WRITE ═══════
+async function githubFetch() {
+  const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE}`;
+  const res = await fetch(url, {
+    headers: {
+      'Authorization': 'token ' + GITHUB_TOKEN,
+      'Accept': 'application/vnd.github.v3+json',
+      'User-Agent': 'LoadReport-Site'
+    }
+  });
+  if (!res.ok) throw new Error('GitHub fetch ' + res.status);
+  const d = await res.json();
+  const fileRaw = atob(d.content.replace(/\s/g,''));
+  const entries = [];
+  for (const line of fileRaw.split(/\r?\n/)) {
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+    try {
+      const bytes     = b64decodeBytes(trimmed);
+      const decrypted = xorDecrypt(bytes, XOR_KEY).map(b => String.fromCharCode(b)).join('');
+      if (decrypted.includes('|') || decrypted.length > 1) entries.push(decrypted);
+    } catch(e) {}
+  }
+  return { sha: d.sha, entries };
+}
+
+async function githubPush(sha, entries, message) {
+  const lines = entries.map(entry => b64encodeBytes(xorEncrypt(entry, XOR_KEY)));
+  const fileContent = lines.join('\n') + '\n';
+  const raw = btoa(fileContent);
+  const lined = [];
+  for (let j = 0; j < raw.length; j += 60) lined.push(raw.slice(j, j+60));
+  const fileB64 = lined.join('\n') + '\n';
+  const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE}`;
+  const res = await fetch(url, {
+    method: 'PUT',
+    headers: {
+      'Authorization': 'token ' + GITHUB_TOKEN,
+      'Accept': 'application/vnd.github.v3+json',
+      'Content-Type': 'application/json',
+      'User-Agent': 'LoadReport-Site'
+    },
+    body: JSON.stringify({ message, content: fileB64, sha })
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error('GitHub push ' + res.status + ': ' + (err.message || ''));
+  }
 }
 
 // ═══════ PARSE ENTRY ═══════
@@ -443,6 +530,10 @@ function renderSubscription(nick, entries) {
           <span class="btn-buy-icon">⚡</span>
           Купить подписку
         </button>
+        <button class="btn-trial" id="trialBtn" onclick="handleTrialSubscription()">
+          <span class="btn-trial-icon">🎁</span>
+          Получить пробную подписку · 2 дня
+        </button>
       </div>
     `;
     return;
@@ -511,10 +602,74 @@ function handleBuySubscription() {
   alert('Для покупки подписки обратись к администратору в Discord!');
 }
 
+// ═══════ TRIAL SUBSCRIPTION ═══════
+async function handleTrialSubscription() {
+  const session = loadSession();
+  if (!session) return;
+
+  const btn = document.getElementById('trialBtn');
+  if (!btn) return;
+  btn.disabled = true;
+  btn.innerHTML = `<span class="sp"></span>Проверяем...`;
+
+  try {
+    // 1. Читаем актуальный файл через GitHub API
+    const { sha, entries } = await githubFetch();
+
+    const cleanNick = stripBracketPrefix(session.nick).toLowerCase();
+
+    // 2. Проверяем — был ли ник когда-либо в базе (даже с истёкшей подпиской)
+    const alreadyExists = entries.some(raw => {
+      const e = parseEntry(raw);
+      return stripBracketPrefix(e.nick).toLowerCase() === cleanNick;
+    });
+
+    if (alreadyExists) {
+      btn.disabled = true;
+      btn.innerHTML = `<span class="btn-trial-icon">🚫</span>Пробная подписка уже была использована`;
+      return;
+    }
+
+    // 3. Формируем новую запись: Ник|timestamp|Пробная-подписка|#7FFFD4
+    btn.innerHTML = `<span class="sp"></span>Активируем...`;
+    const expireTs = Math.floor(Date.now() / 1000) + TRIAL_SECONDS;
+    const entry = `${session.nick}|${expireTs}|${TRIAL_PREFIX}|${TRIAL_COLOR}`;
+    const newEntries = [...entries, entry];
+
+    // 4. Пушим обратно
+    await githubPush(sha, newEntries, `Trial: ${session.nick}`);
+
+    // 5. Перерисовываем блок подписки
+    btn.innerHTML = `<span class="btn-trial-icon">✅</span>Пробная подписка активирована!`;
+    btn.style.color = '#6ee7b7';
+    btn.style.borderColor = 'rgba(16,185,129,0.5)';
+
+    // Перезагружаем подписку через секунду
+    setTimeout(async () => {
+      try {
+        const fresh = await fetchSubscriptions();
+        renderSubscription(session.nick, fresh);
+      } catch(e) {}
+    }, 1200);
+
+  } catch(e) {
+    btn.disabled = false;
+    btn.innerHTML = `<span class="btn-trial-icon">🎁</span>Получить пробную подписку · 2 дня`;
+    // Показываем ошибку под кнопкой
+    const existing = document.getElementById('trialErrMsg');
+    if (existing) existing.remove();
+    const msg = document.createElement('div');
+    msg.id = 'trialErrMsg';
+    msg.style.cssText = 'color:#fca5a5;font-size:.78rem;text-align:center;margin-top:8px;';
+    msg.textContent = 'Ошибка: ' + e.message;
+    btn.after(msg);
+  }
+}
+
 // ═══════ WORKER DB (пользователи) ═══════
 async function readDB() {
   try {
-    const r = await fetch(WORKER_URL);
+    const r = await fetchWithTimeout(WORKER_URL, {}, 5000);
     if (!r.ok) throw new Error('Worker ' + r.status);
     return await r.json();
   } catch(e) { return { users: [], sha: null }; }
@@ -552,6 +707,14 @@ function hideLoading() {
   setTimeout(() => el.style.display = 'none', 350);
 }
 
+// ═══════ FETCH WITH TIMEOUT ═══════
+function fetchWithTimeout(url, options = {}, ms = 8000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), ms);
+  return fetch(url, { ...options, signal: controller.signal })
+    .finally(() => clearTimeout(timer));
+}
+
 // ═══════ DISCORD OAUTH ═══════
 function loginDiscord() {
   const btn = document.getElementById('dcAuthBtn');
@@ -575,9 +738,9 @@ async function handleDiscordCallback() {
   showAlert('Получаем данные Discord...', 'info');
 
   try {
-    const res = await fetch('https://discord.com/api/users/@me', {
+    const res = await fetchWithTimeout('https://discord.com/api/users/@me', {
       headers: { Authorization: 'Bearer ' + token }
-    });
+    }, 8000);
     if (!res.ok) throw new Error('Discord API ' + res.status);
     const dc = await res.json();
 
@@ -723,19 +886,31 @@ function buildDots() {
 
 // ═══════ INIT ═══════
 window.addEventListener('DOMContentLoaded', async () => {
-  if (window.location.hash.includes('access_token')) {
-    showAuthPage();
-    await handleDiscordCallback();
-    return;
-  }
-  const saved = loadSession();
-  if (saved) {
+  // Аварийный таймаут — если через 6 сек всё ещё крутится, показываем авторизацию
+  const emergency = setTimeout(() => { hideLoading(); showAuthPage(); }, 6000);
+
+  try {
+    if (window.location.hash.includes('access_token')) {
+      showAuthPage();
+      clearTimeout(emergency);
+      await handleDiscordCallback();
+      return;
+    }
+    const saved = loadSession();
+    if (saved) {
+      hideLoading();
+      clearTimeout(emergency);
+      await showProfile(saved);
+      return;
+    }
     hideLoading();
-    await showProfile(saved);
-    return;
+    clearTimeout(emergency);
+    showAuthPage();
+  } catch(e) {
+    clearTimeout(emergency);
+    hideLoading();
+    showAuthPage();
   }
-  hideLoading();
-  showAuthPage();
 });
 </script>
 </body>
