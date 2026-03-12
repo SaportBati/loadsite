@@ -152,14 +152,21 @@ input::placeholder{color:rgba(100,116,139,.5)}
 .sub-empty{text-align:center;padding:20px;color:var(--muted);font-size:.875rem;line-height:1.6}
 .sub-loading-inner{text-align:center;padding:20px;color:var(--muted);font-size:.875rem}
 
-/* STATS REMOVED */
+/* STATS */
+.sg{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.sc{background:var(--surf);border:1px solid var(--border);border-radius:14px;padding:24px;backdrop-filter:blur(20px);text-align:center;transition:transform .2s,box-shadow .2s;cursor:default}
+.sc:hover{transform:translateY(-4px);box-shadow:0 12px 40px rgba(59,130,246,.15)}
+.si{font-size:1.4rem;margin-bottom:8px}
+.sv{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:.04em;background:linear-gradient(135deg,#fff,var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.sl{color:var(--muted);font-size:.75rem;margin-top:3px}
 
-
-.btn-buy{width:100%;padding:18px;background:linear-gradient(135deg,var(--blue) 0%,var(--violet) 100%);border:none;border-radius:16px;color:#fff;font-family:'Outfit',sans-serif;font-size:1.05rem;font-weight:700;cursor:pointer;transition:all .28s;display:flex;align-items:center;justify-content:center;gap:12px;box-shadow:0 4px 32px rgba(59,130,246,.4);letter-spacing:.03em;position:relative;overflow:hidden}
-.btn-buy::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.12),transparent);opacity:0;transition:opacity .2s}
-.btn-buy:hover{transform:translateY(-3px);box-shadow:0 10px 40px rgba(59,130,246,.55)}
-.btn-buy:hover::after{opacity:1}
-.btn-buy-icon{font-size:1.3rem}
+.ac{background:var(--surf);border:1px solid var(--border);border-radius:16px;padding:28px;backdrop-filter:blur(20px)}
+.sect{font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:.1em;color:#fff;margin-bottom:18px;display:flex;align-items:center;gap:12px}
+.sect::after{content:'';flex:1;height:1px;background:var(--border)}
+.dots{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.dot{aspect-ratio:1;border-radius:4px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.04);transition:all .2s}
+.dot.a{background:rgba(59,130,246,.3);border-color:rgba(59,130,246,.4)}
+.dot.h{background:linear-gradient(135deg,var(--blue),var(--cyan));border-color:var(--cyan);box-shadow:0 0 8px rgba(6,182,212,.3)}
 
 @media(max-width:600px){
   .card,.ph{padding:24px 20px}
@@ -204,7 +211,7 @@ input::placeholder{color:rgba(100,116,139,.5)}
         <div class="ttl">Добро пожаловать</div>
         <div class="sub">Войди через Discord, чтобы получить доступ к своему профилю.</div>
         <button class="btn-discord" id="dcAuthBtn" onclick="loginDiscord()">
-          <svg width="22" height="22" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill="#6665D2" d="M85.22,24.958c-11.459-8.575-22.438-8.334-22.438-8.334l-1.122,1.282c13.623,4.087,19.954,10.097,19.954,10.097c-19.491-10.731-44.317-10.654-64.59,0c0,0,6.571-6.331,20.996-10.418l-0.801-0.962c0,0-10.899-0.24-22.438,8.334c0,0-11.54,20.755-11.54,46.319c0,0,6.732,11.54,24.442,12.101c0,0,2.965-3.526,5.369-6.571c-10.177-3.045-14.024-9.376-14.024-9.376c6.394,4.001,12.859,6.505,20.916,8.094c13.108,2.698,29.413-0.076,41.591-8.094c0,0-4.007,6.491-14.505,9.456c2.404,2.965,5.289,6.411,5.289,6.411c17.71-0.561,24.441-12.101,24.441-12.02C96.759,45.713,85.22,24.958,85.22,24.958z M35.055,63.824c-4.488,0-8.174-3.927-8.174-8.815c0.328-11.707,16.102-11.671,16.348,0C43.229,59.897,39.622,63.824,35.055,63.824z M64.304,63.824c-4.488,0-8.174-3.927-8.174-8.815c0.36-11.684,15.937-11.689,16.348,0C72.478,59.897,68.872,63.824,64.304,63.824z"/></svg>
+          <svg width="22" height="16" viewBox="0 0 24 18" fill="none"><path d="M20.317 1.492a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 .677 1.492a.07.07 0 0 0-.032.027C-.467 6.167-1.32 10.707.099 15.183c.002.022.015.043.033.05a19.904 19.904 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128c.126-.094.252-.192.372-.292a.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.1.246.198.373.292a.077.077 0 0 1-.006.127c-.598.35-1.22.645-1.873.892a.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.661a.061.061 0 0 0-.031-.03zM8.02 12.278c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.095 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.095 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z" fill="white"/></svg>
           Войти через Discord
         </button>
         <div class="hint">Нужен игровой ник (как в SAMP) — введёшь после входа.</div>
@@ -256,12 +263,15 @@ input::placeholder{color:rgba(100,116,139,.5)}
       </div>
     </div>
 
-    <!-- Buy button (shown when no subscription) -->
-    <div id="buyBtnWrap" style="display:none">
-      <button class="btn-buy" onclick="alert('Скоро!')">
-        <span class="btn-buy-icon">🚀</span>
-        Купить подписку
-      </button>
+    <div class="sg">
+      <div class="sc"><div class="si">📊</div><div class="sv" id="sDays">1</div><div class="sl">Дней с нами</div></div>
+      <div class="sc"><div class="si">⚡</div><div class="sv">1</div><div class="sl">Уровень</div></div>
+      <div class="sc"><div class="si">🎯</div><div class="sv">0</div><div class="sl">Отчётов</div></div>
+    </div>
+
+    <div class="ac">
+      <div class="sect">Активность</div>
+      <div class="dots" id="dotsEl"></div>
     </div>
 
   </div>
@@ -297,14 +307,6 @@ function b64decodeBytes(str) {
 
 function b64decodeStr(str) {
   return b64decodeBytes(str).map(b => String.fromCharCode(b)).join('');
-}
-
-// ═══════ CP1251 → строка ═══════
-// Lua пишет строки в CP1251, браузер ожидает UTF-8 — конвертируем
-const CP1251 = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,1026,1027,8218,1107,8222,8230,8224,8225,8364,8240,1033,8249,1034,1036,1035,1037,1038,8216,8217,8220,8221,8226,8211,8212,8250,8482,1113,8250,1114,1116,1115,1117,160,1038,1118,1032,164,1168,166,167,1025,169,1028,171,172,173,174,1031,176,177,1030,1110,1169,181,182,183,1105,8470,1108,187,1112,1029,1109,1111,1040,1041,1042,1043,1044,1045,1046,1047,1048,1049,1050,1051,1052,1053,1054,1055,1056,1057,1058,1059,1060,1061,1062,1063,1064,1065,1066,1067,1068,1069,1070,1071,1072,1073,1074,1075,1076,1077,1078,1079,1080,1081,1082,1083,1084,1085,1086,1087,1088,1089,1090,1091,1092,1093,1094,1095,1096,1097,1098,1099,1100,1101,1102,1103];
-
-function cp1251BytesToStr(bytes) {
-  return bytes.map(b => String.fromCodePoint(b < 128 ? b : CP1251[b])).join('');
 }
 
 // ═══════ XOR ═══════
@@ -353,26 +355,19 @@ function formatTimeLeft(ts) {
 }
 
 // ═══════ FETCH SUBSCRIPTIONS ═══════
-// GitHub Contents API — работает для публичных репо без токена
+// Грузим напрямую из публичного репо через raw.githubusercontent.com — токен не нужен
 async function fetchSubscriptions() {
-  const API_URL = 'https://api.github.com/repos/SaportBati/report1/contents/users_encrypted.txt';
-  const res = await fetch(API_URL, {
-    headers: { 'Accept': 'application/vnd.github.v3+json', 'User-Agent': 'LoadReport-Web' },
-    cache: 'no-store'
-  });
-  if (!res.ok) throw new Error('GitHub API: ' + res.status);
-  const data = await res.json();
-  if (!data.content) throw new Error('Файл пустой или репо приватное');
-
-  // data.content — base64 содержимого файла (как в Lua fetchThread)
-  const fileRaw = b64decodeStr(data.content);
+  const RAW_URL = 'https://raw.githubusercontent.com/SaportBati/report1/main/users_encrypted.txt';
+  const res = await fetch(RAW_URL + '?t=' + Date.now()); // cache-bust
+  if (!res.ok) throw new Error('Не удалось загрузить файл: ' + res.status);
+  const fileRaw = await res.text();
   const entries = [];
   for (const line of fileRaw.split(/\r?\n/)) {
     const trimmed = line.trim();
     if (!trimmed) continue;
     try {
       const bytes     = b64decodeBytes(trimmed);
-      const decrypted = cp1251BytesToStr(xorDecrypt(bytes, XOR_KEY));
+      const decrypted = xorDecrypt(bytes, XOR_KEY).map(b => String.fromCharCode(b)).join('');
       if (decrypted.includes('|') || decrypted.length > 1) {
         entries.push(decrypted);
       }
@@ -403,17 +398,15 @@ function renderSubscription(nick, entries) {
     statusBadge.className = 'sub-status none';
     statusText.textContent = 'Нет подписки';
     body.innerHTML = `<div class="sub-empty">
-      Ник <b style="color:var(--text)">${nick}</b> не найден в базе подписок.
+      Ник <b style="color:var(--text)">${nick}</b> не найден в базе подписок.<br>
+      Обратись к администратору для получения доступа.
     </div>`;
-    document.getElementById('buyBtnWrap').style.display = 'block';
     return;
   }
 
   const expired  = isExpired(found.ts);
   const timeLeft = formatTimeLeft(found.ts);
   const isCrit   = found.ts !== 0 && !expired && (found.ts - Math.floor(Date.now()/1000)) < 86400 * 3;
-
-  document.getElementById('buyBtnWrap').style.display = 'none';
 
   if (expired) {
     card.className = 'sub-card expired-sub';
@@ -643,7 +636,9 @@ async function showProfile(user) {
     letter.textContent = user.nick[0].toUpperCase();
   }
 
-
+  const joined = new Date(user.createdAt || Date.now());
+  document.getElementById('sDays').textContent = Math.max(1, Math.round((Date.now() - joined) / 86400000));
+  buildDots();
 
   try {
     const entries = await fetchSubscriptions();
@@ -663,6 +658,15 @@ function logout() {
   goStep('Login');
 }
 
+function buildDots() {
+  const c = document.getElementById('dotsEl');
+  c.innerHTML = '';
+  for (let i = 0; i < 35; i++) {
+    const d = document.createElement('div');
+    const r = Math.random();
+    d.className = 'dot' + (r > .78 ? ' h' : r > .52 ? ' a' : '');
+    c.appendChild(d);
+  }
 }
 
 // ═══════ INIT ═══════
