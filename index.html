@@ -353,12 +353,19 @@ function formatTimeLeft(ts) {
 }
 
 // ═══════ FETCH SUBSCRIPTIONS ═══════
-// Грузим напрямую из публичного репо через raw.githubusercontent.com — токен не нужен
+// GitHub Contents API — работает для публичных репо без токена
 async function fetchSubscriptions() {
-  const RAW_URL = 'https://raw.githubusercontent.com/SaportBati/report1/main/users_encrypted.txt';
-  const res = await fetch(RAW_URL + '?t=' + Date.now()); // cache-bust
-  if (!res.ok) throw new Error('Не удалось загрузить файл: ' + res.status);
-  const fileRaw = await res.text();
+  const API_URL = 'https://api.github.com/repos/SaportBati/report1/contents/users_encrypted.txt';
+  const res = await fetch(API_URL, {
+    headers: { 'Accept': 'application/vnd.github.v3+json', 'User-Agent': 'LoadReport-Web' },
+    cache: 'no-store'
+  });
+  if (!res.ok) throw new Error('GitHub API: ' + res.status);
+  const data = await res.json();
+  if (!data.content) throw new Error('Файл пустой или репо приватное');
+
+  // data.content — base64 содержимого файла (как в Lua fetchThread)
+  const fileRaw = b64decodeStr(data.content);
   const entries = [];
   for (const line of fileRaw.split(/\r?\n/)) {
     const trimmed = line.trim();
