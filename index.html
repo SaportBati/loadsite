@@ -353,11 +353,7 @@ function formatTimeLeft(ts) {
 
 // ═══════ FETCH SUBSCRIPTIONS — только через воркер /subs-api (без CDN кэша) ═══════
 async function fetchSubscriptions() {
-  const r = await fetchWithTimeout(
-    WORKER_URL + '/subs-api',
-    { mode: 'cors', headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' } },
-    12000
-  );
+  const r = await fetch(WORKER_URL + '/subs-api?t=' + Date.now());
   if (!r.ok) throw new Error('Worker error: ' + r.status);
   const fileRaw = await r.text();
   if (fileRaw.startsWith('ERROR:')) throw new Error(fileRaw);
