@@ -77,7 +77,6 @@ input::placeholder{color:rgba(100,116,139,.5)}
 @keyframes rot{to{transform:rotate(360deg)}}
 .pi{flex:1;min-width:0}
 .pname{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:.04em;background:linear-gradient(90deg,#fff,var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;margin-bottom:4px}
-.pemail{color:var(--muted);font-size:.82rem;margin-bottom:12px}
 .badges{display:flex;gap:8px;flex-wrap:wrap}
 .badge{display:inline-flex;align-items:center;gap:5px;border-radius:100px;padding:4px 12px;font-size:.72rem;letter-spacing:.07em}
 .badge-ver{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2);color:#6ee7b7}
@@ -181,7 +180,6 @@ input::placeholder{color:rgba(100,116,139,.5)}
       <div class="av-outer"><div class="av" id="avEl"><span id="avLetter">?</span></div><div class="av-ring"></div></div>
       <div class="pi">
         <div class="pname" id="pNick">&mdash;</div>
-        <div class="pemail" id="pEmail">&mdash;</div>
         <div class="badges">
           <span class="badge badge-ver"><span class="badge-dot green"></span>Активен</span>
           <span class="badge badge-dc"><span class="badge-dot indigo"></span>&#127918; Discord</span>
@@ -511,7 +509,7 @@ async function finishDiscordReg(){
 function showAuthPage(){document.getElementById('authWrap').style.display='flex';document.getElementById('profileWrap').style.display='none';document.getElementById('nav').classList.remove('show');}
 async function showProfile(user){
   document.getElementById('authWrap').style.display='none';document.getElementById('profileWrap').style.display='flex';document.getElementById('nav').classList.add('show');
-  document.getElementById('pNick').textContent=user.nick;document.getElementById('pEmail').textContent=user.email||'—';document.getElementById('navNick').textContent='@'+user.nick;
+  document.getElementById('pNick').textContent=user.nick;document.getElementById('navNick').textContent='@'+user.nick;
   const avEl=document.getElementById('avEl'),letter=document.getElementById('avLetter');
   avEl.querySelectorAll('img').forEach(i=>i.remove());
   if(user.avatar){letter.style.display='none';const img=document.createElement('img');img.alt=user.nick;img.src=user.avatar;img.onerror=()=>{img.remove();letter.style.display='';letter.textContent=user.nick[0].toUpperCase();};avEl.insertBefore(img,avEl.firstChild);}
@@ -547,8 +545,27 @@ async function showProfile(user){
   document.getElementById('sCaught').textContent  = totalCaught !== null ? totalCaught       : '—';
   document.getElementById('sChance').textContent  = chance     !== null ? chance + '%'     : '—';
   renderHuntTime(data && data.total_hunting_secs ? data.total_hunting_secs : 0);
+
+  // Авто-обновление каждые 5 сек
+  if(window._autoRefreshTimer) clearInterval(window._autoRefreshTimer);
+  window._autoRefreshTimer = setInterval(() => refreshProfileData(user.nick), 5000);
 }
-function logout(){clearSession();showAuthPage();goStep('Login');}
+function logout(){clearSession();if(window._autoRefreshTimer){clearInterval(window._autoRefreshTimer);window._autoRefreshTimer=null;}showAuthPage();goStep('Login');}
+
+// Обновляет только данные (подписка + статистика) без перерисовки аватара/шапки
+async function refreshProfileData(nick){
+  const [entriesResult, statsData] = await Promise.allSettled([
+    fetchSubscriptions(),
+    fetchPlayerStats(nick)
+  ]);
+  if(entriesResult.status === 'fulfilled') renderSubscription(nick, entriesResult.value);
+  const data = statsData.status === 'fulfilled' ? statsData.value : null;
+  const { avgPing, totalCaught, chance } = computeStats(data);
+  document.getElementById('sPing').textContent    = avgPing     !== null ? avgPing + ' мс' : '—';
+  document.getElementById('sCaught').textContent  = totalCaught !== null ? totalCaught      : '—';
+  document.getElementById('sChance').textContent  = chance      !== null ? chance + '%'    : '—';
+  renderHuntTime(data && data.total_hunting_secs ? data.total_hunting_secs : 0);
+}
 function formatHuntTime(secs) {
   if (!secs || secs <= 0) return null;
   const d = Math.floor(secs / 86400);
