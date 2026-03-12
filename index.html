@@ -215,176 +215,256 @@ const DISCORD_SCOPE     = 'identify email';
 const WORKER_URL        = 'https://loadsite-api.grebenkinmatveyvyceslacovi2007.workers.dev';
 const XOR_KEY           = 'SaportBati_SecretKey_2024';
 const TRIAL_SECONDS     = 2 * 24 * 3600;
-const TRIAL_PREFIX      = 'Пробная-подписка';
+const TRIAL_PREFIX      = '\u041f\u0440\u043e\u0431\u043d\u0430\u044f-\u043f\u043e\u0434\u043f\u0438\u0441\u043a\u0430'; // Пробная-подписка
 const TRIAL_COLOR       = '#7FFFD4';
 
-// BASE64 / XOR
+// ═══════ CP1251 таблица Unicode → байт ═══════
+// Символы 0x80-0xFF в CP1251 (индекс = байт - 0x80)
+const CP1251_MAP = [
+  0x0402,0x0403,0x201A,0x0453,0x201E,0x2026,0x2020,0x2021,
+  0x20AC,0x2030,0x0409,0x2039,0x040A,0x040C,0x040B,0x040F,
+  0x0452,0x2018,0x2019,0x201C,0x201D,0x2022,0x2013,0x2014,
+  0x0000,0x2122,0x0459,0x203A,0x045A,0x045C,0x045B,0x045F,
+  0x00A0,0x040E,0x045E,0x0408,0x00A4,0x0490,0x00A6,0x00A7,
+  0x0401,0x00A9,0x0404,0x00AB,0x00AC,0x00AD,0x00AE,0x0407,
+  0x00B0,0x00B1,0x0406,0x0456,0x0491,0x00B5,0x00B6,0x00B7,
+  0x0451,0x2116,0x0454,0x00BB,0x0458,0x0405,0x0455,0x0457,
+  // 0xC0-0xFF: А-я (кириллица)
+  0x0410,0x0411,0x0412,0x0413,0x0414,0x0415,0x0416,0x0417,
+  0x0418,0x0419,0x041A,0x041B,0x041C,0x041D,0x041E,0x041F,
+  0x0420,0x0421,0x0422,0x0423,0x0424,0x0425,0x0426,0x0427,
+  0x0428,0x0429,0x042A,0x042B,0x042C,0x042D,0x042E,0x042F,
+  0x0430,0x0431,0x0432,0x0433,0x0434,0x0435,0x0436,0x0437,
+  0x0438,0x0439,0x043A,0x043B,0x043C,0x043D,0x043E,0x043F,
+  0x0440,0x0441,0x0442,0x0443,0x0444,0x0445,0x0446,0x0447,
+  0x0448,0x0449,0x044A,0x044B,0x044C,0x044D,0x044E,0x044F,
+];
+
+// Строим обратную таблицу Unicode → CP1251 байт
+const unicodeToCp1251 = new Map();
+for (let i = 0; i < 128; i++) unicodeToCp1251.set(i, i);
+CP1251_MAP.forEach((unicode, i) => { if (unicode) unicodeToCp1251.set(unicode, 0x80 + i); });
+
+// Строим прямую таблицу CP1251 байт → Unicode
+const cp1251ToUnicode = new Array(256);
+for (let i = 0; i < 128; i++) cp1251ToUnicode[i] = i;
+CP1251_MAP.forEach((unicode, i) => { cp1251ToUnicode[0x80 + i] = unicode || 0; });
+
+// Конвертация строки (Unicode) → массив байт CP1251
+function strToCP1251Bytes(str) {
+  const bytes = [];
+  for (let i = 0; i < str.length; i++) {
+    const code = str.charCodeAt(i);
+    const byte = unicodeToCp1251.get(code);
+    bytes.push(byte !== undefined ? byte : 0x3F); // '?' если нет в таблице
+  }
+  return bytes;
+}
+
+// Конвертация массива байт CP1251 → строка Unicode
+function cp1251BytesToStr(bytes) {
+  return bytes.map(b => {
+    const unicode = cp1251ToUnicode[b];
+    return unicode !== undefined ? String.fromCharCode(unicode) : '?';
+  }).join('');
+}
+
+// ═══════ BASE64 / XOR ═══════
 const B64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 function b64decodeBytes(str) {
   str = str.replace(/\s/g, '');
   const out = [];
   for (let i = 0; i < str.length; i += 4) {
-    const a = B64.indexOf(str[i]), b = B64.indexOf(str[i+1]);
-    const c = str[i+2]==='=' ? 0 : B64.indexOf(str[i+2]);
-    const d = str[i+3]==='=' ? 0 : B64.indexOf(str[i+3]);
-    out.push(a*4 + Math.floor(b/16));
-    if (str[i+2]!=='=') out.push((b%16)*16 + Math.floor(c/4));
-    if (str[i+3]!=='=') out.push((c%4)*64 + d);
+    const a=B64.indexOf(str[i]), b=B64.indexOf(str[i+1]);
+    const c=str[i+2]==='='?0:B64.indexOf(str[i+2]);
+    const d=str[i+3]==='='?0:B64.indexOf(str[i+3]);
+    out.push(a*4+Math.floor(b/16));
+    if(str[i+2]!=='=') out.push((b%16)*16+Math.floor(c/4));
+    if(str[i+3]!=='=') out.push((c%4)*64+d);
   }
   return out;
 }
 function b64encodeBytes(bytes) {
-  const chars = [];
-  for (let i = 0; i < bytes.length; i += 3) {
-    const b1=bytes[i], b2=bytes[i+1]??0, b3=bytes[i+2]??0;
-    const has2=i+1<bytes.length, has3=i+2<bytes.length;
+  const chars=[];
+  for(let i=0;i<bytes.length;i+=3){
+    const b1=bytes[i],b2=bytes[i+1]??0,b3=bytes[i+2]??0;
+    const has2=i+1<bytes.length,has3=i+2<bytes.length;
     const n=b1*65536+b2*256+b3;
     chars.push(B64[Math.floor(n/262144)]);
     chars.push(B64[Math.floor((n%262144)/4096)]);
-    chars.push(has2 ? B64[Math.floor((n%4096)/64)] : '=');
-    chars.push(has3 ? B64[n%64] : '=');
+    chars.push(has2?B64[Math.floor((n%4096)/64)]:'=');
+    chars.push(has3?B64[n%64]:'=');
   }
   return chars.join('');
 }
-function xorDecrypt(bytes, key) { return bytes.map((b,i) => b ^ key.charCodeAt(i % key.length)); }
-function xorEncrypt(str, key) { return Array.from(str).map((c,i) => c.charCodeAt(0) ^ key.charCodeAt(i % key.length)); }
 
-// GITHUB — сайт сам шифрует/расшифровывает, воркер только проксирует
+// XOR с CP1251 байтами ключа
+function xorDecrypt(bytes, key) {
+  const keyBytes = strToCP1251Bytes(key);
+  return bytes.map((b, i) => b ^ keyBytes[i % keyBytes.length]);
+}
+
+// XOR строки → CP1251 байты → XOR → массив байт
+function xorEncrypt(str, key) {
+  const strBytes = strToCP1251Bytes(str);
+  const keyBytes = strToCP1251Bytes(key);
+  return strBytes.map((b, i) => b ^ keyBytes[i % keyBytes.length]);
+}
+
+// ═══════ GITHUB — воркер только проксирует, сайт шифрует/расшифровывает ═══════
 async function githubFetch() {
   const r = await fetchWithTimeout(WORKER_URL, {
-    method: 'POST', headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({ action: 'fetchSubs' })
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({action:'fetchSubs'})
   }, 10000);
   if (!r.ok) throw new Error('Worker fetchSubs ' + r.status);
   const d = await r.json();
   if (d.error) throw new Error(d.error);
-  // Декодируем и расшифровываем на стороне сайта
-  const fileRaw = atob(d.content.replace(/\s/g, ''));
+
+  // Декодируем base64 → сырые байты файла → построчно расшифровываем
+  const fileRaw = atob(d.content.replace(/\s/g,''));
   const entries = [];
   for (const line of fileRaw.split(/\r?\n/)) {
     const trimmed = line.trim();
     if (!trimmed) continue;
     try {
-      const bytes = b64decodeBytes(trimmed);
-      const dec   = xorDecrypt(bytes, XOR_KEY).map(b => String.fromCharCode(b)).join('');
-      if (dec.includes('|')) entries.push(dec);
+      const encBytes  = b64decodeBytes(trimmed);
+      const decBytes  = xorDecrypt(encBytes, XOR_KEY);
+      const decStr    = cp1251BytesToStr(decBytes);
+      if (decStr.includes('|')) entries.push(decStr);
     } catch(e) {}
   }
   return { sha: d.sha, entries };
 }
 
 async function githubPush(sha, entries, message) {
-  // Шифруем на стороне сайта: строка → XOR → base64
+  // Шифруем каждую строку: Unicode → CP1251 байты → XOR → Base64
   const encLines = entries.map(e => b64encodeBytes(xorEncrypt(e, XOR_KEY)));
   const fileContent = encLines.join('\n') + '\n';
-  // Кодируем весь файл в base64 для GitHub (побайтово)
+
+  // Кодируем весь файл в Base64 для GitHub API (побайтово)
   const fileBytes = Array.from(fileContent).map(c => c.charCodeAt(0));
   const raw = b64encodeBytes(fileBytes);
   const lined = [];
   for (let j = 0; j < raw.length; j += 60) lined.push(raw.slice(j, j+60));
   const fileB64 = lined.join('\n') + '\n';
-  // Отправляем воркеру готовый base64
+
   const r = await fetchWithTimeout(WORKER_URL, {
-    method: 'POST', headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({ action: 'pushSubs', sha, content: fileB64, message })
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({action:'pushSubs', sha, content: fileB64, message})
   }, 10000);
   if (!r.ok) throw new Error('Worker pushSubs ' + r.status);
   const res = await r.json();
   if (res.error) throw new Error(res.error);
 }
 
+// ═══════ PARSE / FORMAT ═══════
 function parseEntry(entry) {
   const parts = entry.split('|');
-  return { nick: parts[0]||'', ts: parseInt(parts[1])||0, prefix: (parts[2]&&parts[2]!=='')?parts[2]:null, color: (parts[3]&&parts[3]!=='')?parts[3]:null };
+  return {
+    nick:   parts[0]||'',
+    ts:     parseInt(parts[1])||0,
+    prefix: (parts[2]&&parts[2]!=='')?parts[2]:null,
+    color:  (parts[3]&&parts[3]!=='')?parts[3]:null
+  };
 }
-function stripBracketPrefix(name) { return name.replace(/^\[\d+\]/, ''); }
-function isExpired(ts) { if (ts===0) return false; return Math.floor(Date.now()/1000) > ts; }
+function stripBracketPrefix(name) { return name.replace(/^\[\d+\]/,''); }
+function isExpired(ts) { if(ts===0) return false; return Math.floor(Date.now()/1000)>ts; }
 function formatDate(ts) {
-  if (ts===0) return '\u221e Безлимит';
-  const d=new Date(ts*1000), pad=n=>String(n).padStart(2,'0');
+  if(ts===0) return '\u221e Безлимит';
+  const d=new Date(ts*1000),pad=n=>String(n).padStart(2,'0');
   return pad(d.getDate())+'.'+pad(d.getMonth()+1)+'.'+d.getFullYear()+' '+pad(d.getHours())+':'+pad(d.getMinutes());
 }
 function formatTimeLeft(ts) {
-  if (ts===0) return null;
+  if(ts===0) return null;
   const diff=ts-Math.floor(Date.now()/1000);
-  if (diff<=0) return null;
-  const d=Math.floor(diff/86400), h=Math.floor((diff%86400)/3600), m=Math.floor((diff%3600)/60);
-  if (d>0) return d+'д '+h+'ч';
-  if (h>0) return h+'ч '+m+'м';
+  if(diff<=0) return null;
+  const d=Math.floor(diff/86400),h=Math.floor((diff%86400)/3600),m=Math.floor((diff%3600)/60);
+  if(d>0) return d+'д '+h+'ч';
+  if(h>0) return h+'ч '+m+'м';
   return m+'м';
 }
 
+// ═══════ FETCH SUBSCRIPTIONS (для отображения — через raw GitHub) ═══════
 async function fetchSubscriptions() {
   const RAW_URL = 'https://raw.githubusercontent.com/SaportBati/report1/main/users_encrypted.txt';
-  const res = await fetch(RAW_URL + '?t=' + Date.now());
-  if (!res.ok) throw new Error('Не удалось загрузить файл: ' + res.status);
+  const res = await fetch(RAW_URL+'?t='+Date.now());
+  if(!res.ok) throw new Error('Не удалось загрузить файл: '+res.status);
   const fileRaw = await res.text();
   const entries = [];
   for (const line of fileRaw.split(/\r?\n/)) {
     const trimmed = line.trim();
-    if (!trimmed) continue;
+    if(!trimmed) continue;
     try {
-      const bytes = b64decodeBytes(trimmed);
-      const dec   = xorDecrypt(bytes, XOR_KEY).map(b => String.fromCharCode(b)).join('');
-      if (dec.includes('|')) entries.push(dec);
+      const encBytes = b64decodeBytes(trimmed);
+      const decBytes = xorDecrypt(encBytes, XOR_KEY);
+      const decStr   = cp1251BytesToStr(decBytes);
+      if(decStr.includes('|')) entries.push(decStr);
     } catch(e) {}
   }
   return entries;
 }
 
+// ═══════ RENDER SUBSCRIPTION ═══════
 function renderSubscription(nick, entries) {
-  const cleanNick = stripBracketPrefix(nick).toLowerCase();
-  let found = null;
-  for (const raw of entries) { const e=parseEntry(raw); if (stripBracketPrefix(e.nick).toLowerCase()===cleanNick){found=e;break;} }
-  const card=document.getElementById('subCard'), statusBadge=document.getElementById('subStatusBadge'), body=document.getElementById('subBody');
-  if (!found) {
+  const cleanNick=stripBracketPrefix(nick).toLowerCase();
+  let found=null;
+  for(const raw of entries){const e=parseEntry(raw);if(stripBracketPrefix(e.nick).toLowerCase()===cleanNick){found=e;break;}}
+  const card=document.getElementById('subCard'),statusBadge=document.getElementById('subStatusBadge'),body=document.getElementById('subBody');
+  if(!found){
     card.className='sub-card free-sub';
     statusBadge.className='sub-status free';
     statusBadge.innerHTML='<div class="sub-status-dot"></div><span>Free</span>';
-    body.innerHTML=`<div class="free-plan-block"><div class="free-plan-features"><div class="free-feat"><div class="free-feat-label">Тариф</div><div class="free-feat-value">&#128" + "115; Free</div></div><div class="free-feat"><div class="free-feat-label">Отчётов в день</div><div class="free-feat-value limited">3 / день</div></div><div class="free-feat"><div class="free-feat-label">Префикс</div><div class="free-feat-value limited">&mdash;</div></div><div class="free-feat"><div class="free-feat-label">Статус</div><div class="free-feat-value" style="color:var(--blue)">Базовый доступ</div></div></div><div class="free-divider"></div><button class="btn-buy" onclick="handleBuySubscription()"><span class="btn-buy-icon">&#9889;</span>Купить подписку</button><button class="btn-trial" id="trialBtn" onclick="handleTrialSubscription()"><span class="btn-trial-icon">&#127873;</span>Получить пробную подписку &middot; 2 дня</button></div>`;
+    body.innerHTML=`<div class="free-plan-block"><div class="free-plan-features"><div class="free-feat"><div class="free-feat-label">Тариф</div><div class="free-feat-value">🆓 Free</div></div><div class="free-feat"><div class="free-feat-label">Отчётов в день</div><div class="free-feat-value limited">3 / день</div></div><div class="free-feat"><div class="free-feat-label">Префикс</div><div class="free-feat-value limited">&mdash;</div></div><div class="free-feat"><div class="free-feat-label">Статус</div><div class="free-feat-value" style="color:var(--blue)">Базовый доступ</div></div></div><div class="free-divider"></div><button class="btn-buy" onclick="handleBuySubscription()"><span class="btn-buy-icon">⚡</span>Купить подписку</button><button class="btn-trial" id="trialBtn" onclick="handleTrialSubscription()"><span class="btn-trial-icon">🎁</span>Получить пробную подписку · 2 дня</button></div>`;
     return;
   }
-  const expired=isExpired(found.ts), timeLeft=formatTimeLeft(found.ts);
+  const expired=isExpired(found.ts),timeLeft=formatTimeLeft(found.ts);
   const isCrit=found.ts!==0&&!expired&&(found.ts-Math.floor(Date.now()/1000))<86400*3;
-  if (expired) { card.className='sub-card expired-sub'; statusBadge.className='sub-status expired'; statusBadge.innerHTML='<div class="sub-status-dot"></div><span>Истекла</span>'; }
-  else { card.className='sub-card active-sub'; statusBadge.className='sub-status active'; statusBadge.innerHTML='<div class="sub-status-dot"></div><span>'+(found.ts===0?'Активна &middot; Безлимит':'Активна')+'</span>'; }
+  if(expired){card.className='sub-card expired-sub';statusBadge.className='sub-status expired';statusBadge.innerHTML='<div class="sub-status-dot"></div><span>Истекла</span>';}
+  else{card.className='sub-card active-sub';statusBadge.className='sub-status active';statusBadge.innerHTML='<div class="sub-status-dot"></div><span>'+(found.ts===0?'Активна · Безлимит':'Активна')+'</span>';}
   let prefixHTML='<span style="color:var(--muted)">&mdash;</span>';
-  if (found.prefix) { const col=found.color?found.color.replace(/^#/,''):null; const style=col?'color:#'+col+';border-color:#'+col+'55;background:#'+col+'18':''; prefixHTML='<span class="prefix-badge" style="'+style+'">['+found.prefix+']</span>'; }
+  if(found.prefix){const col=found.color?found.color.replace(/^#/,''):null;const style=col?'color:#'+col+';border-color:#'+col+'55;background:#'+col+'18':'';prefixHTML='<span class="prefix-badge" style="'+style+'">['+found.prefix+']</span>';}
   let expireHTML;
-  if (expired) expireHTML='<span style="color:var(--red)">'+formatDate(found.ts)+'</span>';
-  else if (found.ts===0) expireHTML='<span style="color:var(--gold)">&#8734; Безлимит</span>';
+  if(expired) expireHTML='<span style="color:var(--red)">'+formatDate(found.ts)+'</span>';
+  else if(found.ts===0) expireHTML='<span style="color:var(--gold)">∞ Безлимит</span>';
   else expireHTML='<span style="color:var(--green)">'+formatDate(found.ts)+'</span>';
   const timeHTML=timeLeft?'<div class="sub-field"><div class="sub-field-label">Осталось</div><div class="sub-field-value'+(isCrit?' time-critical':'')+'" style="'+(isCrit?'':'color:var(--gold)')+'">'+timeLeft+'</div></div>':'';
   body.innerHTML='<div class="sub-body"><div class="sub-field"><div class="sub-field-label">Игровой ник</div><div class="sub-field-value" style="font-weight:600">'+found.nick+'</div></div><div class="sub-field"><div class="sub-field-label">Префикс</div><div class="sub-field-value">'+prefixHTML+'</div></div><div class="sub-field"><div class="sub-field-label">'+(expired?'Истекла':'Действует до')+'</div><div class="sub-field-value">'+expireHTML+'</div></div>'+timeHTML+'</div>';
 }
 
-function handleBuySubscription() { alert('Для покупки подписки обратись к администратору в Discord!'); }
+function handleBuySubscription(){alert('Для покупки подписки обратись к администратору в Discord!');}
 
-async function handleTrialSubscription() {
-  const session=loadSession(); if (!session) return;
-  const btn=document.getElementById('trialBtn'); if (!btn) return;
-  btn.disabled=true; btn.innerHTML='<span class="sp"></span>Проверяем...';
-  try {
-    const {sha, entries}=await githubFetch();
+// ═══════ TRIAL SUBSCRIPTION ═══════
+async function handleTrialSubscription(){
+  const session=loadSession();if(!session)return;
+  const btn=document.getElementById('trialBtn');if(!btn)return;
+  btn.disabled=true;btn.innerHTML='<span class="sp"></span>Проверяем...';
+  try{
+    const {sha,entries}=await githubFetch();
     const cleanNick=stripBracketPrefix(session.nick).toLowerCase();
     const alreadyExists=entries.some(raw=>{const e=parseEntry(raw);return stripBracketPrefix(e.nick).toLowerCase()===cleanNick;});
-    if (alreadyExists) { btn.disabled=true; btn.innerHTML='<span class="btn-trial-icon">&#128683;</span>Пробная подписка уже была использована'; return; }
+    if(alreadyExists){btn.disabled=true;btn.innerHTML='<span class="btn-trial-icon">🚫</span>Пробная подписка уже была использована';return;}
     btn.innerHTML='<span class="sp"></span>Активируем...';
     const expireTs=Math.floor(Date.now()/1000)+TRIAL_SECONDS;
+    // Формируем запись — все поля ASCII кроме префикса
+    // TRIAL_PREFIX уже в Unicode, xorEncrypt конвертирует в CP1251
     const entry=session.nick+'|'+expireTs+'|'+TRIAL_PREFIX+'|'+TRIAL_COLOR;
-    await githubPush(sha, [...entries, entry], 'Trial: '+session.nick);
-    btn.innerHTML='<span class="btn-trial-icon">&#9989;</span>Пробная подписка активирована!';
-    btn.style.color='#6ee7b7'; btn.style.borderColor='rgba(16,185,129,0.5)';
+    await githubPush(sha,[...entries,entry],'Trial: '+session.nick);
+    btn.innerHTML='<span class="btn-trial-icon">✅</span>Пробная подписка активирована!';
+    btn.style.color='#6ee7b7';btn.style.borderColor='rgba(16,185,129,0.5)';
     setTimeout(async()=>{try{const fresh=await fetchSubscriptions();renderSubscription(session.nick,fresh);}catch(e){}},1200);
-  } catch(e) {
-    btn.disabled=false; btn.innerHTML='<span class="btn-trial-icon">&#127873;</span>Получить пробную подписку &middot; 2 дня';
-    const ex=document.getElementById('trialErrMsg'); if(ex) ex.remove();
-    const msg=document.createElement('div'); msg.id='trialErrMsg'; msg.style.cssText='color:#fca5a5;font-size:.78rem;text-align:center;margin-top:8px;'; msg.textContent='Ошибка: '+e.message; btn.after(msg);
+  }catch(e){
+    btn.disabled=false;btn.innerHTML='<span class="btn-trial-icon">🎁</span>Получить пробную подписку · 2 дня';
+    const ex=document.getElementById('trialErrMsg');if(ex)ex.remove();
+    const msg=document.createElement('div');msg.id='trialErrMsg';msg.style.cssText='color:#fca5a5;font-size:.78rem;text-align:center;margin-top:8px;';msg.textContent='Ошибка: '+e.message;btn.after(msg);
   }
 }
 
-async function readDB() { try { const r=await fetchWithTimeout(WORKER_URL,{},5000); if(!r.ok) throw new Error('Worker '+r.status); return await r.json(); } catch(e){return{users:[],sha:null};} }
-async function writeDB(users,sha) { const r=await fetch(WORKER_URL,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({users,sha})}); if(!r.ok){const e=await r.json();throw new Error(e.error||'Write failed');} }
+// ═══════ WORKER DB (пользователи) ═══════
+async function readDB(){try{const r=await fetchWithTimeout(WORKER_URL,{},5000);if(!r.ok)throw new Error('Worker '+r.status);return await r.json();}catch(e){return{users:[],sha:null};}}
+async function writeDB(users,sha){const r=await fetch(WORKER_URL,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({users,sha})});if(!r.ok){const e=await r.json();throw new Error(e.error||'Write failed');}}
+
+// ═══════ SESSION ═══════
 function saveSession(u){localStorage.setItem('lr_user',JSON.stringify(u));}
 function loadSession(){try{return JSON.parse(localStorage.getItem('lr_user'));}catch{return null;}}
 function clearSession(){localStorage.removeItem('lr_user');}
@@ -394,8 +474,9 @@ function goStep(name){document.querySelectorAll('.step').forEach(s=>s.classList.
 function hideLoading(){const el=document.getElementById('loadingScreen');el.classList.add('hidden');setTimeout(()=>el.style.display='none',350);}
 function fetchWithTimeout(url,options={},ms=8000){const c=new AbortController();const t=setTimeout(()=>c.abort(),ms);return fetch(url,{...options,signal:c.signal}).finally(()=>clearTimeout(t));}
 
+// ═══════ DISCORD OAUTH ═══════
 function loginDiscord(){
-  const btn=document.getElementById('dcAuthBtn'); btn.disabled=true; btn.innerHTML='<span class="sp"></span>Перенаправление...';
+  const btn=document.getElementById('dcAuthBtn');btn.disabled=true;btn.innerHTML='<span class="sp"></span>Перенаправление...';
   const p=new URLSearchParams({client_id:DISCORD_CLIENT_ID,redirect_uri:DISCORD_REDIRECT,response_type:'token',scope:DISCORD_SCOPE});
   window.location.href='https://discord.com/api/oauth2/authorize?'+p;
 }
@@ -406,9 +487,9 @@ async function handleDiscordCallback(){
   if(!token){hideLoading();showAuthPage();return;}
   history.replaceState(null,'',window.location.pathname);
   showAlert('Получаем данные Discord...','info');
-  try {
+  try{
     const res=await fetchWithTimeout('https://discord.com/api/users/@me',{headers:{Authorization:'Bearer '+token}},8000);
-    if(!res.ok) throw new Error('Discord API '+res.status);
+    if(!res.ok)throw new Error('Discord API '+res.status);
     const dc=await res.json();
     let avatarUrl=null;
     if(dc.avatar){const ext=dc.avatar.startsWith('a_')?'gif':'png';avatarUrl='https://cdn.discordapp.com/avatars/'+dc.id+'/'+dc.avatar+'.'+ext+'?size=512';}
@@ -417,21 +498,23 @@ async function handleDiscordCallback(){
     let user=users.find(u=>u.discordId===dc.id);
     if(user){user.avatar=avatarUrl;user.lastLogin=new Date().toISOString();await writeDB(users,sha);saveSession(user);hideAlert();hideLoading();showProfile(user);}
     else{pendingDC={id:dc.id,email:dc.email||null,name:dc.global_name||dc.username,avatarUrl};hideAlert();hideLoading();showAuthPage();document.getElementById('dcNick').value=pendingDC.name;goStep('PickNick');}
-  } catch(e){hideLoading();showAuthPage();showAlert('Ошибка Discord: '+e.message);}
+  }catch(e){hideLoading();showAuthPage();showAlert('Ошибка Discord: '+e.message);}
 }
 async function finishDiscordReg(){
   const nick=document.getElementById('dcNick').value.trim();
   if(!nick){showAlert('Введи ник');return;}
   if(!/^[a-zA-Z0-9_.[\]-]{2,36}$/.test(nick)){showAlert('Ник: буквы, цифры, _ . - [] (2–36 символов)');return;}
-  const btn=document.getElementById('dcBtn'); btn.disabled=true; btn.innerHTML='<span class="sp"></span>Создаём...';
-  try {
+  const btn=document.getElementById('dcBtn');btn.disabled=true;btn.innerHTML='<span class="sp"></span>Создаём...';
+  try{
     const {users,sha}=await readDB();
     if(users.find(u=>u.nick.toLowerCase()===nick.toLowerCase())){showAlert('Этот ник уже занят');return;}
     const u={id:Date.now().toString(36),nick,email:pendingDC.email||'',discordId:pendingDC.id,avatar:pendingDC.avatarUrl,via:'discord',createdAt:new Date().toISOString(),lastLogin:new Date().toISOString()};
     users.push(u);await writeDB(users,sha);saveSession(u);pendingDC=null;showProfile(u);
-  } catch(e){showAlert('Ошибка: '+e.message);}
+  }catch(e){showAlert('Ошибка: '+e.message);}
   finally{btn.disabled=false;btn.innerHTML='Создать профиль &rarr;';}
 }
+
+// ═══════ PROFILE ═══════
 function showAuthPage(){document.getElementById('authWrap').style.display='flex';document.getElementById('profileWrap').style.display='none';document.getElementById('nav').classList.remove('show');}
 async function showProfile(user){
   document.getElementById('authWrap').style.display='none';document.getElementById('profileWrap').style.display='flex';document.getElementById('nav').classList.add('show');
@@ -448,6 +531,8 @@ async function showProfile(user){
 }
 function logout(){clearSession();showAuthPage();goStep('Login');}
 function buildDots(){const c=document.getElementById('dotsEl');c.innerHTML='';for(let i=0;i<35;i++){const d=document.createElement('div');const r=Math.random();d.className='dot'+(r>.78?' h':r>.52?' a':'');c.appendChild(d);}}
+
+// ═══════ INIT ═══════
 window.addEventListener('DOMContentLoaded',async()=>{
   const emergency=setTimeout(()=>{hideLoading();showAuthPage();},6000);
   try{
