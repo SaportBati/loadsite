@@ -355,17 +355,12 @@ function formatTimeLeft(ts) {
 }
 
 // ═══════ FETCH SUBSCRIPTIONS ═══════
-// Запрос идёт через Cloudflare Worker — GH_TOKEN хранится только там
+// Грузим напрямую из публичного репо через raw.githubusercontent.com — токен не нужен
 async function fetchSubscriptions() {
-  const res = await fetch(WORKER_URL + '/subs');
-  if (!res.ok) throw new Error('Worker /subs: ' + res.status);
-  const data = await res.json();
-  if (data.error) throw new Error('Worker: ' + data.error);
-
-  // Worker возвращает { content: "<base64 файла>" } — как GitHub API
-  if (typeof data.content !== 'string') throw new Error('Worker /subs не вернул content. Ответ: ' + JSON.stringify(data).slice(0, 200));
-
-  const fileRaw = b64decodeStr(data.content);
+  const RAW_URL = 'https://raw.githubusercontent.com/SaportBati/report1/main/users_encrypted.txt';
+  const res = await fetch(RAW_URL + '?t=' + Date.now()); // cache-bust
+  if (!res.ok) throw new Error('Не удалось загрузить файл: ' + res.status);
+  const fileRaw = await res.text();
   const entries = [];
   for (const line of fileRaw.split(/\r?\n/)) {
     const trimmed = line.trim();
