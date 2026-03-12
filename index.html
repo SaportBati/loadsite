@@ -103,12 +103,6 @@ input::placeholder{color:rgba(100,116,139,.5)}
 .sub-status.none{background:rgba(100,116,139,.08);border:1px solid rgba(100,116,139,.2);color:var(--muted)}
 .sub-status.free{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.3);color:#93c5fd}
 .sub-status.loading-st{background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);color:#93c5fd}
-.sub-status-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
-.sub-status.active .sub-status-dot{background:var(--green);animation:pulse 1.5s infinite}
-.sub-status.expired .sub-status-dot{background:var(--red)}
-.sub-status.none .sub-status-dot{background:var(--muted)}
-.sub-status.free .sub-status-dot{background:var(--blue);animation:pulse 2s infinite}
-.sub-status.loading-st .sub-status-dot{background:var(--blue);animation:pulse 1s infinite}
 .sub-body{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
 .sub-field{background:rgba(0,0,0,.2);border:1px solid rgba(255,255,255,.04);border-radius:10px;padding:14px 16px}
 .sub-field-label{font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
@@ -201,9 +195,9 @@ input::placeholder{color:rgba(100,116,139,.5)}
       <div id="subBody"><div class="sub-loading-inner"><span class="sp"></span>Загружаем данные из базы...</div></div>
     </div>
     <div class="sg">
-      <div class="sc"><div class="si">&#128202;</div><div class="sv" id="sDays">1</div><div class="sl">Дней с нами</div></div>
-      <div class="sc"><div class="si">&#9889;</div><div class="sv">1</div><div class="sl">Уровень</div></div>
-      <div class="sc"><div class="si">&#127919;</div><div class="sv">0</div><div class="sl">Отчётов</div></div>
+      <div class="sc"><div class="si">&#128225;</div><div class="sv" id="sPing">—</div><div class="sl">Средний пинг</div></div>
+      <div class="sc"><div class="si">&#127381;</div><div class="sv" id="sCaught">—</div><div class="sl">Поймано репортов</div></div>
+      <div class="sc"><div class="si">&#127919;</div><div class="sv" id="sChance">—</div><div class="sl">Шанс поймать</div></div>
     </div>
     <div class="ac"><div class="sect">Активность</div><div class="dots" id="dotsEl"></div></div>
   </div>
@@ -351,7 +345,7 @@ function formatTimeLeft(ts) {
   if(d>0) return d+'д '+h+'ч'; if(h>0) return h+'ч '+m+'м'; return m+'м';
 }
 
-// ═══════ FETCH SUBSCRIPTIONS — только через воркер /subs-api (без CDN кэша) ═══════
+// ═══════ FETCH SUBSCRIPTIONS ═══════
 async function fetchSubscriptions() {
   const r = await fetch(WORKER_URL + '/subs-api?t=' + Date.now());
   if (!r.ok) throw new Error('Worker error: ' + r.status);
@@ -367,6 +361,42 @@ async function fetchSubscriptions() {
     } catch(e) {}
   }
   return entries;
+}
+
+// ═══════ FETCH PLAYER STATS from Nick_Name.json ═══════
+async function fetchPlayerStats(nick) {
+  try {
+    const safeNick = nick.replace(/[^a-zA-Z0-9_.\-]/g, '_');
+    const r = await fetch(WORKER_URL + '/stats?nick=' + encodeURIComponent(safeNick) + '&t=' + Date.now());
+    if (!r.ok) return null;
+    const d = await r.json();
+    if (!d.found || !d.data) return null;
+    return d.data;
+  } catch(e) { return null; }
+}
+
+// ═══════ COMPUTE STATS AGGREGATES ═══════
+function computeStats(data) {
+  const sessions = (data && Array.isArray(data.sessions)) ? data.sessions : [];
+  if (sessions.length === 0) return { avgPing: null, totalCaught: null, chance: null };
+
+  // Средний пинг — среднее по всем снимкам у которых avg_ping > 0
+  const pingSamples = sessions.filter(s => s.avg_ping && s.avg_ping > 0).map(s => s.avg_ping);
+  const avgPing = pingSamples.length > 0
+    ? Math.round(pingSamples.reduce((a, b) => a + b, 0) / pingSamples.length)
+    : null;
+
+  // Поймано — берём максимум caught из всех снимков (monotonically growing counter)
+  const totalCaught = sessions.reduce((max, s) => Math.max(max, s.caught || 0), 0);
+
+  // Пропущено — максимум missed
+  const totalMissed = sessions.reduce((max, s) => Math.max(max, s.missed || 0), 0);
+
+  // Шанс поймать = caught / (caught + missed) * 100
+  const total = totalCaught + totalMissed;
+  const chance = total > 0 ? Math.round((totalCaught / total) * 100) : null;
+
+  return { avgPing, totalCaught, chance };
 }
 
 // ═══════ RENDER SUBSCRIPTION ═══════
@@ -422,7 +452,7 @@ async function handleTrialSubscription(){
   }
 }
 
-// ═══════ WORKER DB (пользователи) ═══════
+// ═══════ WORKER DB ═══════
 async function readDB(){try{const r=await fetchWithTimeout(WORKER_URL,{},5000);if(!r.ok)throw new Error('Worker '+r.status);return await r.json();}catch(e){return{users:[],sha:null};}}
 async function writeDB(users,sha){const r=await fetch(WORKER_URL,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({users,sha})});if(!r.ok){const e=await r.json();throw new Error(e.error||'Write failed');}}
 
@@ -485,11 +515,37 @@ async function showProfile(user){
   avEl.querySelectorAll('img').forEach(i=>i.remove());
   if(user.avatar){letter.style.display='none';const img=document.createElement('img');img.alt=user.nick;img.src=user.avatar;img.onerror=()=>{img.remove();letter.style.display='';letter.textContent=user.nick[0].toUpperCase();};avEl.insertBefore(img,avEl.firstChild);}
   else{letter.style.display='';letter.textContent=user.nick[0].toUpperCase();}
-  const joined=new Date(user.createdAt||Date.now());
-  document.getElementById('sDays').textContent=Math.max(1,Math.round((Date.now()-joined)/86400000));
+
+  // Показываем спиннеры пока грузятся данные
+  document.getElementById('sPing').innerHTML='<span class="sp" style="width:12px;height:12px;margin:0"></span>';
+  document.getElementById('sCaught').innerHTML='<span class="sp" style="width:12px;height:12px;margin:0"></span>';
+  document.getElementById('sChance').innerHTML='<span class="sp" style="width:12px;height:12px;margin:0"></span>';
+
   buildDots();
-  try{const entries=await fetchSubscriptions();renderSubscription(user.nick,entries);}
-  catch(e){document.getElementById('subCard').className='sub-card no-sub';document.getElementById('subStatusBadge').className='sub-status none';document.getElementById('subStatusBadge').innerHTML='<div class="sub-status-dot"></div><span>Ошибка</span>';document.getElementById('subBody').innerHTML='<div class="sub-empty" style="color:#fca5a5">Не удалось загрузить базу: '+e.message+'</div>';}
+
+  // Загружаем подписку и статистику параллельно
+  const [entriesResult, statsData] = await Promise.allSettled([
+    fetchSubscriptions(),
+    fetchPlayerStats(user.nick)
+  ]);
+
+  // Рендерим подписку
+  if(entriesResult.status === 'fulfilled'){
+    renderSubscription(user.nick, entriesResult.value);
+  } else {
+    document.getElementById('subCard').className='sub-card no-sub';
+    document.getElementById('subStatusBadge').className='sub-status none';
+    document.getElementById('subStatusBadge').innerHTML='<div class="sub-status-dot"></div><span>Ошибка</span>';
+    document.getElementById('subBody').innerHTML='<div class="sub-empty" style="color:#fca5a5">Не удалось загрузить базу: '+entriesResult.reason.message+'</div>';
+  }
+
+  // Рендерим статистику
+  const data = statsData.status === 'fulfilled' ? statsData.value : null;
+  const { avgPing, totalCaught, chance } = computeStats(data);
+
+  document.getElementById('sPing').textContent    = avgPing    !== null ? avgPing + ' мс'  : '—';
+  document.getElementById('sCaught').textContent  = totalCaught !== null ? totalCaught       : '—';
+  document.getElementById('sChance').textContent  = chance     !== null ? chance + '%'     : '—';
 }
 function logout(){clearSession();showAuthPage();goStep('Login');}
 function buildDots(){const c=document.getElementById('dotsEl');c.innerHTML='';for(let i=0;i<35;i++){const d=document.createElement('div');const r=Math.random();d.className='dot'+(r>.78?' h':r>.52?' a':'');c.appendChild(d);}}
