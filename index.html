@@ -351,25 +351,16 @@ function formatTimeLeft(ts) {
   if(d>0) return d+'д '+h+'ч'; if(h>0) return h+'ч '+m+'м'; return m+'м';
 }
 
-// ═══════ FETCH SUBSCRIPTIONS — через воркер /subs-api (прямой GitHub API, без CDN кэша) ═══════
+// ═══════ FETCH SUBSCRIPTIONS — только через воркер /subs-api (без CDN кэша) ═══════
 async function fetchSubscriptions() {
-  let fileRaw = null;
-  try {
-    const r = await fetchWithTimeout(
-      WORKER_URL + '/subs-api',
-      { mode: 'cors', headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' } },
-      12000
-    );
-    if (r.ok) { const t = await r.text(); if (!t.startsWith('ERROR:')) fileRaw = t; }
-  } catch(e) {}
-  if (fileRaw === null) {
-    const r2 = await fetchWithTimeout(
-      'https://raw.githubusercontent.com/SaportBati/report1/main/users_encrypted.txt?t=' + Date.now(),
-      { mode: 'cors' }, 10000
-    );
-    if (!r2.ok) throw new Error('Не удалось загрузить данные: ' + r2.status);
-    fileRaw = await r2.text();
-  }
+  const r = await fetchWithTimeout(
+    WORKER_URL + '/subs-api',
+    { mode: 'cors', headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' } },
+    12000
+  );
+  if (!r.ok) throw new Error('Worker error: ' + r.status);
+  const fileRaw = await r.text();
+  if (fileRaw.startsWith('ERROR:')) throw new Error(fileRaw);
   const entries = [];
   for (const line of fileRaw.split(/\r?\n/)) {
     const trimmed = line.trim();
