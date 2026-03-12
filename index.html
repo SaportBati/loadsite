@@ -137,10 +137,11 @@ input::placeholder{color:rgba(100,116,139,.5)}
 .ac{background:var(--surf);border:1px solid var(--border);border-radius:16px;padding:28px;backdrop-filter:blur(20px)}
 .sect{font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:.1em;color:#fff;margin-bottom:18px;display:flex;align-items:center;gap:12px}
 .sect::after{content:'';flex:1;height:1px;background:var(--border)}
-.dots{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
-.dot{aspect-ratio:1;border-radius:4px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.04);transition:all .2s}
-.dot.a{background:rgba(59,130,246,.3);border-color:rgba(59,130,246,.4)}
-.dot.h{background:linear-gradient(135deg,var(--blue),var(--cyan));border-color:var(--cyan);box-shadow:0 0 8px rgba(6,182,212,.3)}
+.hunt-time-inner{display:flex;align-items:center;justify-content:center;gap:20px;flex-wrap:wrap}
+.hunt-seg{text-align:center;min-width:60px}
+.hunt-val{font-family:'Bebas Neue',sans-serif;font-size:2.4rem;letter-spacing:.04em;background:linear-gradient(135deg,#fff,var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1}
+.hunt-lbl{color:var(--muted);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;margin-top:4px}
+.hunt-sep{font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--border);align-self:flex-start;margin-top:6px}
 @media(max-width:600px){.card,.ph{padding:24px 20px}.ph{flex-direction:column;align-items:flex-start}.sg{grid-template-columns:1fr 1fr}.sub-body{grid-template-columns:1fr 1fr}.free-plan-features{grid-template-columns:1fr 1fr}}
 </style>
 </head>
@@ -199,7 +200,7 @@ input::placeholder{color:rgba(100,116,139,.5)}
       <div class="sc"><div class="si">&#127381;</div><div class="sv" id="sCaught">—</div><div class="sl">Поймано репортов</div></div>
       <div class="sc"><div class="si">&#127919;</div><div class="sv" id="sChance">—</div><div class="sl">Шанс поймать</div></div>
     </div>
-    <div class="ac"><div class="sect">Активность</div><div class="dots" id="dotsEl"></div></div>
+    <div class="ac"><div class="sect">Время ловли репортов</div><div class="hunt-time-inner" id="huntTimeEl"><span style="color:var(--muted);font-size:.875rem">Загрузка...</span></div></div>
   </div>
 </div>
 <script>
@@ -520,8 +521,7 @@ async function showProfile(user){
   document.getElementById('sPing').innerHTML='<span class="sp" style="width:12px;height:12px;margin:0"></span>';
   document.getElementById('sCaught').innerHTML='<span class="sp" style="width:12px;height:12px;margin:0"></span>';
   document.getElementById('sChance').innerHTML='<span class="sp" style="width:12px;height:12px;margin:0"></span>';
-
-  buildDots();
+  document.getElementById('huntTimeEl').innerHTML='<span style="color:var(--muted);font-size:.875rem">Загрузка...</span>';
 
   // Загружаем подписку и статистику параллельно
   const [entriesResult, statsData] = await Promise.allSettled([
@@ -546,9 +546,31 @@ async function showProfile(user){
   document.getElementById('sPing').textContent    = avgPing    !== null ? avgPing + ' мс'  : '—';
   document.getElementById('sCaught').textContent  = totalCaught !== null ? totalCaught       : '—';
   document.getElementById('sChance').textContent  = chance     !== null ? chance + '%'     : '—';
+  renderHuntTime(data && data.total_hunting_secs ? data.total_hunting_secs : 0);
 }
 function logout(){clearSession();showAuthPage();goStep('Login');}
-function buildDots(){const c=document.getElementById('dotsEl');c.innerHTML='';for(let i=0;i<35;i++){const d=document.createElement('div');const r=Math.random();d.className='dot'+(r>.78?' h':r>.52?' a':'');c.appendChild(d);}}
+function formatHuntTime(secs) {
+  if (!secs || secs <= 0) return null;
+  const d = Math.floor(secs / 86400);
+  const h = Math.floor((secs % 86400) / 3600);
+  const m = Math.floor((secs % 3600) / 60);
+  const s = secs % 60;
+  return { d, h, m, s };
+}
+function renderHuntTime(secs) {
+  const el = document.getElementById('huntTimeEl');
+  const t = formatHuntTime(secs);
+  if (!t) { el.innerHTML = '<span style="color:var(--muted);font-size:.875rem">Нет данных — начни ловлю!</span>'; return; }
+  const parts = [];
+  if (t.d > 0) parts.push({ val: t.d, lbl: 'дней' });
+  parts.push({ val: t.h, lbl: 'часов' });
+  parts.push({ val: t.m, lbl: 'минут' });
+  parts.push({ val: t.s, lbl: 'секунд' });
+  el.innerHTML = parts.map((p, i) =>
+    (i > 0 ? '<span class="hunt-sep">:</span>' : '') +
+    '<div class="hunt-seg"><div class="hunt-val">' + String(p.val).padStart(2,'0') + '</div><div class="hunt-lbl">' + p.lbl + '</div></div>'
+  ).join('');
+}
 
 // ═══════ INIT ═══════
 window.addEventListener('DOMContentLoaded',async()=>{
