@@ -124,9 +124,11 @@ input::placeholder{color:rgba(100,116,139,.5)}
 .sub-card.active-sub{border-color:rgba(16,185,129,.3)}
 .sub-card.expired-sub{border-color:rgba(239,68,68,.25)}
 .sub-card.no-sub{border-color:rgba(100,116,139,.15)}
+.sub-card.free-sub{border-color:rgba(96,165,250,.2)}
 .sub-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px}
 .sub-card.active-sub::before{background:linear-gradient(90deg,transparent,var(--green),transparent)}
 .sub-card.expired-sub::before{background:linear-gradient(90deg,transparent,var(--red),transparent)}
+.sub-card.free-sub::before{background:linear-gradient(90deg,transparent,var(--blue),transparent)}
 
 .sub-header-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;gap:12px;flex-wrap:wrap}
 .sub-title{font-family:'Bebas Neue',sans-serif;font-size:1.05rem;letter-spacing:.1em;color:#fff}
@@ -134,11 +136,13 @@ input::placeholder{color:rgba(100,116,139,.5)}
 .sub-status.active{background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.3);color:#6ee7b7}
 .sub-status.expired{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);color:#fca5a5}
 .sub-status.none{background:rgba(100,116,139,.08);border:1px solid rgba(100,116,139,.2);color:var(--muted)}
+.sub-status.free{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.3);color:#93c5fd}
 .sub-status.loading-st{background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);color:#93c5fd}
 .sub-status-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
 .sub-status.active .sub-status-dot{background:var(--green);animation:pulse 1.5s infinite}
 .sub-status.expired .sub-status-dot{background:var(--red)}
 .sub-status.none .sub-status-dot{background:var(--muted)}
+.sub-status.free .sub-status-dot{background:var(--blue);animation:pulse 2s infinite}
 .sub-status.loading-st .sub-status-dot{background:var(--blue);animation:pulse 1s infinite}
 
 .sub-body{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
@@ -151,6 +155,23 @@ input::placeholder{color:rgba(100,116,139,.5)}
 
 .sub-empty{text-align:center;padding:20px;color:var(--muted);font-size:.875rem;line-height:1.6}
 .sub-loading-inner{text-align:center;padding:20px;color:var(--muted);font-size:.875rem}
+
+/* FREE PLAN BLOCK */
+.free-plan-block{padding:4px 0 8px}
+.free-plan-features{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:24px}
+.free-feat{background:rgba(0,0,0,.2);border:1px solid rgba(255,255,255,.04);border-radius:10px;padding:14px 16px}
+.free-feat-label{font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.free-feat-value{font-size:.92rem;font-weight:500;color:var(--text);line-height:1.3}
+.free-feat-value.limited{color:var(--muted)}
+
+.btn-buy{width:100%;padding:15px;background:linear-gradient(135deg,var(--blue) 0%,var(--violet) 100%);border:none;border-radius:13px;display:flex;align-items:center;justify-content:center;gap:10px;color:#fff;font-family:'Outfit',sans-serif;font-size:.95rem;font-weight:700;cursor:pointer;transition:all .28s;position:relative;overflow:hidden;box-shadow:0 4px 28px rgba(59,130,246,.4);letter-spacing:.03em}
+.btn-buy:hover{transform:translateY(-2px);box-shadow:0 8px 40px rgba(59,130,246,.6)}
+.btn-buy::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.12),transparent);opacity:0;transition:opacity .2s}
+.btn-buy:hover::after{opacity:1}
+.btn-buy-icon{font-size:1.1rem;animation:sparkle 2s ease-in-out infinite}
+@keyframes sparkle{0%,100%{transform:scale(1) rotate(0deg)}50%{transform:scale(1.15) rotate(8deg)}}
+
+.free-divider{height:1px;background:linear-gradient(90deg,transparent,rgba(59,130,246,.2),transparent);margin:20px 0}
 
 /* STATS */
 .sg{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
@@ -173,6 +194,7 @@ input::placeholder{color:rgba(100,116,139,.5)}
   .ph{flex-direction:column;align-items:flex-start}
   .sg{grid-template-columns:1fr 1fr}
   .sub-body{grid-template-columns:1fr 1fr}
+  .free-plan-features{grid-template-columns:1fr 1fr}
 }
 </style>
 </head>
@@ -284,7 +306,6 @@ const DISCORD_REDIRECT  = 'https://saportbati.github.io/loadsite/';
 const DISCORD_SCOPE     = 'identify email';
 const WORKER_URL        = 'https://loadsite-api.grebenkinmatveyvyceslacovi2007.workers.dev';
 
-// XOR-ключ для расшифровки строк подписок (не секрет — только обфускация)
 const XOR_KEY = 'SaportBati_SecretKey_2024';
 
 // ═══════ BASE64 DECODE ═══════
@@ -315,7 +336,6 @@ function xorDecrypt(bytes, key) {
 }
 
 // ═══════ PARSE ENTRY ═══════
-// Формат: "Ник|TIMESTAMP[|Префикс[|#Цвет]]"
 function parseEntry(entry) {
   const parts = entry.split('|');
   return {
@@ -355,10 +375,9 @@ function formatTimeLeft(ts) {
 }
 
 // ═══════ FETCH SUBSCRIPTIONS ═══════
-// Грузим напрямую из публичного репо через raw.githubusercontent.com — токен не нужен
 async function fetchSubscriptions() {
   const RAW_URL = 'https://raw.githubusercontent.com/SaportBati/report1/main/users_encrypted.txt';
-  const res = await fetch(RAW_URL + '?t=' + Date.now()); // cache-bust
+  const res = await fetch(RAW_URL + '?t=' + Date.now());
   if (!res.ok) throw new Error('Не удалось загрузить файл: ' + res.status);
   const fileRaw = await res.text();
   const entries = [];
@@ -393,17 +412,43 @@ function renderSubscription(nick, entries) {
   const statusText  = document.getElementById('subStatusText');
   const body        = document.getElementById('subBody');
 
+  // ── НЕТ ПОДПИСКИ → показываем Free план с кнопкой покупки ──
   if (!found) {
-    card.className = 'sub-card no-sub';
-    statusBadge.className = 'sub-status none';
-    statusText.textContent = 'Нет подписки';
-    body.innerHTML = `<div class="sub-empty">
-      Ник <b style="color:var(--text)">${nick}</b> не найден в базе подписок.<br>
-      Обратись к администратору для получения доступа.
-    </div>`;
+    card.className = 'sub-card free-sub';
+    statusBadge.className = 'sub-status free';
+    statusBadge.innerHTML = `<div class="sub-status-dot"></div><span id="subStatusText">Free</span>`;
+
+    body.innerHTML = `
+      <div class="free-plan-block">
+        <div class="free-plan-features">
+          <div class="free-feat">
+            <div class="free-feat-label">Тариф</div>
+            <div class="free-feat-value">🆓 Free</div>
+          </div>
+          <div class="free-feat">
+            <div class="free-feat-label">Отчётов в день</div>
+            <div class="free-feat-value limited">3 / день</div>
+          </div>
+          <div class="free-feat">
+            <div class="free-feat-label">Префикс</div>
+            <div class="free-feat-value limited">—</div>
+          </div>
+          <div class="free-feat">
+            <div class="free-feat-label">Статус</div>
+            <div class="free-feat-value" style="color:var(--blue)">Базовый доступ</div>
+          </div>
+        </div>
+        <div class="free-divider"></div>
+        <button class="btn-buy" onclick="handleBuySubscription()">
+          <span class="btn-buy-icon">⚡</span>
+          Купить подписку
+        </button>
+      </div>
+    `;
     return;
   }
 
+  // ── ПОДПИСКА НАЙДЕНА ──
   const expired  = isExpired(found.ts);
   const timeLeft = formatTimeLeft(found.ts);
   const isCrit   = found.ts !== 0 && !expired && (found.ts - Math.floor(Date.now()/1000)) < 86400 * 3;
@@ -411,11 +456,11 @@ function renderSubscription(nick, entries) {
   if (expired) {
     card.className = 'sub-card expired-sub';
     statusBadge.className = 'sub-status expired';
-    statusText.textContent = 'Истекла';
+    statusBadge.innerHTML = `<div class="sub-status-dot"></div><span id="subStatusText">Истекла</span>`;
   } else {
     card.className = 'sub-card active-sub';
     statusBadge.className = 'sub-status active';
-    statusText.textContent = found.ts === 0 ? 'Активна · Безлимит' : 'Активна';
+    statusBadge.innerHTML = `<div class="sub-status-dot"></div><span id="subStatusText">${found.ts === 0 ? 'Активна · Безлимит' : 'Активна'}</span>`;
   }
 
   let prefixHTML = '<span style="color:var(--muted)">—</span>';
@@ -457,6 +502,13 @@ function renderSubscription(nick, entries) {
     </div>
     ${timeHTML}
   </div>`;
+}
+
+// ═══════ BUY SUBSCRIPTION ═══════
+function handleBuySubscription() {
+  // Сюда можно вставить ссылку на оплату или открыть модальное окно
+  // Например: window.open('https://your-payment-link.com', '_blank');
+  alert('Для покупки подписки обратись к администратору в Discord!');
 }
 
 // ═══════ WORKER DB (пользователи) ═══════
@@ -646,7 +698,7 @@ async function showProfile(user) {
   } catch(e) {
     document.getElementById('subCard').className = 'sub-card no-sub';
     document.getElementById('subStatusBadge').className = 'sub-status none';
-    document.getElementById('subStatusText').textContent = 'Ошибка';
+    document.getElementById('subStatusBadge').innerHTML = `<div class="sub-status-dot"></div><span id="subStatusText">Ошибка</span>`;
     document.getElementById('subBody').innerHTML =
       `<div class="sub-empty" style="color:#fca5a5">Не удалось загрузить базу: ${e.message}</div>`;
   }
