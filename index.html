@@ -162,6 +162,28 @@ input::placeholder{color:rgba(100,116,139,.5)}
 .mbtn-cancel{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:var(--text)}.mbtn-cancel:hover{background:rgba(255,255,255,.1)}
 .mbtn-del{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.35);color:#fca5a5}.mbtn-del:hover{background:rgba(239,68,68,.25)}
 
+
+/* ── EDIT PENCIL ── */
+.btn-edit{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:6px;background:rgba(96,165,250,.1);border:1px solid rgba(96,165,250,.2);color:var(--blue);cursor:pointer;transition:all .18s;flex-shrink:0;padding:0;vertical-align:middle;margin-left:6px}
+.btn-edit:hover{background:rgba(96,165,250,.22);border-color:rgba(96,165,250,.45);transform:scale(1.1)}
+.btn-edit svg{width:12px;height:12px;pointer-events:none}
+.btn-edit.cd{opacity:.35;cursor:not-allowed}
+.btn-edit.cd:hover{transform:none;background:rgba(96,165,250,.1);border-color:rgba(96,165,250,.2)}
+.pname-row{display:flex;align-items:center;gap:4px}
+.sub-field-label{display:flex;align-items:center;gap:4px}
+/* ── EDIT MODAL ── */
+.modal-box.edit-box{border-color:rgba(59,130,246,.3)}
+.modal-warn{background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.2);border-radius:10px;padding:11px 13px;color:#fca5a5;font-size:.8rem;line-height:1.55;margin-bottom:16px;text-align:left}
+.modal-warn strong{color:#ff8a8a;display:block;margin-bottom:3px}
+.modal-input{width:100%;padding:10px 13px;background:rgba(0,0,0,.35);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'Outfit',sans-serif;font-size:.9rem;outline:none;transition:all .22s;margin-bottom:14px;box-sizing:border-box}
+.modal-input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(59,130,246,.1)}
+.mbtn-save{background:linear-gradient(135deg,var(--blue),var(--violet));color:#fff;border:none}
+.mbtn-save:hover{filter:brightness(1.1)}
+.mbtn-save:disabled{opacity:.4;cursor:not-allowed;filter:none}
+.modal-cd{font-size:.74rem;color:var(--muted);margin-top:8px;text-align:center;min-height:16px}
+.modal-cd .cdnum{color:var(--gold);font-weight:700}
+.ph-actions{margin-left:auto;flex-shrink:0;display:flex;flex-direction:column;gap:8px;align-items:flex-end}
+
 @media(max-width:900px){.main-layout{flex-direction:column}.sidebar{width:100%;position:static}.user-list{max-height:160px;display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:4px}}
 @media(max-width:600px){.card,.ph{padding:24px 20px}.ph{flex-direction:column;align-items:flex-start}.sg{grid-template-columns:1fr 1fr}.sub-body{grid-template-columns:1fr 1fr}.free-plan-features{grid-template-columns:1fr 1fr}}
 </style>
@@ -222,7 +244,7 @@ input::placeholder{color:rgba(100,116,139,.5)}
       <div class="ph">
         <div class="av-outer"><div class="av" id="avEl"><span id="avLetter">?</span></div><div class="av-ring"></div></div>
         <div class="pi">
-          <div class="pname" id="pNick">&mdash;</div>
+          <div class="pname-row"><div class="pname" id="pNick">&mdash;</div><button class="btn-edit" id="btnEditNick" style="display:none" title="Изменить ник" onclick="openEditModal(&quot;nick&quot;)"><svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11.013 1.427a1.75 1.75 0 0 1 2.474 0l1.086 1.086a1.75 1.75 0 0 1 0 2.474l-8.61 8.61c-.21.21-.47.364-.756.445l-3.251.93a.75.75 0 0 1-.927-.928l.929-3.25c.081-.286.235-.547.445-.758l8.61-8.61zm1.414 1.06a.25.25 0 0 0-.354 0L10.811 3.75l1.439 1.44 1.263-1.263a.25.25 0 0 0 0-.354l-1.086-1.086zM11.189 6.25 9.75 4.81 3.23 11.33l-.479 1.679 1.679-.48 6.759-6.278z" fill="currentColor"/></svg></button></div>
           <div class="badges" id="pBadges">
             <span class="badge badge-ver"><span class="badge-dot green"></span>Активен</span>
             <span class="badge badge-dc"><span class="badge-dot indigo"></span>&#127918; Discord</span>
@@ -372,7 +394,22 @@ function renderSubscription(nick,entries,readonly){
   else if(found.ts===0)expireHTML='<span style="color:var(--gold)">∞ Безлимит</span>';
   else expireHTML='<span style="color:var(--green)">'+formatDate(found.ts)+'</span>';
   const timeHTML=timeLeft?'<div class="sub-field"><div class="sub-field-label">Осталось</div><div class="sub-field-value'+(isCrit?' time-critical':'')+'" style="'+(isCrit?'':'color:var(--gold)')+'">'+timeLeft+'</div></div>':'';
-  body.innerHTML='<div class="sub-body"><div class="sub-field"><div class="sub-field-label">Игровой ник</div><div class="sub-field-value" style="font-weight:600">'+found.nick+'</div></div><div class="sub-field"><div class="sub-field-label">Префикс</div><div class="sub-field-value">'+prefixHTML+'</div></div><div class="sub-field"><div class="sub-field-label">'+(expired?'Истекла':'Действует до')+'</div><div class="sub-field-value">'+expireHTML+'</div></div>'+timeHTML+'</div>';
+  // Карандашик у префикса
+  const isTrial=found.prefix===TRIAL_PREFIX;
+  let pfxPencil='';
+  if(!readonly&&!isTrial&&!expired){
+    const session2=loadSession();
+    const isDev2=_cp&&_cp.isDev;
+    const cdLeft2=isDev2?0:(session2?getCdLeft(session2):99999);
+    const locked2=!isDev2&&cdLeft2>0;
+    pfxPencil='<button class="btn-edit'+(locked2?' cd':'')+'" onclick="openEditModal(&quot;prefix&quot;)" title="'+(locked2?'КД: '+fmtCd(cdLeft2):'Изменить префикс')+'"><svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11.013 1.427a1.75 1.75 0 0 1 2.474 0l1.086 1.086a1.75 1.75 0 0 1 0 2.474l-8.61 8.61c-.21.21-.47.364-.756.445l-3.251.93a.75.75 0 0 1-.927-.928l.929-3.25c.081-.286.235-.547.445-.758l8.61-8.61zm1.414 1.06a.25.25 0 0 0-.354 0L10.811 3.75l1.439 1.44 1.263-1.263a.25.25 0 0 0 0-.354l-1.086-1.086zM11.189 6.25 9.75 4.81 3.23 11.33l-.479 1.679 1.679-.48 6.759-6.278z" fill="currentColor"/></svg></button>';
+  }
+  // Обновляем subEntry в _cp
+  if(_cp&&_cp.user&&_cp.user.nick.toLowerCase()===nick.toLowerCase()){
+    const cleanUpd=stripBracketPrefix(nick).toLowerCase();
+    _cp.subEntry=entries.find?entries.find(raw=>{const e=parseEntry(raw);return stripBracketPrefix(e.nick).toLowerCase()===cleanUpd;})||null:null;
+  }
+  body.innerHTML='<div class="sub-body"><div class="sub-field"><div class="sub-field-label">Игровой ник</div><div class="sub-field-value" style="font-weight:600">'+found.nick+'</div></div><div class="sub-field"><div class="sub-field-label">Префикс'+pfxPencil+'</div><div class="sub-field-value">'+prefixHTML+'</div></div><div class="sub-field"><div class="sub-field-label">'+(expired?'Истекла':'Действует до')+'</div><div class="sub-field-value">'+expireHTML+'</div></div>'+timeHTML+'</div>';
 }
 
 function handleBuySubscription(){alert('Для покупки подписки обратись к администратору в Discord!');}
@@ -542,6 +579,9 @@ async function viewUserProfile(user){
   }catch(e){}
   const isDev=myPrefix===DEV_PREFIX;
 
+  // Инициализируем _cp (subEntry обновится после загрузки)
+  _cp={user,isOwn,isDev,subEntry:null};
+
   // delete button
   const phActions=document.getElementById('phActions');phActions.innerHTML='';
   if(isDev){
@@ -551,10 +591,29 @@ async function viewUserProfile(user){
     phActions.appendChild(btn);
   }
 
+  // Карандашик у ника (свой профиль или dev смотрит чужой)
+  const nickPencilBtn=document.getElementById('btnEditNick');
+  if(isOwn||isDev){
+    nickPencilBtn.style.display='inline-flex';
+    // Получаем актуальный КД из свежей БД
+    let cdUser=isOwn?session:user;
+    try{const{users:dbU}=await readDB();const fresh=dbU.find(u=>u.id===(isOwn?session.id:user.id));if(fresh)cdUser=fresh;if(isOwn&&fresh){Object.assign(session,fresh);saveSession(session);}}catch(e){}
+    const cdLeft=isDev?0:getCdLeft(cdUser);
+    if(!isDev&&cdLeft>0){nickPencilBtn.classList.add('cd');nickPencilBtn.title='КД: '+fmtCd(cdLeft);}
+    else{nickPencilBtn.classList.remove('cd');nickPencilBtn.title='Изменить ник';}
+    nickPencilBtn.onclick=()=>openEditModal('nick');
+  }else{
+    nickPencilBtn.style.display='none';
+  }
+
   // load sub + stats
   const[er,sr]=await Promise.allSettled([fetchSubscriptions(),fetchPlayerStats(user.nick)]);
   const entries=er.status==='fulfilled'?er.value:(_cachedEntries||[]);
   _cachedEntries=entries;
+  // Найдём subEntry и сохраним в _cp
+  const cleanNickVup=stripBracketPrefix(user.nick).toLowerCase();
+  const foundRawVup=entries.find(raw=>{const e=parseEntry(raw);return stripBracketPrefix(e.nick).toLowerCase()===cleanNickVup;})||null;
+  _cp.subEntry=foundRawVup;
   renderSubscription(user.nick,entries,!isOwn);
   applyStats(sr.status==='fulfilled'?sr.value:null);
 }
@@ -609,21 +668,12 @@ function applyStats(data){
 // ── MAIN SHOW PROFILE ──
 function showAuthPage(){document.getElementById('authWrap').style.display='flex';document.getElementById('profileWrap').style.display='none';document.getElementById('nav').classList.remove('show');}
 async function showProfile(user){
-  // Показываем страницу СРАЗУ, без ожидания сети
-  document.getElementById('authWrap').style.display='none';
-  document.getElementById('profileWrap').style.display='flex';
-  document.getElementById('nav').classList.add('show');
+  hideLoading();
+  document.getElementById('authWrap').style.display='none';document.getElementById('profileWrap').style.display='flex';document.getElementById('nav').classList.add('show');
   document.getElementById('navNick').textContent='@'+user.nick;
   _viewingUser=null;
-  // Базовый рендер аватара/ника до загрузки данных
-  document.getElementById('pNick').textContent=user.nick;
-  const avEl=document.getElementById('avEl'),letter=document.getElementById('avLetter');
-  avEl.querySelectorAll('img').forEach(i=>i.remove());
-  if(user.avatar){letter.style.display='none';const img=document.createElement('img');img.alt=user.nick;img.src=user.avatar;img.onerror=()=>{img.remove();letter.style.display='';letter.textContent=user.nick[0].toUpperCase();};avEl.insertBefore(img,avEl.firstChild);}
-  else{letter.style.display='';letter.textContent=user.nick[0].toUpperCase();}
-  setStatsLoading();
-  // Данные грузим фоново — страница уже видна
-  Promise.all([loadSidebar(user.nick),viewUserProfile(user)]).catch(()=>{});
+
+  await Promise.all([loadSidebar(user.nick),viewUserProfile(user)]);
   startWatchdog(user);
 
   stopAutoRefresh();
@@ -658,10 +708,169 @@ window.addEventListener('DOMContentLoaded',async()=>{
   try{
     if(window.location.hash.includes('access_token')){showAuthPage();clearTimeout(emergency);await handleDiscordCallback();return;}
     const saved=loadSession();
-    if(saved){hideLoading();clearTimeout(emergency);showProfile(saved);return;}
+    if(saved){hideLoading();clearTimeout(emergency);await showProfile(saved);return;}
     hideLoading();clearTimeout(emergency);showAuthPage();
   }catch(e){clearTimeout(emergency);hideLoading();showAuthPage();}
 });
+
+// ── CONSTANTS ──
+const EDIT_CD_SEC   = 24*3600;
+const EDIT_LOCK_SEC = 30;
+
+// ── CURRENT PROFILE STATE ──
+let _cp = null; // {user, isOwn, isDev, subEntry}
+let _cdTimer = null;
+
+// ── COOLDOWN HELPERS ──
+function getCdLeft(user){
+  if(!user||!user.editCooldown)return 0;
+  const diff=EDIT_CD_SEC-(Math.floor(Date.now()/1000)-(user.editCooldown.lastEdit||0));
+  return diff>0?diff:0;
+}
+function fmtCd(s){const h=Math.floor(s/3600),m=Math.floor((s%3600)/60);return h>0?h+'ч '+m+'м':m+'м '+Math.floor(s%60)+'с';}
+
+// ── OPEN EDIT MODAL ──
+function openEditModal(type){
+  if(document.getElementById('_em'))return;
+  const session=loadSession();if(!session)return;
+  if(!_cp)return;
+  const{user,isOwn,isDev,subEntry}=_cp;
+  const targetUser=isOwn?session:user;
+
+  if(!isDev){
+    const cd=getCdLeft(targetUser);
+    if(cd>0){
+      showCdBlock(cd);return;
+    }
+  }
+  if(type==='prefix'){
+    if(!subEntry){alert('Смена префикса доступна только с активной подпиской.');return;}
+    const e=parseEntry(subEntry);
+    if(isExpired(e.ts)){alert('Подписка истекла — обнови её для смены префикса.');return;}
+    if(e.prefix===TRIAL_PREFIX){alert('На пробной подписке смена префикса недоступна.');return;}
+  }
+
+  const isNick=(type==='nick');
+  const curVal=isNick?targetUser.nick:(subEntry?parseEntry(subEntry).prefix||'':'');
+  const title=isNick?'✏️ Изменить ник':'✏️ Изменить префикс';
+
+  const ov=document.createElement('div');ov.className='modal-overlay';ov.id='_em';
+  ov.innerHTML=`<div class="modal-box edit-box">
+    <div class="modal-ttl">${title}</div>
+    <div class="modal-warn">
+      <strong>⚠️ Внимание!</strong>
+      После сохранения редактирование будет заблокировано на <strong>24 часа</strong>.${isDev?'<br><span style="color:#6ee7b7;font-size:.76rem">👑 Ты разработчик — КД не применяется.</span>':''}
+    </div>
+    <input class="modal-input" id="_ei" type="text" maxlength="${isNick?36:24}" value="${curVal}" placeholder="${isNick?'Your_Nickname':'МойПрефикс'}">
+    <div class="modal-acts">
+      <button class="mbtn mbtn-cancel" onclick="closeEm()">Отмена</button>
+      <button class="mbtn mbtn-save" id="_esave" disabled>Сохранить (<span id="_ecdnum">${EDIT_LOCK_SEC}</span>с)</button>
+    </div>
+    <div class="modal-cd" id="_ecdtxt">Кнопка разблокируется через <span class="cdnum" id="_ecdnum2">${EDIT_LOCK_SEC}</span> сек.</div>
+  </div>`;
+  document.body.appendChild(ov);
+  ov.addEventListener('click',e=>{if(e.target===ov)closeEm();});
+  document.getElementById('_ei').focus();
+  document.getElementById('_ei').addEventListener('keydown',e=>{if(e.key==='Enter'){const b=document.getElementById('_esave');if(!b.disabled)doEdit(type,targetUser,isDev);}});
+  document.getElementById('_esave').onclick=()=>doEdit(type,targetUser,isDev);
+
+  let sec=EDIT_LOCK_SEC;
+  _cdTimer=setInterval(()=>{
+    sec--;
+    const n=document.getElementById('_ecdnum'),n2=document.getElementById('_ecdnum2');
+    if(n)n.textContent=sec;if(n2)n2.textContent=sec;
+    if(sec<=0){
+      clearInterval(_cdTimer);_cdTimer=null;
+      const b=document.getElementById('_esave');if(b){b.disabled=false;b.textContent='Сохранить';}
+      const t=document.getElementById('_ecdtxt');if(t)t.textContent='';
+    }
+  },1000);
+}
+
+function closeEm(){if(_cdTimer){clearInterval(_cdTimer);_cdTimer=null;}const m=document.getElementById('_em');if(m)m.remove();}
+
+function showCdBlock(cd){
+  if(document.getElementById('_cdb'))return;
+  const ov=document.createElement('div');ov.className='modal-overlay';ov.id='_cdb';
+  ov.innerHTML=`<div class="modal-box edit-box" style="border-color:rgba(245,158,11,.35)"><div class="modal-ttl">⏳ Недоступно</div><div class="modal-txt">Редактирование заблокировано на <span style="color:var(--gold);font-weight:700">${fmtCd(cd)}</span>.</div><div class="modal-acts"><button class="mbtn mbtn-cancel" onclick="document.getElementById('_cdb').remove()">Понятно</button></div></div>`;
+  document.body.appendChild(ov);
+  ov.addEventListener('click',e=>{if(e.target===ov)ov.remove();});
+}
+
+// ── DO EDIT ──
+async function doEdit(type,targetUser,isDev){
+  const inp=document.getElementById('_ei');if(!inp)return;
+  const val=inp.value.trim();
+  const saveBtn=document.getElementById('_esave');
+
+  // Валидация
+  if(type==='nick'&&!/^[a-zA-Z0-9_.[\]-]{2,36}$/.test(val)){
+    inp.style.borderColor='var(--red)';inp.focus();return;
+  }
+  if(type==='prefix'&&(val.length<1||val.length>24)){
+    inp.style.borderColor='var(--red)';inp.focus();return;
+  }
+
+  if(saveBtn){saveBtn.disabled=true;saveBtn.innerHTML='<span class="sp" style="width:11px;height:11px;margin-right:4px"></span>Сохраняем...';}
+  try{
+    if(type==='nick') await _editNick(targetUser,val,isDev);
+    else               await _editPrefix(targetUser,val,isDev);
+    closeEm();
+  }catch(e){
+    if(saveBtn){saveBtn.disabled=false;saveBtn.textContent='Сохранить';}
+    inp.style.borderColor='var(--red)';
+    let errEl=document.getElementById('_eierr');
+    if(!errEl){errEl=document.createElement('div');errEl.id='_eierr';errEl.style.cssText='color:#fca5a5;font-size:.78rem;margin-top:-8px;margin-bottom:8px;';inp.after(errEl);}
+    errEl.textContent='Ошибка: '+e.message;
+  }
+}
+
+async function _editNick(targetUser,newNick,isDev){
+  const{users,sha}=await readDB();
+  if(users.find(u=>u.nick.toLowerCase()===newNick.toLowerCase()&&u.id!==targetUser.id))
+    throw new Error('Этот ник уже занят');
+  const idx=users.findIndex(u=>u.id===targetUser.id);
+  if(idx===-1)throw new Error('Пользователь не найден');
+  users[idx].nick=newNick;
+  if(!isDev)users[idx].editCooldown={lastEdit:Math.floor(Date.now()/1000)};
+  await writeDB(users,sha);
+  // Обновляем сессию если это мой аккаунт
+  const session=loadSession();
+  if(session&&session.id===targetUser.id){
+    session.nick=newNick;
+    if(!isDev)session.editCooldown={lastEdit:Math.floor(Date.now()/1000)};
+    saveSession(session);
+    document.getElementById('navNick').textContent='@'+newNick;
+  }
+  const updUser=Object.assign({},targetUser,{nick:newNick});
+  if(!isDev)updUser.editCooldown={lastEdit:Math.floor(Date.now()/1000)};
+  await viewUserProfile(updUser);
+  const s=loadSession();if(s)loadSidebar(s.nick);
+}
+
+async function _editPrefix(targetUser,newPrefix,isDev){
+  const{sha,entries}=await githubFetch();
+  const cleanNick=stripBracketPrefix(targetUser.nick).toLowerCase();
+  const idx=entries.findIndex(raw=>{const e=parseEntry(raw);return stripBracketPrefix(e.nick).toLowerCase()===cleanNick;});
+  if(idx===-1)throw new Error('Запись подписки не найдена');
+  const e=parseEntry(entries[idx]);
+  entries[idx]=e.nick+'|'+e.ts+'|'+newPrefix+'|'+(e.color||'');
+  await githubPush(sha,entries,'PrefixEdit:'+targetUser.nick+'->'+newPrefix);
+  if(!isDev){
+    const{users,sha:us}=await readDB();
+    const ui=users.findIndex(u=>u.id===targetUser.id);
+    if(ui!==-1){users[ui].editCooldown={lastEdit:Math.floor(Date.now()/1000)};await writeDB(users,us);}
+    const session=loadSession();
+    if(session&&session.id===targetUser.id){
+      session.editCooldown={lastEdit:Math.floor(Date.now()/1000)};saveSession(session);
+    }
+  }
+  _cachedEntries=null;
+  const fresh=await fetchSubscriptions();
+  _cachedEntries=fresh;
+  renderSubscription(targetUser.nick,fresh,_cp?!_cp.isOwn:true);
+}
+
 </script>
 </body>
 </html>
