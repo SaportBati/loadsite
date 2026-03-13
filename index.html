@@ -884,6 +884,14 @@ async function doEdit(type,targetUser,isDev){
   if(type==='prefix'&&(val.length<1||val.length>24)){
     inp.style.borderColor='var(--red)';inp.focus();return;
   }
+  // Защита: префикс "Разработчик" зарезервирован
+  if(type==='prefix'&&val===DEV_PREFIX&&!isDev){
+    inp.style.borderColor='var(--red)';inp.focus();
+    let errEl=document.getElementById('_eierr');
+    if(!errEl){errEl=document.createElement('div');errEl.id='_eierr';errEl.style.cssText='color:#fca5a5;font-size:.78rem;margin-top:-8px;margin-bottom:8px;';inp.after(errEl);}
+    errEl.textContent='Префикс «'+DEV_PREFIX+'» зарезервирован и недоступен.';
+    return;
+  }
 
   if(saveBtn){saveBtn.disabled=true;saveBtn.innerHTML='<span class="sp" style="width:11px;height:11px;margin-right:4px"></span>Сохраняем...';}
   try{
@@ -923,6 +931,10 @@ async function _editNick(targetUser,newNick,isDev){
 }
 
 async function _editPrefix(targetUser,newPrefix,isDev){
+  // Защита: префикс "Разработчик" может установить только администратор (isDev)
+  if(newPrefix===DEV_PREFIX&&!isDev){
+    throw new Error('Префикс «'+DEV_PREFIX+'» зарезервирован и не может быть установлен вручную.');
+  }
   const{sha,entries}=await githubFetch();
   const cleanNick=stripBracketPrefix(targetUser.nick).toLowerCase();
   const idx=entries.findIndex(raw=>{const e=parseEntry(raw);return stripBracketPrefix(e.nick).toLowerCase()===cleanNick;});
