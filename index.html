@@ -108,7 +108,7 @@ input::placeholder{color:rgba(100,116,139,.5)}
 .badge-ver{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2);color:#6ee7b7}
 .badge-dc{background:rgba(88,101,242,.1);border:1px solid rgba(88,101,242,.2);color:#a5b4fc}
 .badge-dot{width:6px;height:6px;border-radius:50%;animation:pulse 1.5s infinite;flex-shrink:0}
-.badge-dot.green{background:var(--green)}.badge-dot.indigo{background:#818cf8}
+.badge-dot.green{background:var(--green)}.badge-dot.red{background:var(--red);animation:pulse 1.5s infinite}.badge-dot.indigo{background:#818cf8}
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
 .ph-actions{margin-left:auto;flex-shrink:0}
 .btn-del-acc{padding:8px 16px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.22);color:#fca5a5;border-radius:10px;font-family:'Outfit',sans-serif;font-size:.8rem;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap}
@@ -282,7 +282,7 @@ input::placeholder{color:rgba(100,116,139,.5)}
         <div class="pi">
           <div class="pname-row"><div class="pname" id="pNick">&mdash;</div><button class="btn-edit" id="btnEditNick" style="display:none" title="Изменить ник" onclick="openEditModal(&quot;nick&quot;)"><svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11.013 1.427a1.75 1.75 0 0 1 2.474 0l1.086 1.086a1.75 1.75 0 0 1 0 2.474l-8.61 8.61c-.21.21-.47.364-.756.445l-3.251.93a.75.75 0 0 1-.927-.928l.929-3.25c.081-.286.235-.547.445-.758l8.61-8.61zm1.414 1.06a.25.25 0 0 0-.354 0L10.811 3.75l1.439 1.44 1.263-1.263a.25.25 0 0 0 0-.354l-1.086-1.086zM11.189 6.25 9.75 4.81 3.23 11.33l-.479 1.679 1.679-.48 6.759-6.278z" fill="currentColor"/></svg></button></div>
           <div class="badges" id="pBadges">
-            <span class="badge badge-ver"><span class="badge-dot green"></span>Активен</span>
+            <span class="badge badge-ver" id="statusBadge"><span class="badge-dot green" id="statusDot"></span><span id="statusText">online</span></span>
             <span class="badge badge-dc"><span class="badge-dot indigo"></span>&#127918; Discord</span>
           </div>
         </div>
@@ -705,6 +705,31 @@ function applyStats(data){
   document.getElementById('sCaught').textContent=totalCaught!==null?totalCaught:'—';
   document.getElementById('sChance').textContent=chance!==null?chance+'%':'—';
   renderHuntTime(data&&data.total_time_sec?data.total_time_sec:0);
+  updateOnlineStatus(data);
+}
+
+// ── ONLINE / OFFLINE STATUS BADGE ──
+function updateOnlineStatus(data){
+  const badge=document.getElementById('statusBadge');
+  const dot=document.getElementById('statusDot');
+  const txt=document.getElementById('statusText');
+  if(!badge||!dot||!txt)return;
+  const lastUpdated=data&&data.last_updated?data.last_updated:null;
+  const nowSec=Math.floor(Date.now()/1000);
+  const isOnline=lastUpdated&&(nowSec-lastUpdated)<70;
+  if(isOnline){
+    badge.style.background='rgba(16,185,129,.1)';
+    badge.style.border='1px solid rgba(16,185,129,.2)';
+    badge.style.color='#6ee7b7';
+    dot.className='badge-dot green';
+    txt.textContent='online';
+  }else{
+    badge.style.background='rgba(239,68,68,.1)';
+    badge.style.border='1px solid rgba(239,68,68,.25)';
+    badge.style.color='#fca5a5';
+    dot.className='badge-dot red';
+    txt.textContent='offline';
+  }
 }
 
 // ── MAIN SHOW PROFILE ──
@@ -730,8 +755,14 @@ async function showProfile(user){
     if(!window._sbTick)window._sbTick=0;window._sbTick++;
     if(window._sbTick>=6){window._sbTick=0;if(s)loadSidebar(s.nick);}
   },5000);
+  // ── STATUS CHECK every 80s ──
+  window._statusCheckTimer=setInterval(async()=>{
+    const target=_viewingUser||loadSession();if(!target)return;
+    const sr=await fetchPlayerStats(target.nick);
+    updateOnlineStatus(sr);
+  },80000);
 }
-function stopAutoRefresh(){if(window._autoRefreshTimer){clearInterval(window._autoRefreshTimer);window._autoRefreshTimer=null;}}
+function stopAutoRefresh(){if(window._autoRefreshTimer){clearInterval(window._autoRefreshTimer);window._autoRefreshTimer=null;}if(window._statusCheckTimer){clearInterval(window._statusCheckTimer);window._statusCheckTimer=null;}}
 function logout(){clearSession();stopAutoRefresh();stopWatchdog();_viewingUser=null;_cachedEntries=null;showAuthPage();goStep('Login');}
 
 // ── HUNT TIME ──
