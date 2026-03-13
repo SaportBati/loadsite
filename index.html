@@ -326,13 +326,11 @@ async function fetchPlayerStats(nick){
 
 // ── COMPUTE STATS ──
 function computeStats(data){
-  const sessions=(data&&Array.isArray(data.sessions))?data.sessions:[];
-  if(!sessions.length)return{avgPing:null,totalCaught:null,chance:null};
-  const pingSamples=sessions.filter(s=>s.avg_ping&&s.avg_ping>0).map(s=>s.avg_ping);
-  const avgPing=pingSamples.length>0?Math.round(pingSamples.reduce((a,b)=>a+b,0)/pingSamples.length):null;
-  const totalCaught=sessions.reduce((max,s)=>Math.max(max,s.caught||0),0);
-  const totalMissed=sessions.reduce((max,s)=>Math.max(max,s.missed||0),0);
-  const total=totalCaught+totalMissed;
+  if(!data)return{avgPing:null,totalCaught:null,chance:null};
+  const avgPing=(data.avg_ping&&data.avg_ping>0)?Math.round(data.avg_ping):null;
+  const totalCaught=(data.total_caught!=null)?data.total_caught:null;
+  const totalMissed=(data.total_missed!=null)?data.total_missed:0;
+  const total=(totalCaught!=null)?totalCaught+totalMissed:0;
   const chance=total>0?Math.round((totalCaught/total)*100):null;
   return{avgPing,totalCaught,chance};
 }
@@ -595,7 +593,7 @@ function applyStats(data){
   document.getElementById('sPing').textContent=avgPing!==null?avgPing+' мс':'—';
   document.getElementById('sCaught').textContent=totalCaught!==null?totalCaught:'—';
   document.getElementById('sChance').textContent=chance!==null?chance+'%':'—';
-  renderHuntTime(data&&data.total_hunting_secs?data.total_hunting_secs:0);
+  renderHuntTime(data&&data.total_time_sec?data.total_time_sec:0);
 }
 
 // ── MAIN SHOW PROFILE ──
