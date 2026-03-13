@@ -321,7 +321,17 @@ async function fetchSubscriptions(){
 
 // ── FETCH PLAYER STATS ──
 async function fetchPlayerStats(nick){
-  try{const safeNick=nick.replace(/[^a-zA-Z0-9_.\-]/g,'_');const r=await fetch(WORKER_URL+'/stats?nick='+encodeURIComponent(safeNick)+'&t='+Date.now());if(!r.ok)return null;const d=await r.json();if(!d.found||!d.data)return null;return d.data;}catch(e){return null;}
+  try{
+    const safeNick=nick.replace(/[^a-zA-Z0-9_.\-]/g,'_');
+    const r=await fetchWithTimeout(WORKER_URL+'/stats?nick='+encodeURIComponent(safeNick)+'&t='+Date.now(),{},8000);
+    if(!r.ok)return null;
+    const d=await r.json();
+    if(d&&typeof d==='object'){
+      if('total_caught' in d||'avg_ping' in d)return d;
+      if(d.found&&d.data)return d.data;
+    }
+    return null;
+  }catch(e){return null;}
 }
 
 // ── COMPUTE STATS ──
@@ -599,11 +609,21 @@ function applyStats(data){
 // ── MAIN SHOW PROFILE ──
 function showAuthPage(){document.getElementById('authWrap').style.display='flex';document.getElementById('profileWrap').style.display='none';document.getElementById('nav').classList.remove('show');}
 async function showProfile(user){
-  document.getElementById('authWrap').style.display='none';document.getElementById('profileWrap').style.display='flex';document.getElementById('nav').classList.add('show');
+  // Показываем страницу СРАЗУ, без ожидания сети
+  document.getElementById('authWrap').style.display='none';
+  document.getElementById('profileWrap').style.display='flex';
+  document.getElementById('nav').classList.add('show');
   document.getElementById('navNick').textContent='@'+user.nick;
   _viewingUser=null;
-
-  await Promise.all([loadSidebar(user.nick),viewUserProfile(user)]);
+  // Базовый рендер аватара/ника до загрузки данных
+  document.getElementById('pNick').textContent=user.nick;
+  const avEl=document.getElementById('avEl'),letter=document.getElementById('avLetter');
+  avEl.querySelectorAll('img').forEach(i=>i.remove());
+  if(user.avatar){letter.style.display='none';const img=document.createElement('img');img.alt=user.nick;img.src=user.avatar;img.onerror=()=>{img.remove();letter.style.display='';letter.textContent=user.nick[0].toUpperCase();};avEl.insertBefore(img,avEl.firstChild);}
+  else{letter.style.display='';letter.textContent=user.nick[0].toUpperCase();}
+  setStatsLoading();
+  // Данные грузим фоново — страница уже видна
+  Promise.all([loadSidebar(user.nick),viewUserProfile(user)]).catch(()=>{});
   startWatchdog(user);
 
   stopAutoRefresh();
@@ -638,7 +658,7 @@ window.addEventListener('DOMContentLoaded',async()=>{
   try{
     if(window.location.hash.includes('access_token')){showAuthPage();clearTimeout(emergency);await handleDiscordCallback();return;}
     const saved=loadSession();
-    if(saved){hideLoading();clearTimeout(emergency);await showProfile(saved);return;}
+    if(saved){hideLoading();clearTimeout(emergency);showProfile(saved);return;}
     hideLoading();clearTimeout(emergency);showAuthPage();
   }catch(e){clearTimeout(emergency);hideLoading();showAuthPage();}
 });
