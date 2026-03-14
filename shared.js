@@ -14,6 +14,9 @@ const DEV_PREFIX        = 'Разработчик';
 const EDIT_CD_SEC       = 24 * 3600;
 const EDIT_LOCK_SEC     = 30;
 
+// Секретный ключ для закрытых эндпоинтов воркера
+const API_SECRET = 'LR_s3cr3t_K3y_2024_xZ9q';
+
 // ── CP1251 ──
 const CP1251_MAP=[0x0402,0x0403,0x201A,0x0453,0x201E,0x2026,0x2020,0x2021,0x20AC,0x2030,0x0409,0x2039,0x040A,0x040C,0x040B,0x040F,0x0452,0x2018,0x2019,0x201C,0x201D,0x2022,0x2013,0x2014,0x0000,0x2122,0x0459,0x203A,0x045A,0x045C,0x045B,0x045F,0x00A0,0x040E,0x045E,0x0408,0x00A4,0x0490,0x00A6,0x00A7,0x0401,0x00A9,0x0404,0x00AB,0x00AC,0x00AD,0x00AE,0x0407,0x00B0,0x00B1,0x0406,0x0456,0x0491,0x00B5,0x00B6,0x00B7,0x0451,0x2116,0x0454,0x00BB,0x0458,0x0405,0x0455,0x0457,0x0410,0x0411,0x0412,0x0413,0x0414,0x0415,0x0416,0x0417,0x0418,0x0419,0x041A,0x041B,0x041C,0x041D,0x041E,0x041F,0x0420,0x0421,0x0422,0x0423,0x0424,0x0425,0x0426,0x0427,0x0428,0x0429,0x042A,0x042B,0x042C,0x042D,0x042E,0x042F,0x0430,0x0431,0x0432,0x0433,0x0434,0x0435,0x0436,0x0437,0x0438,0x0439,0x043A,0x043B,0x043C,0x043D,0x043E,0x043F,0x0440,0x0441,0x0442,0x0443,0x0444,0x0445,0x0446,0x0447,0x0448,0x0449,0x044A,0x044B,0x044C,0x044D,0x044E,0x044F];
 const unicodeToCp1251=new Map();for(let i=0;i<128;i++)unicodeToCp1251.set(i,i);CP1251_MAP.forEach((u,i)=>{if(u)unicodeToCp1251.set(u,0x80+i);});
@@ -30,13 +33,30 @@ function xorEncrypt(str,key){const s=strToCP1251Bytes(str),k=strToCP1251Bytes(ke
 // ── FETCH HELPERS ──
 function fetchWithTimeout(url,options={},ms=8000){const c=new AbortController();const t=setTimeout(()=>c.abort(),ms);return fetch(url,{...options,signal:c.signal}).finally(()=>clearTimeout(t));}
 
-// ── WORKER DB ──
-async function readDB(){try{const r=await fetchWithTimeout(WORKER_URL,{},5000);if(!r.ok)throw new Error('Worker '+r.status);return await r.json();}catch(e){return{users:[],sha:null};}}
-async function writeDB(users,sha){const r=await fetch(WORKER_URL,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({users,sha})});if(!r.ok){const e=await r.json();throw new Error(e.error||'Write failed');}}
+// ── WORKER DB (закрытые — с ключом) ──
+async function readDB(){
+  try{
+    const r=await fetchWithTimeout(WORKER_URL,{headers:{'X-API-Key':API_SECRET}},5000);
+    if(!r.ok)throw new Error('Worker '+r.status);
+    return await r.json();
+  }catch(e){return{users:[],sha:null};}
+}
+async function writeDB(users,sha){
+  const r=await fetch(WORKER_URL,{
+    method:'PUT',
+    headers:{'Content-Type':'application/json','X-API-Key':API_SECRET},
+    body:JSON.stringify({users,sha})
+  });
+  if(!r.ok){const e=await r.json();throw new Error(e.error||'Write failed');}
+}
 
-// ── GITHUB SUBS ──
+// ── GITHUB SUBS (закрытые — с ключом) ──
 async function githubFetch(){
-  const r=await fetchWithTimeout(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'fetchSubs'})},10000);
+  const r=await fetchWithTimeout(WORKER_URL,{
+    method:'POST',
+    headers:{'Content-Type':'application/json','X-API-Key':API_SECRET},
+    body:JSON.stringify({action:'fetchSubs'})
+  },10000);
   if(!r.ok)throw new Error('Worker fetchSubs '+r.status);
   const d=await r.json();if(d.error)throw new Error(d.error);
   const fileRaw=atob(d.content.replace(/\s/g,''));
@@ -51,10 +71,16 @@ async function githubPush(sha,entries,message){
   const raw=b64encodeBytes(fileBytes);
   const lined=[];for(let j=0;j<raw.length;j+=60)lined.push(raw.slice(j,j+60));
   const fileB64=lined.join('\n')+'\n';
-  const r=await fetchWithTimeout(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'pushSubs',sha,content:fileB64,message})},10000);
+  const r=await fetchWithTimeout(WORKER_URL,{
+    method:'POST',
+    headers:{'Content-Type':'application/json','X-API-Key':API_SECRET},
+    body:JSON.stringify({action:'pushSubs',sha,content:fileB64,message})
+  },10000);
   if(!r.ok)throw new Error('Worker pushSubs '+r.status);
   const res=await r.json();if(res.error)throw new Error(res.error);
 }
+
+// GET /subs-api — открытый, без ключа
 async function fetchSubscriptions(){
   const r=await fetch(WORKER_URL+'/subs-api?t='+Date.now());
   if(!r.ok)throw new Error('Worker error: '+r.status);
@@ -64,6 +90,8 @@ async function fetchSubscriptions(){
   for(const line of fileRaw.split(/\r?\n/)){const t=line.trim();if(!t)continue;try{const dec=cp1251BytesToStr(xorDecrypt(b64decodeBytes(t),XOR_KEY));if(dec.includes('|'))entries.push(dec);}catch(e){}}
   return entries;
 }
+
+// GET /stats — открытый, без ключа
 async function fetchPlayerStats(nick){
   try{
     const safeNick=nick.replace(/[^a-zA-Z0-9_.\-]/g,'_');
