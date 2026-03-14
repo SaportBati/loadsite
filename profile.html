@@ -7,6 +7,32 @@
 <title>Load Report — Профиль</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="shared.css">
+<style>
+/* ── TICKETS ── */
+.support-btn{display:flex;align-items:center;gap:8px;padding:10px 18px;background:rgba(6,182,212,.1);border:1px solid rgba(6,182,212,.25);border-radius:10px;color:var(--cyan);font-family:'Outfit',sans-serif;font-size:.85rem;font-weight:500;cursor:pointer;transition:all .2s;margin-top:12px;width:100%}
+.support-btn:hover{background:rgba(6,182,212,.2);transform:translateY(-1px)}
+.ticket-modal{background:#0d1220;border:1px solid var(--border);border-radius:18px;padding:28px 30px;width:100%;max-width:560px;max-height:85vh;overflow-y:auto}
+.ticket-list{display:flex;flex-direction:column;gap:10px;margin-top:16px}
+.ticket-item{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:12px;padding:14px 16px;cursor:pointer;transition:all .2s}
+.ticket-item:hover{border-color:rgba(59,130,246,.3);background:rgba(59,130,246,.05)}
+.ticket-item-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.ticket-subject{font-weight:600;font-size:.9rem;color:var(--text)}
+.ticket-badge{font-size:.7rem;font-weight:600;padding:3px 8px;border-radius:6px;text-transform:uppercase;letter-spacing:.06em}
+.tb-open{background:rgba(59,130,246,.15);color:var(--blue);border:1px solid rgba(59,130,246,.3)}
+.tb-answered{background:rgba(16,185,129,.15);color:var(--green);border:1px solid rgba(16,185,129,.3)}
+.tb-closed{background:rgba(100,116,139,.15);color:var(--muted);border:1px solid rgba(100,116,139,.3)}
+.ticket-meta{font-size:.75rem;color:var(--muted)}
+.ticket-detail{background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:10px;padding:14px;margin:12px 0;font-size:.85rem;line-height:1.65;color:rgba(226,232,240,.85);white-space:pre-wrap}
+.ticket-reply{background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.2);border-radius:10px;padding:14px;margin:8px 0}
+.ticket-reply-label{font-size:.72rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--green);margin-bottom:6px}
+.ticket-reply-text{font-size:.85rem;line-height:1.65;color:rgba(226,232,240,.85);white-space:pre-wrap}
+.ticket-form textarea{width:100%;padding:11px 14px;background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'Outfit',sans-serif;font-size:.875rem;resize:vertical;min-height:90px;outline:none;transition:border-color .2s;box-sizing:border-box}
+.ticket-form textarea:focus{border-color:var(--blue)}
+.ticket-form input{width:100%;padding:11px 14px;background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'Outfit',sans-serif;font-size:.875rem;outline:none;transition:border-color .2s;box-sizing:border-box;margin-bottom:10px}
+.ticket-form input:focus{border-color:var(--blue)}
+/* dev ticket list */
+.dev-ticket-nick{font-size:.75rem;color:var(--muted);margin-top:2px}
+</style>
 </head>
 <body>
 
@@ -116,6 +142,22 @@
         </div>
       </div>
 
+
+      <!-- Support button (only on own profile) -->
+      <div id="supportBtnWrap" style="display:none">
+        <button class="support-btn" onclick="openSupportModal()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          Написать в поддержку
+        </button>
+      </div>
+
+      <!-- Dev support panel -->
+      <div id="devSupportWrap" style="display:none">
+        <button class="support-btn" style="background:rgba(139,92,246,.1);border-color:rgba(139,92,246,.3);color:var(--violet)" onclick="openDevTickets()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          &#9881; Панель тикетов
+        </button>
+      </div>
     </div><!-- /profile-wrap -->
   </div><!-- /main-layout -->
 </div><!-- /wrap -->
@@ -423,6 +465,7 @@ async function renderProfile(){
   renderSubscription(_target.nick,entries,!_isOwn);
   applyStats(sr.status==='fulfilled'?sr.value:null);
   renderAdminPanel();
+  showSupportButtons();
 }
 
 // ── ADMIN PANEL ──
@@ -839,6 +882,282 @@ function startTimers(){
       }catch(e){}
     },15000);
   }
+}
+
+// ── SUPPORT / TICKETS ──
+
+function showSupportButtons(){
+  if(_isOwn){
+    document.getElementById('supportBtnWrap').style.display='block';
+    if(_isDev) document.getElementById('devSupportWrap').style.display='block';
+  }
+}
+
+// ── ОТКРЫТЬ ФОРМУ СОЗДАНИЯ ТИКЕТА ──
+async function openSupportModal(){
+  if(document.getElementById('_ticketModal'))return;
+  const ov=document.createElement('div');ov.className='modal-overlay';ov.id='_ticketModal';
+
+  // Загружаем существующие тикеты
+  let ticketsHTML='<div class="sp" style="width:12px;height:12px"></div>';
+  ov.innerHTML=`<div class="modal-box ticket-modal">
+    <div class="modal-ttl">💬 Поддержка</div>
+    <div id="_ticketContent">
+      <div style="text-align:center;padding:20px"><span class="sp"></span></div>
+    </div>
+  </div>`;
+  document.body.appendChild(ov);
+  ov.addEventListener('click',e=>{if(e.target===ov)closeTicketModal();});
+
+  // Загружаем тикеты
+  try{
+    const r=await fetch(WORKER_URL+'/tickets?nick='+encodeURIComponent(_session.nick));
+    const d=await r.json();
+    renderTicketList(d.tickets||[]);
+  }catch(e){
+    document.getElementById('_ticketContent').innerHTML='<div style="color:var(--red);font-size:.85rem">Ошибка загрузки тикетов</div>';
+  }
+}
+
+function renderTicketList(tickets){
+  const wrap=document.getElementById('_ticketContent');
+  if(!wrap)return;
+  const openTickets=tickets.filter(t=>t.status!=='closed');
+  let html=`<button class="mbtn mbtn-save" style="width:100%;margin-bottom:16px" onclick="showNewTicketForm()">+ Новый тикет</button>`;
+  if(openTickets.length===0){
+    html+=`<div style="color:var(--muted);font-size:.85rem;text-align:center;padding:16px">Открытых обращений нет</div>`;
+  }else{
+    html+=`<div style="font-size:.75rem;color:var(--muted);margin-bottom:8px;font-weight:600;letter-spacing:.06em;text-transform:uppercase">Мои обращения</div>
+    <div class="ticket-list">`;
+    for(const t of openTickets){
+      const badge=t.status==='answered'?'tb-answered':t.status==='closed'?'tb-closed':'tb-open';
+      const label=t.status==='answered'?'Отвечен':t.status==='closed'?'Закрыт':'Открыт';
+      const date=new Date(t.created_at*1000).toLocaleDateString('ru');
+      html+=`<div class="ticket-item" onclick="showTicketDetail(${t.id})">
+        <div class="ticket-item-header">
+          <div class="ticket-subject">${escHtml(t.subject)}</div>
+          <span class="ticket-badge ${badge}">${label}</span>
+        </div>
+        <div class="ticket-meta">${date}</div>
+      </div>`;
+    }
+    html+=`</div>`;
+  }
+  // Закрытые тикеты
+  const closed=tickets.filter(t=>t.status==='closed');
+  if(closed.length>0){
+    html+=`<div style="font-size:.75rem;color:var(--muted);margin:16px 0 8px;font-weight:600;letter-spacing:.06em;text-transform:uppercase">Закрытые</div><div class="ticket-list">`;
+    for(const t of closed){
+      const date=new Date(t.created_at*1000).toLocaleDateString('ru');
+      html+=`<div class="ticket-item" onclick="showTicketDetail(${t.id})">
+        <div class="ticket-item-header">
+          <div class="ticket-subject" style="color:var(--muted)">${escHtml(t.subject)}</div>
+          <span class="ticket-badge tb-closed">Закрыт</span>
+        </div>
+        <div class="ticket-meta">${date}</div>
+      </div>`;
+    }
+    html+=`</div>`;
+  }
+  html+=`<div class="modal-acts" style="margin-top:16px"><button class="mbtn mbtn-cancel" onclick="closeTicketModal()">Закрыть</button></div>`;
+  wrap.innerHTML=html;
+  wrap._tickets=tickets;
+}
+
+function showNewTicketForm(){
+  const wrap=document.getElementById('_ticketContent');
+  if(!wrap)return;
+  wrap.innerHTML=`
+    <div style="font-size:.8rem;color:var(--muted);margin-bottom:16px">Опиши проблему — мы ответим как можно скорее.</div>
+    <div class="ticket-form">
+      <input id="_tSubject" placeholder="Тема обращения" maxlength="100">
+      <textarea id="_tMessage" placeholder="Опиши проблему подробно..." maxlength="1000"></textarea>
+      <div style="font-size:.72rem;color:var(--muted);text-align:right;margin-top:4px" id="_tCount">0 / 1000</div>
+    </div>
+    <div id="_tErr" style="color:#fca5a5;font-size:.8rem;margin:8px 0;display:none"></div>
+    <div class="modal-acts" style="margin-top:14px">
+      <button class="mbtn mbtn-cancel" onclick="openSupportModal();closeTicketModal()">Назад</button>
+      <button class="mbtn mbtn-save" id="_tSend" onclick="submitTicket()">Отправить</button>
+    </div>`;
+  document.getElementById('_tMessage').addEventListener('input',function(){
+    document.getElementById('_tCount').textContent=this.value.length+' / 1000';
+  });
+}
+
+async function submitTicket(){
+  const subject=(document.getElementById('_tSubject')?.value||'').trim();
+  const message=(document.getElementById('_tMessage')?.value||'').trim();
+  const errEl=document.getElementById('_tErr');
+  const btn=document.getElementById('_tSend');
+  errEl.style.display='none';
+  if(!subject){errEl.textContent='Укажи тему';errEl.style.display='block';return;}
+  if(message.length<10){errEl.textContent='Сообщение слишком короткое';errEl.style.display='block';return;}
+  btn.disabled=true;btn.innerHTML='<span class="sp" style="width:11px;height:11px;margin-right:4px"></span>Отправляем...';
+  try{
+    const r=await fetch(WORKER_URL+'/tickets',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({nick:_session.nick,subject,message})
+    });
+    const d=await r.json();
+    if(d.error==='too_many_tickets'){errEl.textContent='У тебя уже 3 открытых тикета. Дождись ответа.';errEl.style.display='block';btn.disabled=false;btn.textContent='Отправить';return;}
+    if(!d.ok)throw new Error(d.error||'Ошибка');
+    // Успех
+    document.getElementById('_ticketContent').innerHTML=`
+      <div style="text-align:center;padding:24px">
+        <div style="font-size:2rem;margin-bottom:12px">✅</div>
+        <div style="font-size:.95rem;font-weight:600;color:var(--green);margin-bottom:8px">Тикет отправлен!</div>
+        <div style="font-size:.82rem;color:var(--muted)">Мы ответим в течение 24 часов.</div>
+      </div>
+      <div class="modal-acts"><button class="mbtn mbtn-cancel" onclick="closeTicketModal()">Закрыть</button></div>`;
+  }catch(e){
+    errEl.textContent='Ошибка: '+e.message;errEl.style.display='block';
+    btn.disabled=false;btn.textContent='Отправить';
+  }
+}
+
+function showTicketDetail(id){
+  const wrap=document.getElementById('_ticketContent');
+  if(!wrap)return;
+  const tickets=wrap._tickets||[];
+  const t=tickets.find(x=>x.id===id);
+  if(!t)return;
+  const badge=t.status==='answered'?'tb-answered':t.status==='closed'?'tb-closed':'tb-open';
+  const label=t.status==='answered'?'Отвечен':t.status==='closed'?'Закрыт':'Открыт';
+  const date=new Date(t.created_at*1000).toLocaleString('ru');
+  let replyHTML='';
+  if(t.reply){
+    replyHTML=`<div class="ticket-reply">
+      <div class="ticket-reply-label">⚙ Ответ поддержки</div>
+      <div class="ticket-reply-text">${escHtml(t.reply)}</div>
+    </div>`;
+  }else if(t.status==='open'){
+    replyHTML=`<div style="color:var(--muted);font-size:.82rem;text-align:center;padding:12px">⏳ Ожидает ответа...</div>`;
+  }
+  wrap.innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div style="font-weight:600;font-size:.95rem">${escHtml(t.subject)}</div>
+      <span class="ticket-badge ${badge}">${label}</span>
+    </div>
+    <div style="font-size:.75rem;color:var(--muted);margin-bottom:10px">${date}</div>
+    <div class="ticket-detail">${escHtml(t.message)}</div>
+    ${replyHTML}
+    <div class="modal-acts" style="margin-top:16px">
+      <button class="mbtn mbtn-cancel" onclick="openSupportModal();closeTicketModal()">← Назад</button>
+    </div>`;
+}
+
+function closeTicketModal(){
+  document.getElementById('_ticketModal')?.remove();
+}
+
+// ── DEV: ПАНЕЛЬ ВСЕХ ТИКЕТОВ ──
+async function openDevTickets(){
+  if(document.getElementById('_devTicketModal'))return;
+  const ov=document.createElement('div');ov.className='modal-overlay';ov.id='_devTicketModal';
+  ov.innerHTML=`<div class="modal-box ticket-modal">
+    <div class="modal-ttl">⚙ Тикеты поддержки</div>
+    <div id="_devTicketContent"><div style="text-align:center;padding:20px"><span class="sp"></span></div></div>
+  </div>`;
+  document.body.appendChild(ov);
+  ov.addEventListener('click',e=>{if(e.target===ov)ov.remove();});
+  await loadDevTickets();
+}
+
+async function loadDevTickets(){
+  const wrap=document.getElementById('_devTicketContent');
+  if(!wrap)return;
+  try{
+    const r=await fetch(WORKER_URL+'/tickets/all',{headers:{'X-API-Key':'LR_s3cr3t_K3y_2024_xZ9q'}});
+    const d=await r.json();
+    const tickets=d.tickets||[];
+    const open=tickets.filter(t=>t.status==='open');
+    const answered=tickets.filter(t=>t.status==='answered');
+    const closed=tickets.filter(t=>t.status==='closed');
+
+    let html='';
+    const renderGroup=(label,list,color)=>{
+      if(!list.length)return'';
+      let h=`<div style="font-size:.72rem;color:${color};margin:16px 0 8px;font-weight:700;letter-spacing:.08em;text-transform:uppercase">${label} (${list.length})</div><div class="ticket-list">`;
+      for(const t of list){
+        const date=new Date(t.created_at*1000).toLocaleDateString('ru');
+        h+=`<div class="ticket-item" onclick="showDevTicketDetail(${t.id})">
+          <div class="ticket-item-header">
+            <div class="ticket-subject">${escHtml(t.subject)}</div>
+          </div>
+          <div class="dev-ticket-nick">от: ${escHtml(t.nick)} · ${date}</div>
+        </div>`;
+      }
+      return h+'</div>';
+    };
+    html+=renderGroup('🔴 Открытые',open,'#ef4444');
+    html+=renderGroup('🟡 Отвеченные',answered,'#f59e0b');
+    html+=renderGroup('⚫ Закрытые',closed,'#64748b');
+    if(!tickets.length) html='<div style="color:var(--muted);text-align:center;padding:20px">Тикетов нет</div>';
+    html+=`<div class="modal-acts" style="margin-top:16px"><button class="mbtn mbtn-cancel" onclick="document.getElementById(\'_devTicketModal\').remove()">Закрыть</button></div>`;
+    wrap.innerHTML=html;
+    wrap._tickets=tickets;
+  }catch(e){
+    wrap.innerHTML=`<div style="color:var(--red);font-size:.85rem">Ошибка: ${e.message}</div>`;
+  }
+}
+
+function showDevTicketDetail(id){
+  const wrap=document.getElementById('_devTicketContent');
+  if(!wrap)return;
+  const tickets=wrap._tickets||[];
+  const t=tickets.find(x=>x.id===id);
+  if(!t)return;
+  const date=new Date(t.created_at*1000).toLocaleString('ru');
+  const isClosed=t.status==='closed';
+  wrap.innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+      <div style="font-weight:600">${escHtml(t.subject)}</div>
+    </div>
+    <div style="font-size:.75rem;color:var(--muted);margin-bottom:4px">от: <strong>${escHtml(t.nick)}</strong> · ${date}</div>
+    <div class="ticket-detail">${escHtml(t.message)}</div>
+    ${t.reply?`<div class="ticket-reply"><div class="ticket-reply-label">Твой ответ</div><div class="ticket-reply-text">${escHtml(t.reply)}</div></div>`:''}
+    ${!isClosed?`<div class="ticket-form" style="margin-top:12px">
+      <textarea id="_devReply" placeholder="Напиши ответ пользователю..." maxlength="2000">${t.reply||''}</textarea>
+    </div>
+    <div id="_devReplyErr" style="color:#fca5a5;font-size:.8rem;margin:6px 0;display:none"></div>
+    <div class="modal-acts" style="margin-top:12px">
+      <button class="mbtn mbtn-cancel" onclick="loadDevTickets()">← Назад</button>
+      <button class="mbtn mbtn-del" onclick="closeDevTicket(${t.id})">Закрыть тикет</button>
+      <button class="mbtn mbtn-save" onclick="replyDevTicket(${t.id})">Отправить ответ</button>
+    </div>`:`<div class="modal-acts" style="margin-top:12px"><button class="mbtn mbtn-cancel" onclick="loadDevTickets()">← Назад</button></div>`}`;
+}
+
+async function replyDevTicket(id){
+  const reply=(document.getElementById('_devReply')?.value||'').trim();
+  const errEl=document.getElementById('_devReplyErr');
+  if(!reply){errEl.textContent='Введи ответ';errEl.style.display='block';return;}
+  errEl.style.display='none';
+  try{
+    const r=await fetch(WORKER_URL+'/tickets/reply',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','X-API-Key':'LR_s3cr3t_K3y_2024_xZ9q'},
+      body:JSON.stringify({id,reply})
+    });
+    const d=await r.json();
+    if(!d.ok)throw new Error(d.error||'Ошибка');
+    await loadDevTickets();
+  }catch(e){errEl.textContent='Ошибка: '+e.message;errEl.style.display='block';}
+}
+
+async function closeDevTicket(id){
+  try{
+    await fetch(WORKER_URL+'/tickets/close',{
+      method:'DELETE',
+      headers:{'Content-Type':'application/json','X-API-Key':'LR_s3cr3t_K3y_2024_xZ9q'},
+      body:JSON.stringify({id})
+    });
+    await loadDevTickets();
+  }catch(e){alert('Ошибка: '+e.message);}
+}
+
+function escHtml(str){
+  return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
 // ── INIT ──
