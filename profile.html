@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<title>Load Report — Профиль</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+</head>
+<body>
+
+<div class="loading-screen" id="loadingScreen">
+  <div class="loading-logo">LOAD REPORT</div>
+  <div class="loading-sp"></div>
+</div>
+
+<div class="bg">
+  <div class="grid-lines"></div>
+  <div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div>
+  <div class="noise"></div>
+</div>
+
+<!-- NAV -->
+<nav class="nav">
+  <a class="nav-brand" href="profile.html">LOAD REPORT</a>
+  <div class="nav-right">
+    <span class="nav-nick" id="navNick"></span>
+    <button class="btn-ghost" onclick="logout()">Выйти &rarr;</button>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div class="wrap" id="mainWrap">
+  <div class="main-layout" id="mainLayout" style="display:none;animation:appear .55s cubic-bezier(.22,1,.36,1) both">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-card">
+        <div class="sidebar-ttl">&#128101; Игроки</div>
+        <div class="user-list" id="userList">
+          <div class="sidebar-empty"><span class="sp" style="width:11px;height:11px;margin-right:5px"></span>Загрузка...</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- PROFILE CONTENT -->
+    <div class="profile-wrap">
+
+      <!-- Viewing someone else's profile -->
+      <div id="viewingBanner" style="display:none" class="viewing-banner">
+        <span id="viewingText"></span>
+        <button class="btn-back" onclick="goMyProfile()">&#8592; Мой профиль</button>
+      </div>
+
+      <!-- Profile header -->
+      <div class="ph">
+        <div class="av-outer">
+          <div class="av" id="avEl"><span id="avLetter">?</span></div>
+          <div class="av-ring"></div>
+        </div>
+        <div class="pi">
+          <div class="pname-row">
+            <div class="pname" id="pNick">&mdash;</div>
+            <button class="btn-edit" id="btnEditNick" style="display:none" title="Изменить ник"
+                    onclick="openEditModal('nick')">
+              <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M11.013 1.427a1.75 1.75 0 0 1 2.474 0l1.086 1.086a1.75 1.75 0 0 1 0 2.474l-8.61 8.61c-.21.21-.47.364-.756.445l-3.251.93a.75.75 0 0 1-.927-.928l.929-3.25c.081-.286.235-.547.445-.758l8.61-8.61zm1.414 1.06a.25.25 0 0 0-.354 0L10.811 3.75l1.439 1.44 1.263-1.263a.25.25 0 0 0 0-.354l-1.086-1.086zM11.189 6.25 9.75 4.81 3.23 11.33l-.479 1.679 1.679-.48 6.759-6.278z" fill="currentColor"/>
+              </svg>
+            </button>
+          </div>
+          <div class="badges" id="pBadges">
+            <span class="badge badge-ver" id="statusBadge">
+              <span class="badge-dot green" id="statusDot"></span>
+              <span id="statusText">online</span>
+            </span>
+            <span class="badge badge-dc">
+              <span class="badge-dot indigo"></span>&#127918; Discord
+            </span>
+          </div>
+        </div>
+        <div class="ph-actions" id="phActions"></div>
+      </div>
+
+      <!-- Subscription card -->
+      <div class="sub-card no-sub" id="subCard">
+        <div class="sub-header-row">
+          <div class="sub-title">&#127259; Подписка Load Report</div>
+          <div class="sub-status loading-st" id="subStatusBadge">
+            <span id="subStatusText">Проверяем...</span>
+          </div>
+        </div>
+        <div id="subBody">
+          <div class="sub-loading-inner"><span class="sp"></span>Загружаем данные из базы...</div>
+        </div>
+      </div>
+
+      <!-- Admin panel (only for devs) -->
+      <div class="admin-panel" id="adminPanel" style="display:none">
+        <div class="admin-panel-title">&#9881; Панель администратора</div>
+        <div class="admin-actions" id="adminActions"></div>
+      </div>
+
+      <!-- Stats -->
+      <div class="sg">
+        <div class="sc"><div class="si">&#128225;</div><div class="sv" id="sPing">—</div><div class="sl">Средний пинг</div></div>
+        <div class="sc"><div class="si">&#127381;</div><div class="sv" id="sCaught">—</div><div class="sl">Поймано репортов</div></div>
+        <div class="sc"><div class="si">&#127919;</div><div class="sv" id="sChance">—</div><div class="sl">Шанс поймать</div></div>
+      </div>
+
+      <!-- Hunt time -->
+      <div class="ac">
+        <div class="sect">Время ловли репортов</div>
+        <div class="hunt-time-inner" id="huntTimeEl">
+          <span style="color:var(--muted);font-size:.875rem">Загрузка...</span>
+        </div>
+      </div>
+
+    </div><!-- /profile-wrap -->
+  </div><!-- /main-layout -->
+</div><!-- /wrap -->
+
+<script src="shared.js"></script>
+<script>
+// ── STATE ──
+let _session = null;      // logged-in user
+let _target  = null;      // user whose profile is shown
+let _isOwn   = true;
+let _isDev   = false;
+let _subEntry= null;      // raw entry string from subs file
+let _cachedEntries = null;
+let _cdTimer = null;
+let _autoRefreshTimer = null;
+let _statusCheckTimer = null;
+let _watchdog = null;
+
+// ── HELPERS ──
+function hideLoading(){
+  const el=document.getElementById('loadingScreen');
+  el.classList.add('hidden');
+  setTimeout(()=>el.style.display='none',350);
+}
+
+// ── RENDER SUBSCRIPTION ──
+function renderSubscription(nick, entries, readonly){
+  const cleanNick=stripBracketPrefix(nick).toLowerCase();
+  let found=null;
+  for(const raw of entries){
+    const e=parseEntry(raw);
+    if(stripBracketPrefix(e.nick).toLowerCase()===cleanNick){found=e;break;}
+  }
+  const card=document.getElementById('subCard'),
+        statusBadge=document.getElementById('subStatusBadge'),
+        body=document.getElementById('subBody');
+
+  if(!found){
+    card.className='sub-card free-sub';
+    statusBadge.className='sub-status free';
+    statusBadge.innerHTML='<span>Free</span>';
+    if(readonly){
+      body.innerHTML='<div class="sub-body"><div class="sub-field"><div class="sub-field-label">Тариф</div><div class="sub-field-value" style="color:var(--blue)">🆓 Free</div></div></div>';
+    }else{
+      body.innerHTML=`<div class="free-plan-block">
+        <div class="free-plan-features">
+          <div class="free-feat"><div class="free-feat-label">Тариф</div><div class="free-feat-value">🆓 Free</div></div>
+          <div class="free-feat"><div class="free-feat-label">Отчётов в день</div><div class="free-feat-value limited">3 / день</div></div>
+          <div class="free-feat"><div class="free-feat-label">Префикс</div><div class="free-feat-value limited">&mdash;</div></div>
+          <div class="free-feat"><div class="free-feat-label">Статус</div><div class="free-feat-value" style="color:var(--blue)">Базовый доступ</div></div>
+        </div>
+        <div class="free-divider"></div>
+        <button class="btn-buy" onclick="handleBuySubscription()"><span class="btn-buy-icon">⚡</span>Купить подписку</button>
+        <button class="btn-trial" id="trialBtn" onclick="handleTrialSubscription()"><span>🎁</span>Получить пробную подписку · 2 дня</button>
+      </div>`;
+    }
+    _subEntry=null;
+    return;
+  }
+
+  const expired=isExpired(found.ts), timeLeft=formatTimeLeft(found.ts);
+  const isCrit=found.ts!==0&&!expired&&(found.ts-Math.floor(Date.now()/1000))<86400*3;
+  if(expired){
+    card.className='sub-card expired-sub';
+    statusBadge.className='sub-status expired';
+    statusBadge.innerHTML='<span>Истекла</span>';
+  }else{
+    card.className='sub-card active-sub';
+    statusBadge.className='sub-status active';
+    statusBadge.innerHTML='<span>'+(found.ts===0?'Активна · Безлимит':'Активна')+'</span>';
+  }
+
+  let prefixHTML='<span style="color:var(--muted)">&mdash;</span>';
+  if(found.prefix){
+    const col=found.color?found.color.replace(/^#/,''):null;
+    const style=col?'color:#'+col+';border-color:#'+col+'55;background:#'+col+'18':'';
+    prefixHTML='<span class="prefix-badge" style="'+style+'">['+found.prefix+']</span>';
+  }
+
+  let expireHTML;
+  if(expired) expireHTML='<span style="color:var(--red)">'+formatDate(found.ts)+'</span>';
+  else if(found.ts===0) expireHTML='<span style="color:var(--gold)">∞ Безлимит</span>';
+  else expireHTML='<span style="color:var(--green)">'+formatDate(found.ts)+'</span>';
+
+  const timeHTML=timeLeft
+    ?'<div class="sub-field"><div class="sub-field-label">Осталось</div><div class="sub-field-value'+(isCrit?' time-critical':'')+'" style="'+(isCrit?'':'color:var(--gold)')+'">'+timeLeft+'</div></div>'
+    :'';
+
+  const isTrial=found.prefix===TRIAL_PREFIX;
+  let pfxPencil='';
+  if(!readonly&&!isTrial&&!expired){
+    const cdLeft=_isDev?0:getCdLeft(_session);
+    const locked=!_isDev&&cdLeft>0;
+    pfxPencil=`<button class="btn-edit${locked?' cd':''}" onclick="openEditModal('prefix')" title="${locked?'КД: '+fmtCd(cdLeft):'Изменить префикс'}">
+      <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11.013 1.427a1.75 1.75 0 0 1 2.474 0l1.086 1.086a1.75 1.75 0 0 1 0 2.474l-8.61 8.61c-.21.21-.47.364-.756.445l-3.251.93a.75.75 0 0 1-.927-.928l.929-3.25c.081-.286.235-.547.445-.758l8.61-8.61zm1.414 1.06a.25.25 0 0 0-.354 0L10.811 3.75l1.439 1.44 1.263-1.263a.25.25 0 0 0 0-.354l-1.086-1.086zM11.189 6.25 9.75 4.81 3.23 11.33l-.479 1.679 1.679-.48 6.759-6.278z" fill="currentColor"/></svg>
+    </button>`;
+  }
+
+  // Update _subEntry
+  const rawFound=entries.find(raw=>{const e=parseEntry(raw);return stripBracketPrefix(e.nick).toLowerCase()===cleanNick;})||null;
+  _subEntry=rawFound;
+
+  body.innerHTML=`<div class="sub-body">
+    <div class="sub-field"><div class="sub-field-label">Игровой ник</div><div class="sub-field-value" style="font-weight:600">${found.nick}</div></div>
+    <div class="sub-field"><div class="sub-field-label">Префикс ${pfxPencil}</div><div class="sub-field-value">${prefixHTML}</div></div>
+    <div class="sub-field"><div class="sub-field-label">${expired?'Истекла':'Действует до'}</div><div class="sub-field-value">${expireHTML}</div></div>
+    ${timeHTML}
+  </div>`;
+}
+
+// ── STATS ──
+function setStatsLoading(){
+  document.getElementById('sPing').innerHTML='<span class="sp" style="width:12px;height:12px;margin:0"></span>';
+  document.getElementById('sCaught').innerHTML='<span class="sp" style="width:12px;height:12px;margin:0"></span>';
+  document.getElementById('sChance').innerHTML='<span class="sp" style="width:12px;height:12px;margin:0"></span>';
+  document.getElementById('huntTimeEl').innerHTML='<span style="color:var(--muted);font-size:.875rem">Загрузка...</span>';
+  document.getElementById('subCard').className='sub-card no-sub';
+  document.getElementById('subStatusBadge').className='sub-status loading-st';
+  document.getElementById('subStatusBadge').innerHTML='<span>Проверяем...</span>';
+  document.getElementById('subBody').innerHTML='<div class="sub-loading-inner"><span class="sp"></span>Загружаем данные из базы...</div>';
+}
+
+function applyStats(data){
+  const{avgPing,totalCaught,chance}=computeStats(data);
+  document.getElementById('sPing').textContent=avgPing!==null?avgPing+' мс':'—';
+  document.getElementById('sCaught').textContent=totalCaught!==null?totalCaught:'—';
+  document.getElementById('sChance').textContent=chance!==null?chance+'%':'—';
+  renderHuntTime(data&&data.total_time_sec?data.total_time_sec:0);
+  updateOnlineStatus(data);
+}
+
+function renderHuntTime(secs){
+  const el=document.getElementById('huntTimeEl');
+  const t=formatHuntTime(secs);
+  if(!t){el.innerHTML='<span style="color:var(--muted);font-size:.875rem">Нет данных — начни ловлю!</span>';return;}
+  const parts=[];
+  if(t.d>0)parts.push({val:t.d,lbl:'дней'});
+  parts.push({val:t.h,lbl:'часов'});
+  parts.push({val:t.m,lbl:'минут'});
+  parts.push({val:t.s,lbl:'секунд'});
+  el.innerHTML=parts.map((p,i)=>
+    (i>0?'<span class="hunt-sep">:</span>':'')+
+    '<div class="hunt-seg"><div class="hunt-val">'+String(p.val).padStart(2,'0')+'</div><div class="hunt-lbl">'+p.lbl+'</div></div>'
+  ).join('');
+}
+
+function updateOnlineStatus(data){
+  const badge=document.getElementById('statusBadge'),dot=document.getElementById('statusDot'),txt=document.getElementById('statusText');
+  if(!badge||!dot||!txt)return;
+  const lastUpdated=data&&data.last_updated?data.last_updated:null;
+  const isOnline=lastUpdated&&(Math.floor(Date.now()/1000)-lastUpdated)<70;
+  if(isOnline){
+    badge.style.cssText='background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2);color:#6ee7b7';
+    dot.className='badge-dot green';txt.textContent='online';
+  }else{
+    badge.style.cssText='background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);color:#fca5a5';
+    dot.className='badge-dot red';txt.textContent='offline';
+  }
+}
+
+// ── AVATAR ──
+function renderAvatar(user){
+  const avEl=document.getElementById('avEl'),letter=document.getElementById('avLetter');
+  avEl.querySelectorAll('img').forEach(i=>i.remove());
+  if(user.avatar){
+    letter.style.display='none';
+    const img=document.createElement('img');
+    img.alt=user.nick;img.src=user.avatar;
+    img.onerror=()=>{img.remove();letter.style.display='';letter.textContent=user.nick[0].toUpperCase();};
+    avEl.insertBefore(img,avEl.firstChild);
+  }else{
+    letter.style.display='';letter.textContent=user.nick[0].toUpperCase();
+  }
+}
+
+// ── LOAD SIDEBAR ──
+async function loadSidebar(){
+  const ul=document.getElementById('userList');
+  try{
+    const[{users},entries]=await Promise.all([readDB(),fetchSubscriptions()]);
+    _cachedEntries=entries;
+    if(!users||!users.length){ul.innerHTML='<div class="sidebar-empty">Пока нет игроков</div>';return;}
+    ul.innerHTML='';
+    for(const u of users){
+      const subEntry=entries.find(raw=>{
+        const e=parseEntry(raw);
+        return stripBracketPrefix(e.nick).toLowerCase()===stripBracketPrefix(u.nick).toLowerCase();
+      });
+      const prefix=subEntry?parseEntry(subEntry).prefix:null;
+      const isDev=prefix===DEV_PREFIX;
+      const isMe=_session&&u.nick.toLowerCase()===_session.nick.toLowerCase();
+      const isViewing=_target&&_target.nick.toLowerCase()===u.nick.toLowerCase();
+
+      const item=document.createElement('div');
+      item.className='user-item'+(isMe?' is-me':'')+(isViewing?' is-active':'');
+      item.onclick=()=>navigateToProfile(u.nick);
+
+      const avHTML=u.avatar
+        ?'<div class="uav"><img src="'+u.avatar+'" alt="" onerror="this.parentNode.innerHTML=\''+u.nick[0].toUpperCase()+'\'"></div>'
+        :'<div class="uav">'+u.nick[0].toUpperCase()+'</div>';
+      const pfxHTML=prefix
+        ?'<div class="upfx'+(isDev?' is-dev':'')+'">'+( isDev?'⚙ ':'')+'['+prefix+']</div>'
+        :'<div class="upfx">Free</div>';
+
+      item.innerHTML=avHTML+'<div class="uinfo"><div class="uname">'+u.nick+'</div>'+pfxHTML+'</div>';
+      ul.appendChild(item);
+    }
+  }catch(e){
+    ul.innerHTML='<div class="sidebar-empty" style="color:#fca5a5">Ошибка</div>';
+  }
+}
+
+function setSidebarHighlight(){
+  document.querySelectorAll('.user-item').forEach(el=>{
+    const n=el.querySelector('.uname');if(!n)return;
+    const nick=n.textContent.toLowerCase();
+    el.classList.remove('is-me','is-active');
+    if(_session&&nick===_session.nick.toLowerCase()) el.classList.add('is-me');
+    if(_target&&nick===_target.nick.toLowerCase()) el.classList.add('is-active');
+  });
+}
+
+// ── NAVIGATE ──
+function navigateToProfile(nick){
+  if(_session&&nick.toLowerCase()===_session.nick.toLowerCase()){
+    window.location.href='profile.html';
+  }else{
+    window.location.href='profile.html?user='+encodeURIComponent(nick);
+  }
+}
+
+// ── RENDER PROFILE ──
+async function renderProfile(){
+  document.getElementById('pNick').textContent=_target.nick;
+  renderAvatar(_target);
+  setStatsLoading();
+
+  // Viewing banner
+  const banner=document.getElementById('viewingBanner'),vtext=document.getElementById('viewingText');
+  if(_isOwn){
+    banner.style.display='none';
+    document.title='Load Report — Мой профиль';
+  }else{
+    vtext.textContent='👁 Профиль: '+_target.nick;
+    banner.style.display='flex';
+    document.title='Load Report — '+_target.nick;
+  }
+
+  // Nav nick
+  if(_session) document.getElementById('navNick').textContent='@'+_session.nick;
+
+  // Check if session user is dev
+  try{
+    const entries=_cachedEntries||await fetchSubscriptions();
+    _cachedEntries=entries;
+    const myEntry=entries.find(raw=>{
+      const e=parseEntry(raw);
+      return stripBracketPrefix(e.nick).toLowerCase()===stripBracketPrefix(_session.nick).toLowerCase();
+    });
+    _isDev=myEntry?parseEntry(myEntry).prefix===DEV_PREFIX:false;
+  }catch(e){_isDev=false;}
+
+  // Delete button (only devs)
+  const phActions=document.getElementById('phActions');
+  phActions.innerHTML='';
+  if(_isDev){
+    const btn=document.createElement('button');
+    btn.className='btn-del-acc';
+    btn.textContent=_isOwn?'🗑 Удалить мой аккаунт':'🗑 Удалить аккаунт';
+    btn.onclick=()=>promptDelete();
+    phActions.appendChild(btn);
+  }
+
+  // Edit nick pencil
+  const nickPencilBtn=document.getElementById('btnEditNick');
+  if(_isOwn||_isDev){
+    nickPencilBtn.style.display='inline-flex';
+    try{
+      const{users}=await readDB();
+      const fresh=users.find(u=>u.id===_target.id);
+      if(fresh){
+        Object.assign(_target,fresh);
+        if(_isOwn){Object.assign(_session,fresh);saveSession(_session);}
+      }
+    }catch(e){}
+    const cdLeft=_isDev?0:getCdLeft(_isOwn?_session:_target);
+    if(!_isDev&&cdLeft>0){
+      nickPencilBtn.classList.add('cd');
+      nickPencilBtn.title='КД: '+fmtCd(cdLeft);
+    }else{
+      nickPencilBtn.classList.remove('cd');
+      nickPencilBtn.title='Изменить ник';
+    }
+  }else{
+    nickPencilBtn.style.display='none';
+  }
+
+  // Load sub + stats
+  const[er,sr]=await Promise.allSettled([
+    fetchSubscriptions(),
+    fetchPlayerStats(_target.nick)
+  ]);
+  if(er.status==='fulfilled'){_cachedEntries=er.value;}
+  const entries=er.status==='fulfilled'?er.value:(_cachedEntries||[]);
+  renderSubscription(_target.nick,entries,!_isOwn);
+  applyStats(sr.status==='fulfilled'?sr.value:null);
+  renderAdminPanel();
+}
+
+// ── ADMIN PANEL ──
+function renderAdminPanel(){
+  const panel=document.getElementById('adminPanel'),acts=document.getElementById('adminActions');
+  if(!_isDev){panel.style.display='none';return;}
+  panel.style.display='block';
+  acts.innerHTML='';
+  const btns=[
+    {label:'📋 Информация об аккаунте', cls:'abtn-blue',   fn:adminShowInfo},
+    {label:'✏️ Изменить префикс',       cls:'abtn-violet', fn:()=>openEditModal('prefix')},
+    {label:'📊 Редактировать статистику',cls:'abtn-orange', fn:adminEditStats},
+    {label:_target.banned?'✅ Снять блокировку':'🚫 Заблокировать', cls:_target.banned?'abtn-green':'abtn-red', fn:adminToggleBan},
+  ];
+  btns.forEach(b=>{
+    const btn=document.createElement('button');
+    btn.className='admin-btn '+b.cls;
+    btn.textContent=b.label;
+    btn.onclick=b.fn;
+    acts.appendChild(btn);
+  });
+}
+
+// ── ADMIN — INFO ──
+async function adminShowInfo(){
+  if(document.getElementById('_am'))return;
+  let fullUser=_target;
+  try{const{users}=await readDB();const f=users.find(u=>u.id===_target.id);if(f)fullUser=f;}catch(e){}
+  const banned=fullUser.banned;
+  const banInfo=banned?(fullUser.bannedUntil===0?'Навсегда':new Date(fullUser.bannedUntil*1000).toLocaleString('ru')):'Нет';
+  const ov=document.createElement('div');ov.className='modal-overlay';ov.id='_am';
+  ov.innerHTML=`<div class="modal-box admin-box">
+    <div class="modal-ttl">📋 Информация: ${fullUser.nick}</div>
+    <div class="admin-info-grid">
+      <div class="aig-field"><div class="aig-label">Ник</div><div class="aig-value">${fullUser.nick}</div></div>
+      <div class="aig-field"><div class="aig-label">ID в системе</div><div class="aig-value mono">${fullUser.id}</div></div>
+      <div class="aig-field"><div class="aig-label">Discord ID</div><div class="aig-value mono">${fullUser.discordId||'—'}</div></div>
+      <div class="aig-field"><div class="aig-label">Email</div><div class="aig-value mono">${fullUser.email||'—'}</div></div>
+      <div class="aig-field"><div class="aig-label">Способ входа</div><div class="aig-value">${fullUser.via||'—'}</div></div>
+      <div class="aig-field"><div class="aig-label">Регистрация</div><div class="aig-value mono">${fullUser.createdAt?new Date(fullUser.createdAt).toLocaleString('ru'):'—'}</div></div>
+      <div class="aig-field"><div class="aig-label">Последний вход</div><div class="aig-value mono">${fullUser.lastLogin?new Date(fullUser.lastLogin).toLocaleString('ru'):'—'}</div></div>
+      <div class="aig-field"><div class="aig-label">КД редактирования</div><div class="aig-value">${fullUser.editCooldown?fmtCd(getCdLeft(fullUser)):'—'}</div></div>
+      <div class="aig-field" style="grid-column:1/-1"><div class="aig-label">Статус блокировки</div><div class="aig-value">${banned?`<span class="banned-badge">🚫 Заблокирован до: ${banInfo}</span>`:'<span style="color:var(--green)">Активен</span>'}</div></div>
+      <div class="aig-field" style="grid-column:1/-1"><div class="aig-label">Avatar URL</div><div class="aig-value mono" style="font-size:.7rem">${fullUser.avatar||'—'}</div></div>
+    </div>
+    <div class="modal-acts"><button class="mbtn mbtn-cancel" onclick="closeAm()">Закрыть</button></div>
+  </div>`;
+  document.body.appendChild(ov);
+  ov.addEventListener('click',e=>{if(e.target===ov)closeAm();});
+}
+
+// ── ADMIN — EDIT STATS ──
+async function adminEditStats(){
+  if(document.getElementById('_am'))return;
+  let cur={total_caught:0,total_missed:0,total_time_sec:0,avg_ping:0};
+  try{const d=await fetchPlayerStats(_target.nick);if(d)Object.assign(cur,d);}catch(e){}
+  const ov=document.createElement('div');ov.className='modal-overlay';ov.id='_am';
+  ov.innerHTML=`<div class="modal-box admin-box">
+    <div class="modal-ttl">📊 Статистика: ${_target.nick}</div>
+    <div class="stats-edit-grid">
+      <div class="seg-field"><div class="seg-label">Поймано</div><input class="seg-input" id="_se_caught" type="number" min="0" value="${cur.total_caught}"></div>
+      <div class="seg-field"><div class="seg-label">Пропущено</div><input class="seg-input" id="_se_missed" type="number" min="0" value="${cur.total_missed}"></div>
+      <div class="seg-field"><div class="seg-label">Время (сек)</div><input class="seg-input" id="_se_time" type="number" min="0" value="${cur.total_time_sec}"></div>
+      <div class="seg-field"><div class="seg-label">Средний пинг</div><input class="seg-input" id="_se_ping" type="number" min="0" value="${cur.avg_ping}"></div>
+    </div>
+    <div class="modal-acts">
+      <button class="mbtn mbtn-cancel" onclick="closeAm()">Отмена</button>
+      <button class="mbtn mbtn-save" id="_se_save" onclick="adminSaveStats()">Сохранить</button>
+    </div>
+  </div>`;
+  document.body.appendChild(ov);
+  ov.addEventListener('click',e=>{if(e.target===ov)closeAm();});
+}
+
+async function adminSaveStats(){
+  const btn=document.getElementById('_se_save');
+  if(btn){btn.disabled=true;btn.innerHTML='<span class="sp" style="width:11px;height:11px;margin-right:4px"></span>Сохраняем...';}
+  try{
+    const data={
+      total_caught:parseInt(document.getElementById('_se_caught').value)||0,
+      total_missed:parseInt(document.getElementById('_se_missed').value)||0,
+      total_time_sec:parseInt(document.getElementById('_se_time').value)||0,
+      avg_ping:parseInt(document.getElementById('_se_ping').value)||0,
+    };
+    const safeNick=_target.nick.replace(/[^a-zA-Z0-9_.\-]/g,'_');
+    const r=await fetchWithTimeout(WORKER_URL+'/stats',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({nick:safeNick,data})
+    },10000);
+    if(!r.ok)throw new Error('Worker error '+r.status);
+    const res=await r.json();if(res.error)throw new Error(res.error);
+    closeAm();applyStats(data);
+  }catch(e){
+    if(btn){btn.disabled=false;btn.textContent='Сохранить';}
+    alert('Ошибка: '+e.message);
+  }
+}
+
+// ── ADMIN — BAN ──
+async function adminToggleBan(){
+  if(document.getElementById('_am'))return;
+  let fullUser=_target;
+  try{const{users}=await readDB();const f=users.find(u=>u.id===_target.id);if(f)fullUser=f;}catch(e){}
+  const isBanned=!!fullUser.banned;
+  const ov=document.createElement('div');ov.className='modal-overlay';ov.id='_am';
+  if(isBanned){
+    ov.innerHTML=`<div class="modal-box admin-box">
+      <div class="modal-ttl">✅ Снять блокировку</div>
+      <div class="modal-txt">Разблокировать аккаунт <strong>${fullUser.nick}</strong>?</div>
+      <div class="modal-acts">
+        <button class="mbtn mbtn-cancel" onclick="closeAm()">Отмена</button>
+        <button class="mbtn mbtn-save" onclick="adminExecUnban('${fullUser.id}')">Разблокировать</button>
+      </div>
+    </div>`;
+  }else{
+    ov.innerHTML=`<div class="modal-box admin-box">
+      <div class="modal-ttl">🚫 Заблокировать</div>
+      <div class="modal-txt">Заблокировать возможность обновлять статус для <strong>${fullUser.nick}</strong>.</div>
+      <div class="ban-row">
+        <input class="ban-input" id="_ban_dur" type="number" min="1" placeholder="Срок (0 = навсегда)">
+        <select class="ban-unit" id="_ban_unit">
+          <option value="3600">часов</option>
+          <option value="86400" selected>дней</option>
+          <option value="604800">недель</option>
+        </select>
+      </div>
+      <div style="font-size:.75rem;color:var(--muted);margin-bottom:16px;text-align:left">0 = бессрочная блокировка.</div>
+      <div class="modal-acts">
+        <button class="mbtn mbtn-cancel" onclick="closeAm()">Отмена</button>
+        <button class="mbtn mbtn-del" onclick="adminExecBan('${fullUser.id}')">Заблокировать</button>
+      </div>
+    </div>`;
+  }
+  document.body.appendChild(ov);
+  ov.addEventListener('click',e=>{if(e.target===ov)closeAm();});
+}
+
+async function adminExecBan(userId){
+  const dur=parseInt(document.getElementById('_ban_dur')?.value||0)||0;
+  const unit=parseInt(document.getElementById('_ban_unit')?.value||86400);
+  const bannedUntil=dur===0?0:Math.floor(Date.now()/1000)+dur*unit;
+  const btn=document.querySelector('#_am .mbtn-del');
+  if(btn){btn.disabled=true;btn.textContent='Блокируем...';}
+  try{
+    const{users,sha}=await readDB();
+    const idx=users.findIndex(u=>u.id===userId);
+    if(idx===-1)throw new Error('Пользователь не найден');
+    users[idx].banned=true;users[idx].bannedUntil=bannedUntil;
+    await writeDB(users,sha);
+    closeAm();
+    Object.assign(_target,{banned:true,bannedUntil});
+    renderAdminPanel();
+  }catch(e){if(btn){btn.disabled=false;btn.textContent='Заблокировать';}alert('Ошибка: '+e.message);}
+}
+
+async function adminExecUnban(userId){
+  const btn=document.querySelector('#_am .mbtn-save');
+  if(btn){btn.disabled=true;btn.textContent='Разблокируем...';}
+  try{
+    const{users,sha}=await readDB();
+    const idx=users.findIndex(u=>u.id===userId);
+    if(idx===-1)throw new Error('Пользователь не найден');
+    delete users[idx].banned;delete users[idx].bannedUntil;
+    await writeDB(users,sha);
+    closeAm();
+    delete _target.banned;delete _target.bannedUntil;
+    renderAdminPanel();
+  }catch(e){if(btn){btn.disabled=false;btn.textContent='Разблокировать';}alert('Ошибка: '+e.message);}
+}
+
+function closeAm(){const m=document.getElementById('_am');if(m)m.remove();}
+
+// ── DELETE ACCOUNT ──
+function promptDelete(){
+  if(document.getElementById('_delModal'))return;
+  const ov=document.createElement('div');ov.className='modal-overlay';ov.id='_delModal';
+  ov.innerHTML=`<div class="modal-box">
+    <div class="modal-ttl">⚠️ Удалить аккаунт</div>
+    <div class="modal-txt">Аккаунт <strong>${_target.nick}</strong> будет удалён безвозвратно. Продолжить?</div>
+    <div class="modal-acts">
+      <button class="mbtn mbtn-cancel" onclick="document.getElementById('_delModal').remove()">Отмена</button>
+      <button class="mbtn mbtn-del" id="_delOk">Удалить</button>
+    </div>
+  </div>`;
+  document.body.appendChild(ov);
+  document.getElementById('_delOk').onclick=execDelete;
+}
+
+async function execDelete(){
+  const btn=document.getElementById('_delOk');
+  if(btn){btn.disabled=true;btn.textContent='Удаляем...';}
+  try{
+    const{users,sha}=await readDB();
+    await writeDB(users.filter(u=>u.id!==_target.id),sha);
+    document.getElementById('_delModal')?.remove();
+    if(_isOwn){
+      stopTimers();clearSession();
+      window.location.href='index.html';
+    }else{
+      window.location.href='profile.html';
+    }
+  }catch(e){
+    if(btn){btn.disabled=false;btn.textContent='Удалить';}
+    alert('Ошибка: '+e.message);
+  }
+}
+
+// ── BUY / TRIAL ──
+function handleBuySubscription(){alert('Для покупки подписки обратись к администратору в Discord!');}
+
+async function handleTrialSubscription(){
+  const btn=document.getElementById('trialBtn');if(!btn)return;
+  btn.disabled=true;btn.innerHTML='<span class="sp"></span>Проверяем...';
+  try{
+    const{sha,entries}=await githubFetch();
+    const cleanNick=stripBracketPrefix(_session.nick).toLowerCase();
+    if(entries.some(raw=>{const e=parseEntry(raw);return stripBracketPrefix(e.nick).toLowerCase()===cleanNick;})){
+      btn.disabled=true;btn.innerHTML='<span>🚫</span>Пробная подписка уже была использована';return;
+    }
+    btn.innerHTML='<span class="sp"></span>Активируем...';
+    const expireTs=Math.floor(Date.now()/1000)+TRIAL_SECONDS;
+    const entry=_session.nick+'|'+expireTs+'|'+TRIAL_PREFIX+'|'+TRIAL_COLOR;
+    await githubPush(sha,[...entries,entry],'Trial: '+_session.nick);
+    btn.innerHTML='<span>✅</span>Пробная подписка активирована!';
+    btn.style.color='#6ee7b7';btn.style.borderColor='rgba(16,185,129,0.5)';
+    setTimeout(async()=>{
+      try{const fresh=await fetchSubscriptions();_cachedEntries=fresh;renderSubscription(_session.nick,fresh,false);}catch(e){}
+    },1200);
+  }catch(e){
+    btn.disabled=false;btn.innerHTML='<span>🎁</span>Получить пробную подписку · 2 дня';
+    const msg=document.createElement('div');
+    msg.style.cssText='color:#fca5a5;font-size:.78rem;text-align:center;margin-top:8px;';
+    msg.textContent='Ошибка: '+e.message;btn.after(msg);
+  }
+}
+
+// ── EDIT MODAL ──
+function openEditModal(type){
+  if(document.getElementById('_em'))return;
+  const targetUser=_target;
+
+  if(!_isDev){
+    const cd=getCdLeft(_isOwn?_session:targetUser);
+    if(cd>0){showCdBlock(cd);return;}
+  }
+  if(type==='prefix'){
+    if(!_subEntry){alert('Смена префикса доступна только с активной подпиской.');return;}
+    const e=parseEntry(_subEntry);
+    if(isExpired(e.ts)){alert('Подписка истекла — обнови её для смены префикса.');return;}
+    if(e.prefix===TRIAL_PREFIX){alert('На пробной подписке смена префикса недоступна.');return;}
+  }
+
+  const isNick=(type==='nick');
+  const curVal=isNick?targetUser.nick:(_subEntry?parseEntry(_subEntry).prefix||'':'');
+  const title=isNick?'✏️ Изменить ник':'✏️ Изменить префикс';
+
+  const ov=document.createElement('div');ov.className='modal-overlay';ov.id='_em';
+  ov.innerHTML=`<div class="modal-box edit-box">
+    <div class="modal-ttl">${title}</div>
+    <div class="modal-warn">
+      <strong>⚠️ Внимание!</strong>
+      После сохранения редактирование будет заблокировано на <strong>24 часа</strong>.
+      ${_isDev?'<br><span style="color:#6ee7b7;font-size:.76rem">👑 Ты разработчик — КД не применяется.</span>':''}
+    </div>
+    <input class="modal-input" id="_ei" type="text" maxlength="${isNick?36:24}" value="${curVal}" placeholder="${isNick?'Your_Nickname':'МойПрефикс'}">
+    <div class="modal-acts">
+      <button class="mbtn mbtn-cancel" onclick="closeEm()">Отмена</button>
+      <button class="mbtn mbtn-save" id="_esave" disabled>Сохранить (<span id="_ecdnum">${EDIT_LOCK_SEC}</span>с)</button>
+    </div>
+    <div class="modal-cd" id="_ecdtxt">Кнопка разблокируется через <span class="cdnum" id="_ecdnum2">${EDIT_LOCK_SEC}</span> сек.</div>
+  </div>`;
+  document.body.appendChild(ov);
+  ov.addEventListener('click',e=>{if(e.target===ov)closeEm();});
+  document.getElementById('_ei').focus();
+  document.getElementById('_ei').addEventListener('keydown',e=>{
+    if(e.key==='Enter'){const b=document.getElementById('_esave');if(!b.disabled)doEdit(type);}
+  });
+  document.getElementById('_esave').onclick=()=>doEdit(type);
+
+  let sec=EDIT_LOCK_SEC;
+  _cdTimer=setInterval(()=>{
+    sec--;
+    const n=document.getElementById('_ecdnum'),n2=document.getElementById('_ecdnum2');
+    if(n)n.textContent=sec;if(n2)n2.textContent=sec;
+    if(sec<=0){
+      clearInterval(_cdTimer);_cdTimer=null;
+      const b=document.getElementById('_esave');if(b){b.disabled=false;b.textContent='Сохранить';}
+      const t=document.getElementById('_ecdtxt');if(t)t.textContent='';
+    }
+  },1000);
+}
+
+function closeEm(){if(_cdTimer){clearInterval(_cdTimer);_cdTimer=null;}document.getElementById('_em')?.remove();}
+
+function showCdBlock(cd){
+  if(document.getElementById('_cdb'))return;
+  const ov=document.createElement('div');ov.className='modal-overlay';ov.id='_cdb';
+  ov.innerHTML=`<div class="modal-box edit-box" style="border-color:rgba(245,158,11,.35)">
+    <div class="modal-ttl">⏳ Недоступно</div>
+    <div class="modal-txt">Редактирование заблокировано на <span style="color:var(--gold);font-weight:700">${fmtCd(cd)}</span>.</div>
+    <div class="modal-acts"><button class="mbtn mbtn-cancel" onclick="document.getElementById('_cdb').remove()">Понятно</button></div>
+  </div>`;
+  document.body.appendChild(ov);
+  ov.addEventListener('click',e=>{if(e.target===ov)ov.remove();});
+}
+
+async function doEdit(type){
+  const inp=document.getElementById('_ei');if(!inp)return;
+  const val=inp.value.trim();
+  const saveBtn=document.getElementById('_esave');
+
+  if(type==='nick'&&!/^[a-zA-Z0-9_.[\]-]{2,36}$/.test(val)){inp.style.borderColor='var(--red)';inp.focus();return;}
+  if(type==='prefix'&&(val.length<1||val.length>24)){inp.style.borderColor='var(--red)';inp.focus();return;}
+  if(type==='prefix'&&val===DEV_PREFIX&&!_isDev){
+    inp.style.borderColor='var(--red)';inp.focus();
+    let errEl=document.getElementById('_eierr');
+    if(!errEl){errEl=document.createElement('div');errEl.id='_eierr';errEl.style.cssText='color:#fca5a5;font-size:.78rem;margin-top:-8px;margin-bottom:8px;';inp.after(errEl);}
+    errEl.textContent='Префикс «'+DEV_PREFIX+'» зарезервирован.';return;
+  }
+
+  if(saveBtn){saveBtn.disabled=true;saveBtn.innerHTML='<span class="sp" style="width:11px;height:11px;margin-right:4px"></span>Сохраняем...';}
+  try{
+    if(type==='nick') await _editNick(val);
+    else               await _editPrefix(val);
+    closeEm();
+  }catch(e){
+    if(saveBtn){saveBtn.disabled=false;saveBtn.textContent='Сохранить';}
+    inp.style.borderColor='var(--red)';
+    let errEl=document.getElementById('_eierr');
+    if(!errEl){errEl=document.createElement('div');errEl.id='_eierr';errEl.style.cssText='color:#fca5a5;font-size:.78rem;margin-top:-8px;margin-bottom:8px;';inp.after(errEl);}
+    errEl.textContent='Ошибка: '+e.message;
+  }
+}
+
+async function _editNick(newNick){
+  const{users,sha}=await readDB();
+  if(users.find(u=>u.nick.toLowerCase()===newNick.toLowerCase()&&u.id!==_target.id))
+    throw new Error('Этот ник уже занят');
+  const idx=users.findIndex(u=>u.id===_target.id);
+  if(idx===-1)throw new Error('Пользователь не найден');
+  users[idx].nick=newNick;
+  if(!_isDev)users[idx].editCooldown={lastEdit:Math.floor(Date.now()/1000)};
+  await writeDB(users,sha);
+  if(_isOwn){
+    _session.nick=newNick;
+    if(!_isDev)_session.editCooldown={lastEdit:Math.floor(Date.now()/1000)};
+    saveSession(_session);
+    document.getElementById('navNick').textContent='@'+newNick;
+    // Redirect to keep URL clean for own profile
+    window.location.href='profile.html';
+  }else{
+    window.location.href='profile.html?user='+encodeURIComponent(newNick);
+  }
+}
+
+async function _editPrefix(newPrefix){
+  if(newPrefix===DEV_PREFIX&&!_isDev)
+    throw new Error('Префикс «'+DEV_PREFIX+'» зарезервирован.');
+  const{sha,entries}=await githubFetch();
+  const cleanNick=stripBracketPrefix(_target.nick).toLowerCase();
+  const idx=entries.findIndex(raw=>{const e=parseEntry(raw);return stripBracketPrefix(e.nick).toLowerCase()===cleanNick;});
+  if(idx===-1)throw new Error('Запись подписки не найдена');
+  const e=parseEntry(entries[idx]);
+  entries[idx]=e.nick+'|'+e.ts+'|'+newPrefix+'|'+(e.color||'');
+  await githubPush(sha,entries,'PrefixEdit:'+_target.nick+'->'+newPrefix);
+  if(!_isDev){
+    const{users,sha:us}=await readDB();
+    const ui=users.findIndex(u=>u.id===_target.id);
+    if(ui!==-1){users[ui].editCooldown={lastEdit:Math.floor(Date.now()/1000)};await writeDB(users,us);}
+    if(_isOwn){_session.editCooldown={lastEdit:Math.floor(Date.now()/1000)};saveSession(_session);}
+  }
+  _cachedEntries=null;
+  const fresh=await fetchSubscriptions();
+  _cachedEntries=fresh;
+  renderSubscription(_target.nick,fresh,!_isOwn);
+}
+
+// ── TIMERS ──
+function stopTimers(){
+  if(_autoRefreshTimer){clearInterval(_autoRefreshTimer);_autoRefreshTimer=null;}
+  if(_statusCheckTimer){clearInterval(_statusCheckTimer);_statusCheckTimer=null;}
+  if(_watchdog){clearInterval(_watchdog);_watchdog=null;}
+}
+
+function startTimers(){
+  stopTimers();
+
+  // Auto-refresh every 5s
+  _autoRefreshTimer=setInterval(async()=>{
+    const[er,sr]=await Promise.allSettled([fetchSubscriptions(),fetchPlayerStats(_target.nick)]);
+    if(er.status==='fulfilled'){_cachedEntries=er.value;renderSubscription(_target.nick,er.value,!_isOwn);}
+    if(sr.status==='fulfilled')applyStats(sr.value);
+  },5000);
+
+  // Status check every 80s
+  _statusCheckTimer=setInterval(async()=>{
+    const sr=await fetchPlayerStats(_target.nick);
+    updateOnlineStatus(sr);
+  },80000);
+
+  // Watchdog: detect if own account was deleted
+  if(_isOwn){
+    _watchdog=setInterval(async()=>{
+      try{
+        const{users}=await readDB();
+        const still=users.find(u=>u.id===_session.id);
+        if(still){
+          if(still.banned!==undefined){_session.banned=still.banned;_session.bannedUntil=still.bannedUntil;saveSession(_session);}
+          else{delete _session.banned;delete _session.bannedUntil;saveSession(_session);}
+        }else{
+          stopTimers();clearSession();
+          window.location.href='index.html';
+        }
+      }catch(e){}
+    },15000);
+  }
+}
+
+// ── INIT ──
+window.addEventListener('DOMContentLoaded',async()=>{
+  const emergency=setTimeout(()=>{hideLoading();window.location.href='index.html';},8000);
+  try{
+    _session=loadSession();
+    if(!_session){clearTimeout(emergency);window.location.href='index.html';return;}
+
+    // Who are we viewing?
+    const params=new URLSearchParams(window.location.search);
+    const userParam=params.get('user');
+
+    if(userParam){
+      // Viewing someone else
+      const{users}=await readDB();
+      const found=users.find(u=>u.nick.toLowerCase()===decodeURIComponent(userParam).toLowerCase());
+      if(!found){
+        // Not found — redirect to own profile
+        clearTimeout(emergency);window.location.href='profile.html';return;
+      }
+      _target=found;
+      _isOwn=(_target.id===_session.id);
+    }else{
+      // Own profile
+      _target=_session;
+      _isOwn=true;
+    }
+
+    clearTimeout(emergency);
+    document.getElementById('mainLayout').style.display='flex';
+    hideLoading();
+
+    // Load sidebar and profile in parallel
+    await Promise.all([loadSidebar(),renderProfile()]);
+    setSidebarHighlight();
+    startTimers();
+  }catch(e){
+    clearTimeout(emergency);hideLoading();
+    console.error(e);
+  }
+});
+</script>
+</body>
+</html>

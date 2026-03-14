@@ -4,38 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
-<title>Load Report</title>
+<title>Load Report — Вход</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
 <style>
-:root{--bg:#080c14;--bg2:#0d1220;--surf:rgba(255,255,255,0.035);--border:rgba(96,165,250,0.15);--blue:#3b82f6;--cyan:#06b6d4;--violet:#8b5cf6;--green:#10b981;--red:#ef4444;--gold:#f59e0b;--text:#e2e8f0;--muted:#64748b}
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
-body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
-.bg{position:fixed;inset:0;z-index:0;pointer-events:none}
-.grid-lines{position:absolute;inset:0;background-image:linear-gradient(rgba(59,130,246,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(59,130,246,0.04) 1px,transparent 1px);background-size:60px 60px;animation:gridMove 20s linear infinite}
-@keyframes gridMove{to{background-position:60px 60px}}
-.orb{position:absolute;border-radius:50%;filter:blur(100px);animation:drift 14s ease-in-out infinite}
-.o1{width:600px;height:600px;background:radial-gradient(circle,rgba(59,130,246,0.18),transparent);top:-150px;left:-150px}
-.o2{width:500px;height:500px;background:radial-gradient(circle,rgba(139,92,246,0.15),transparent);bottom:-100px;right:-100px;animation-delay:-5s}
-.o3{width:350px;height:350px;background:radial-gradient(circle,rgba(6,182,212,0.12),transparent);top:40%;left:50%;animation-delay:-9s}
-@keyframes drift{0%,100%{transform:translate(0,0)}33%{transform:translate(40px,-50px)}66%{transform:translate(-30px,30px)}}
-.noise{position:absolute;inset:0;opacity:0.025;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");background-size:256px 256px}
-.nav{position:fixed;top:0;left:0;right:0;z-index:50;padding:14px 32px;display:none;align-items:center;justify-content:space-between;background:rgba(8,12,20,0.75);backdrop-filter:blur(24px);border-bottom:1px solid var(--border)}
-.nav.show{display:flex}
-.nav-brand{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:.06em;background:linear-gradient(90deg,var(--blue),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;cursor:pointer;user-select:none}
-.nav-right{display:flex;align-items:center;gap:12px}
-.nav-nick{color:var(--muted);font-size:.875rem}
-.btn-ghost{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:#fca5a5;padding:7px 16px;border-radius:8px;font-family:'Outfit',sans-serif;font-size:.85rem;cursor:pointer;transition:all .2s}
-.btn-ghost:hover{background:rgba(239,68,68,.2);transform:translateY(-1px)}
-.wrap{position:relative;z-index:1;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
-.wrap.has-nav{padding-top:90px;align-items:flex-start}
 .brand{text-align:center;margin-bottom:36px}
 .brand-logo{font-family:'Bebas Neue',sans-serif;font-size:3.5rem;letter-spacing:.08em;line-height:1;background:linear-gradient(135deg,#fff 30%,var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;display:inline-block}
 .brand-logo::after{content:'';display:block;height:2px;background:linear-gradient(90deg,transparent,var(--cyan),var(--blue),transparent);margin-top:4px;animation:scanline 2.5s ease-in-out infinite}
 @keyframes scanline{0%,100%{opacity:.4;transform:scaleX(.7)}50%{opacity:1;transform:scaleX(1)}}
 .brand-sub{color:var(--muted);font-size:.78rem;letter-spacing:.25em;text-transform:uppercase;margin-top:6px}
-.card{background:var(--surf);border:1px solid var(--border);border-radius:20px;padding:40px 44px;width:100%;max-width:400px;backdrop-filter:blur(32px);box-shadow:0 0 0 1px rgba(255,255,255,.02),0 20px 60px rgba(0,0,0,.4);animation:appear .5s cubic-bezier(.22,1,.36,1) both;text-align:center}
-@keyframes appear{from{opacity:0;transform:translateY(24px) scale(.98)}to{opacity:1;transform:none}}
 .step{display:none}.step.active{display:block;animation:appear .4s cubic-bezier(.22,1,.36,1) both}
 .ttl{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:.06em;background:linear-gradient(90deg,#fff,var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}
 .sub{color:var(--muted);font-size:.88rem;line-height:1.6;margin-bottom:32px}
@@ -43,1118 +20,196 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
 .btn-discord:hover{background:rgba(88,101,242,.28);border-color:rgba(88,101,242,.6);transform:translateY(-2px);box-shadow:0 8px 32px rgba(88,101,242,.35)}
 .btn-discord::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.07),transparent);opacity:0;transition:opacity .2s}
 .btn-discord:hover::after{opacity:1}
-.alert{padding:11px 14px;border-radius:10px;font-size:.85rem;margin-bottom:20px;display:none}
-.alert.show{display:block}
-.err{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);color:#fca5a5}
-.ok{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.25);color:#6ee7b7}
-.info{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.25);color:#93c5fd}
-.sp{display:inline-block;width:15px;height:15px;border:2px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;animation:spin .65s linear infinite;margin-right:8px;vertical-align:middle}
-@keyframes spin{to{transform:rotate(360deg)}}
-.fg{margin-bottom:16px;text-align:left}
-label{display:block;font-size:.75rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
-input[type=text]{width:100%;padding:12px 15px;background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'Outfit',sans-serif;font-size:.925rem;outline:none;transition:all .22s}
-input:focus{border-color:var(--blue);background:rgba(59,130,246,.06);box-shadow:0 0 0 3px rgba(59,130,246,.1)}
-input::placeholder{color:rgba(100,116,139,.5)}
-.btn{width:100%;padding:13px;border:none;border-radius:11px;font-family:'Outfit',sans-serif;font-size:.9rem;font-weight:600;cursor:pointer;transition:all .28s;position:relative;overflow:hidden;margin-top:4px}
-.btn-primary{background:linear-gradient(135deg,var(--blue) 0%,var(--violet) 100%);color:#fff;box-shadow:0 4px 24px rgba(59,130,246,.35)}
-.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(59,130,246,.5)}
-.btn-primary:disabled{opacity:.45;cursor:not-allowed;transform:none}
-.btn::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.12),transparent);opacity:0;transition:opacity .2s}
-.btn:hover::after{opacity:1}
 .hint{color:var(--muted);font-size:.76rem;margin-top:18px;line-height:1.5}
-.loading-screen{position:fixed;inset:0;z-index:100;background:var(--bg);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;transition:opacity .3s}
-.loading-screen.hidden{opacity:0;pointer-events:none}
-.loading-logo{font-family:'Bebas Neue',sans-serif;font-size:2.5rem;letter-spacing:.08em;background:linear-gradient(135deg,#fff,var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.loading-sp{width:32px;height:32px;border:3px solid rgba(59,130,246,.2);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite}
-
-/* ── LAYOUT ── */
-.main-layout{width:100%;max-width:1160px;display:flex;gap:24px;align-items:flex-start;animation:appear .55s cubic-bezier(.22,1,.36,1) both;padding-bottom:40px}
-
-/* ── SIDEBAR ── */
-.sidebar{width:248px;flex-shrink:0;position:sticky;top:84px}
-.sidebar-card{background:var(--surf);border:1px solid var(--border);border-radius:16px;padding:18px;backdrop-filter:blur(20px)}
-.sidebar-ttl{font-family:'Bebas Neue',sans-serif;font-size:.88rem;letter-spacing:.12em;color:var(--muted);margin-bottom:12px;display:flex;align-items:center;gap:8px}
-.sidebar-ttl::after{content:'';flex:1;height:1px;background:var(--border)}
-.user-list{display:flex;flex-direction:column;gap:4px;max-height:520px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(96,165,250,.2) transparent}
-.user-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:10px;cursor:pointer;transition:all .15s;border:1px solid transparent}
-.user-item:hover{background:rgba(59,130,246,.07);border-color:var(--border)}
-.user-item.is-me{background:rgba(59,130,246,.1);border-color:rgba(59,130,246,.22)}
-.user-item.is-viewing{background:rgba(139,92,246,.1);border-color:rgba(139,92,246,.28)}
-.uav{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--violet));display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:700;color:#fff;flex-shrink:0;overflow:hidden}
-.uav img{width:100%;height:100%;object-fit:cover;border-radius:50%}
-.uinfo{flex:1;min-width:0}
-.uname{font-size:.8rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.upfx{font-size:.64rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--muted)}
-.upfx.is-dev{color:var(--gold)}
-.sidebar-empty{color:var(--muted);font-size:.8rem;text-align:center;padding:8px 0}
-
-/* ── PROFILE ── */
-.profile-wrap{flex:1;min-width:0;display:flex;flex-direction:column;gap:20px;padding-bottom:40px}
-.viewing-banner{background:rgba(139,92,246,.07);border:1px solid rgba(139,92,246,.2);border-radius:12px;padding:10px 16px;font-size:.82rem;color:#c4b5fd;display:flex;align-items:center;justify-content:space-between;gap:12px}
-.btn-back{padding:6px 14px;background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.3);color:#c4b5fd;border-radius:8px;font-family:'Outfit',sans-serif;font-size:.78rem;font-weight:600;cursor:pointer;transition:all .18s;white-space:nowrap;flex-shrink:0}
-.btn-back:hover{background:rgba(139,92,246,.2)}
-
-.ph{background:var(--surf);border:1px solid var(--border);border-radius:20px;padding:32px 36px;backdrop-filter:blur(28px);display:flex;align-items:center;gap:28px;position:relative;overflow:hidden;box-shadow:0 0 0 1px rgba(255,255,255,.02),0 20px 60px rgba(0,0,0,.4)}
-.ph::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--blue),var(--cyan),var(--violet));background-size:200% 100%;animation:shimmer 3s linear infinite}
-@keyframes shimmer{to{background-position:200% 0}}
-.av-outer{position:relative;flex-shrink:0;width:88px;height:88px}
-.av{width:88px;height:88px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--violet));display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:2.2rem;color:#fff;overflow:hidden;box-shadow:0 0 30px rgba(59,130,246,.4);position:relative;z-index:1}
-.av img{width:100%;height:100%;object-fit:cover;display:block;border-radius:50%}
-.av-ring{position:absolute;inset:-5px;border-radius:50%;border:2px solid transparent;background:linear-gradient(var(--bg2),var(--bg2)) padding-box,linear-gradient(135deg,var(--blue),var(--cyan)) border-box;animation:rot 5s linear infinite;z-index:0}
-@keyframes rot{to{transform:rotate(360deg)}}
-.pi{flex:1;min-width:0}
-.pname{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:.04em;background:linear-gradient(90deg,#fff,var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;margin-bottom:4px}
-.badges{display:flex;gap:8px;flex-wrap:wrap}
-.badge{display:inline-flex;align-items:center;gap:5px;border-radius:100px;padding:4px 12px;font-size:.72rem;letter-spacing:.07em}
-.badge-ver{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2);color:#6ee7b7}
-.badge-dc{background:rgba(88,101,242,.1);border:1px solid rgba(88,101,242,.2);color:#a5b4fc}
-.badge-dot{width:6px;height:6px;border-radius:50%;animation:pulse 1.5s infinite;flex-shrink:0}
-.badge-dot.green{background:var(--green)}.badge-dot.red{background:var(--red);animation:pulse 1.5s infinite}.badge-dot.indigo{background:#818cf8}
-@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
-.ph-actions{margin-left:auto;flex-shrink:0}
-.btn-del-acc{padding:8px 16px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.22);color:#fca5a5;border-radius:10px;font-family:'Outfit',sans-serif;font-size:.8rem;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap}
-.btn-del-acc:hover{background:rgba(239,68,68,.2);border-color:rgba(239,68,68,.45);transform:translateY(-1px)}
-
-.sub-card{background:var(--surf);border:1px solid var(--border);border-radius:16px;padding:28px 32px;backdrop-filter:blur(20px);position:relative;overflow:hidden}
-.sub-card.active-sub{border-color:rgba(16,185,129,.3)}.sub-card.expired-sub{border-color:rgba(239,68,68,.25)}.sub-card.no-sub{border-color:rgba(100,116,139,.15)}.sub-card.free-sub{border-color:rgba(96,165,250,.2)}
-.sub-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px}
-.sub-card.active-sub::before{background:linear-gradient(90deg,transparent,var(--green),transparent)}.sub-card.expired-sub::before{background:linear-gradient(90deg,transparent,var(--red),transparent)}.sub-card.free-sub::before{background:linear-gradient(90deg,transparent,var(--blue),transparent)}
-.sub-header-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;gap:12px;flex-wrap:wrap}
-.sub-title{font-family:'Bebas Neue',sans-serif;font-size:1.05rem;letter-spacing:.1em;color:#fff}
-.sub-status{display:inline-flex;align-items:center;gap:6px;border-radius:100px;padding:5px 14px;font-size:.75rem;font-weight:600;letter-spacing:.06em}
-.sub-status.active{background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.3);color:#6ee7b7}.sub-status.expired{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);color:#fca5a5}.sub-status.none{background:rgba(100,116,139,.08);border:1px solid rgba(100,116,139,.2);color:var(--muted)}.sub-status.free{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.3);color:#93c5fd}.sub-status.loading-st{background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);color:#93c5fd}
-.sub-body{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
-.sub-field{background:rgba(0,0,0,.2);border:1px solid rgba(255,255,255,.04);border-radius:10px;padding:14px 16px}
-.sub-field-label{font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
-.sub-field-value{font-size:.92rem;font-weight:500;color:var(--text);word-break:break-word;line-height:1.3}
-.prefix-badge{display:inline-block;border-radius:6px;padding:2px 10px;font-size:.85rem;font-weight:600;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12)}
-.time-critical{color:var(--red)!important}
-.sub-empty{text-align:center;padding:20px;color:var(--muted);font-size:.875rem;line-height:1.6}
-.sub-loading-inner{text-align:center;padding:20px;color:var(--muted);font-size:.875rem}
-.free-plan-block{padding:4px 0 8px}
-.free-plan-features{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:24px}
-.free-feat{background:rgba(0,0,0,.2);border:1px solid rgba(255,255,255,.04);border-radius:10px;padding:14px 16px}
-.free-feat-label{font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
-.free-feat-value{font-size:.92rem;font-weight:500;color:var(--text);line-height:1.3}.free-feat-value.limited{color:var(--muted)}
-.btn-buy{width:100%;padding:15px;background:linear-gradient(135deg,var(--blue) 0%,var(--violet) 100%);border:none;border-radius:13px;display:flex;align-items:center;justify-content:center;gap:10px;color:#fff;font-family:'Outfit',sans-serif;font-size:.95rem;font-weight:700;cursor:pointer;transition:all .28s;position:relative;overflow:hidden;box-shadow:0 4px 28px rgba(59,130,246,.4);letter-spacing:.03em}
-.btn-buy:hover{transform:translateY(-2px);box-shadow:0 8px 40px rgba(59,130,246,.6)}.btn-buy::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.12),transparent);opacity:0;transition:opacity .2s}.btn-buy:hover::after{opacity:1}
-.btn-buy-icon{font-size:1.1rem;animation:sparkle 2s ease-in-out infinite}
-@keyframes sparkle{0%,100%{transform:scale(1) rotate(0deg)}50%{transform:scale(1.15) rotate(8deg)}}
-.btn-trial{width:100%;padding:13px;background:rgba(127,255,212,0.08);border:1px solid rgba(127,255,212,0.3);border-radius:13px;display:flex;align-items:center;justify-content:center;gap:10px;color:#7fffd4;font-family:'Outfit',sans-serif;font-size:.9rem;font-weight:600;cursor:pointer;transition:all .28s;margin-top:10px;letter-spacing:.02em}
-.btn-trial:hover{background:rgba(127,255,212,0.15);border-color:rgba(127,255,212,0.55);transform:translateY(-2px);box-shadow:0 6px 28px rgba(127,255,212,0.2)}.btn-trial:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}.btn-trial-icon{font-size:1rem}
-.free-divider{height:1px;background:linear-gradient(90deg,transparent,rgba(59,130,246,.2),transparent);margin:20px 0}
-.sg{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-.sc{background:var(--surf);border:1px solid var(--border);border-radius:14px;padding:24px;backdrop-filter:blur(20px);text-align:center;transition:transform .2s,box-shadow .2s;cursor:default}
-.sc:hover{transform:translateY(-4px);box-shadow:0 12px 40px rgba(59,130,246,.15)}
-.si{font-size:1.4rem;margin-bottom:8px}.sv{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:.04em;background:linear-gradient(135deg,#fff,var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}.sl{color:var(--muted);font-size:.75rem;margin-top:3px}
-.ac{background:var(--surf);border:1px solid var(--border);border-radius:16px;padding:28px;backdrop-filter:blur(20px)}
-.sect{font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:.1em;color:#fff;margin-bottom:18px;display:flex;align-items:center;gap:12px}
-.sect::after{content:'';flex:1;height:1px;background:var(--border)}
-.hunt-time-inner{display:flex;align-items:center;justify-content:center;gap:20px;flex-wrap:wrap}
-.hunt-seg{text-align:center;min-width:60px}.hunt-val{font-family:'Bebas Neue',sans-serif;font-size:2.4rem;letter-spacing:.04em;background:linear-gradient(135deg,#fff,var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1}.hunt-lbl{color:var(--muted);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;margin-top:4px}.hunt-sep{font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--border);align-self:flex-start;margin-top:6px}
-
-/* ── CONFIRM MODAL ── */
-.modal-overlay{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.72);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;animation:appear .2s}
-.modal-box{background:#0d1220;border:1px solid rgba(239,68,68,.28);border-radius:18px;padding:32px 36px;max-width:360px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.7)}
-.modal-ttl{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:.06em;color:#fff;margin-bottom:10px}
-.modal-txt{color:var(--muted);font-size:.875rem;line-height:1.6;margin-bottom:24px}
-.modal-acts{display:flex;gap:12px}
-.mbtn{flex:1;padding:11px;border-radius:10px;font-family:'Outfit',sans-serif;font-size:.875rem;font-weight:600;cursor:pointer;border:none;transition:all .2s}
-.mbtn-cancel{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:var(--text)}.mbtn-cancel:hover{background:rgba(255,255,255,.1)}
-.mbtn-del{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.35);color:#fca5a5}.mbtn-del:hover{background:rgba(239,68,68,.25)}
-
-
-/* ── EDIT PENCIL ── */
-.btn-edit{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:6px;background:rgba(96,165,250,.1);border:1px solid rgba(96,165,250,.2);color:var(--blue);cursor:pointer;transition:all .18s;flex-shrink:0;padding:0;vertical-align:middle;margin-left:6px}
-.btn-edit:hover{background:rgba(96,165,250,.22);border-color:rgba(96,165,250,.45);transform:scale(1.1)}
-.btn-edit svg{width:12px;height:12px;pointer-events:none}
-.btn-edit.cd{opacity:.35;cursor:not-allowed}
-.btn-edit.cd:hover{transform:none;background:rgba(96,165,250,.1);border-color:rgba(96,165,250,.2)}
-.pname-row{display:flex;align-items:center;gap:4px}
-.sub-field-label{display:flex;align-items:center;gap:4px}
-/* ── EDIT MODAL ── */
-.modal-box.edit-box{border-color:rgba(59,130,246,.3)}
-.modal-warn{background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.2);border-radius:10px;padding:11px 13px;color:#fca5a5;font-size:.8rem;line-height:1.55;margin-bottom:16px;text-align:left}
-.modal-warn strong{color:#ff8a8a;display:block;margin-bottom:3px}
-.modal-input{width:100%;padding:10px 13px;background:rgba(0,0,0,.35);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'Outfit',sans-serif;font-size:.9rem;outline:none;transition:all .22s;margin-bottom:14px;box-sizing:border-box}
-.modal-input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(59,130,246,.1)}
-.mbtn-save{background:linear-gradient(135deg,var(--blue),var(--violet));color:#fff;border:none}
-.mbtn-save:hover{filter:brightness(1.1)}
-.mbtn-save:disabled{opacity:.4;cursor:not-allowed;filter:none}
-.modal-cd{font-size:.74rem;color:var(--muted);margin-top:8px;text-align:center;min-height:16px}
-.modal-cd .cdnum{color:var(--gold);font-weight:700}
-.ph-actions{margin-left:auto;flex-shrink:0;display:flex;flex-direction:column;gap:8px;align-items:flex-end}
-
-
-/* ── ADMIN PANEL ── */
-.admin-btn{padding:7px 14px;border-radius:9px;font-family:'Outfit',sans-serif;font-size:.78rem;font-weight:600;cursor:pointer;border:1px solid;transition:all .18s;white-space:nowrap}
-.admin-btn:hover{transform:translateY(-1px)}
-.abtn-orange{background:rgba(245,158,11,.1);border-color:rgba(245,158,11,.3);color:#fcd34d}
-.abtn-orange:hover{background:rgba(245,158,11,.2)}
-.abtn-red{background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.28);color:#fca5a5}
-.abtn-red:hover{background:rgba(239,68,68,.22)}
-.abtn-green{background:rgba(16,185,129,.1);border-color:rgba(16,185,129,.28);color:#6ee7b7}
-.abtn-green:hover{background:rgba(16,185,129,.22)}
-.abtn-blue{background:rgba(59,130,246,.1);border-color:rgba(59,130,246,.28);color:#93c5fd}
-.abtn-blue:hover{background:rgba(59,130,246,.22)}
-.abtn-violet{background:rgba(139,92,246,.1);border-color:rgba(139,92,246,.28);color:#c4b5fd}
-.abtn-violet:hover{background:rgba(139,92,246,.22)}
-.admin-panel{background:rgba(245,158,11,.04);border:1px solid rgba(245,158,11,.18);border-radius:14px;padding:18px 22px;margin-top:0}
-.admin-panel-title{font-family:'Bebas Neue',sans-serif;font-size:.85rem;letter-spacing:.12em;color:var(--gold);margin-bottom:14px;display:flex;align-items:center;gap:8px}
-.admin-panel-title::after{content:'';flex:1;height:1px;background:rgba(245,158,11,.2)}
-.admin-actions{display:flex;gap:8px;flex-wrap:wrap}
-/* ── ADMIN MODAL ── */
-.modal-box.admin-box{border-color:rgba(245,158,11,.35);max-width:520px}
-.admin-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;text-align:left}
-.aig-field{background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.05);border-radius:8px;padding:10px 12px}
-.aig-label{font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
-.aig-value{font-size:.82rem;color:var(--text);word-break:break-all;font-weight:500}
-.aig-value.mono{font-family:monospace;font-size:.78rem}
-.stats-edit-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;text-align:left}
-.seg-field{display:flex;flex-direction:column;gap:4px}
-.seg-label{font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
-.seg-input{padding:8px 10px;background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Outfit',sans-serif;font-size:.85rem;outline:none;transition:border-color .2s}
-.seg-input:focus{border-color:var(--blue)}
-.ban-row{display:flex;align-items:center;gap:10px;margin-bottom:14px}
-.ban-input{flex:1;padding:8px 10px;background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Outfit',sans-serif;font-size:.85rem;outline:none}
-.ban-input:focus{border-color:var(--blue)}
-.ban-unit{padding:8px 12px;background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Outfit',sans-serif;font-size:.85rem;outline:none;cursor:pointer}
-.banned-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);border-radius:6px;padding:2px 8px;font-size:.72rem;color:#fca5a5}
-
-@media(max-width:900px){.main-layout{flex-direction:column}.sidebar{width:100%;position:static}.user-list{max-height:160px;display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:4px}}
-@media(max-width:600px){.card,.ph{padding:24px 20px}.ph{flex-direction:column;align-items:flex-start}.sg{grid-template-columns:1fr 1fr}.sub-body{grid-template-columns:1fr 1fr}.free-plan-features{grid-template-columns:1fr 1fr}}
 </style>
 </head>
 <body>
-<div class="loading-screen" id="loadingScreen"><div class="loading-logo">LOAD REPORT</div><div class="loading-sp"></div></div>
-<div class="bg"><div class="grid-lines"></div><div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div><div class="noise"></div></div>
+<div class="loading-screen" id="loadingScreen">
+  <div class="loading-logo">LOAD REPORT</div>
+  <div class="loading-sp"></div>
+</div>
 
-<nav class="nav" id="nav">
-  <span class="nav-brand" onclick="goOwnProfile()">LOAD REPORT</span>
-  <div class="nav-right"><span class="nav-nick" id="navNick"></span><button class="btn-ghost" onclick="logout()">Выйти &rarr;</button></div>
-</nav>
+<div class="bg">
+  <div class="grid-lines"></div>
+  <div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div>
+  <div class="noise"></div>
+</div>
 
-<!-- AUTH -->
-<div class="wrap" id="authWrap" style="display:none">
+<div class="wrap center">
   <div style="display:flex;flex-direction:column;align-items:center;width:100%">
-    <div class="brand"><div class="brand-logo">LOAD REPORT</div><div class="brand-sub">Аналитика &middot; Прогресс &middot; Данные</div></div>
+    <div class="brand">
+      <div class="brand-logo">LOAD REPORT</div>
+      <div class="brand-sub">Аналитика &middot; Прогресс &middot; Данные</div>
+    </div>
     <div class="card">
       <div id="alertBox" class="alert"></div>
+
+      <!-- Step 1: Discord login -->
       <div class="step active" id="stepLogin">
         <div class="ttl">Добро пожаловать</div>
         <div class="sub">Войди через Discord, чтобы получить доступ к своему профилю.</div>
         <button class="btn-discord" id="dcAuthBtn" onclick="loginDiscord()">
-          <svg width="22" height="16" viewBox="0 0 24 18" fill="none"><path d="M20.317 1.492a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 .677 1.492a.07.07 0 0 0-.032.027C-.467 6.167-1.32 10.707.099 15.183c.002.022.015.043.033.05a19.904 19.904 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128c.126-.094.252-.192.372-.292a.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.1.246.198.373.292a.077.077 0 0 1-.006.127c-.598.35-1.22.645-1.873.892a.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.661a.061.061 0 0 0-.031-.03zM8.02 12.278c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.095 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.095 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z" fill="white"/></svg>
+          <svg width="22" height="16" viewBox="0 0 24 18" fill="none">
+            <path d="M20.317 1.492a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 .677 1.492a.07.07 0 0 0-.032.027C-.467 6.167-1.32 10.707.099 15.183c.002.022.015.043.033.05a19.904 19.904 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128c.126-.094.252-.192.372-.292a.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.1.246.198.373.292a.077.077 0 0 1-.006.127c-.598.35-1.22.645-1.873.892a.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.661a.061.061 0 0 0-.031-.03zM8.02 12.278c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.095 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.095 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z" fill="white"/>
+          </svg>
           Войти через Discord
         </button>
         <div class="hint">Нужен игровой ник (как в SAMP) &mdash; введёшь после входа.</div>
       </div>
+
+      <!-- Step 2: Pick nickname -->
       <div class="step" id="stepPickNick">
         <div class="ttl">Твой игровой ник</div>
         <div class="sub">Введи ник из SAMP &mdash; он используется для поиска подписки в базе.</div>
-        <div class="fg"><label>Ник *</label><input type="text" id="dcNick" placeholder="Your_Nickname" maxlength="36" onkeydown="if(event.key==='Enter')finishDiscordReg()"></div>
+        <div class="fg">
+          <label>Ник *</label>
+          <input type="text" id="dcNick" placeholder="Your_Nickname" maxlength="36"
+                 onkeydown="if(event.key==='Enter')finishDiscordReg()">
+        </div>
         <button class="btn btn-primary" id="dcBtn" onclick="finishDiscordReg()">Создать профиль &rarr;</button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- PROFILE PAGE -->
-<div class="wrap has-nav" id="profileWrap" style="display:none">
-  <div class="main-layout">
-
-    <aside class="sidebar">
-      <div class="sidebar-card">
-        <div class="sidebar-ttl">&#128101; Игроки</div>
-        <div class="user-list" id="userList">
-          <div class="sidebar-empty"><span class="sp" style="width:11px;height:11px;margin-right:5px"></span>Загрузка...</div>
-        </div>
-      </div>
-    </aside>
-
-    <div class="profile-wrap">
-      <div id="viewingBanner" style="display:none" class="viewing-banner">
-        <span id="viewingText"></span>
-        <button class="btn-back" onclick="goOwnProfile()">&#8592; Мой профиль</button>
-      </div>
-
-      <div class="ph">
-        <div class="av-outer"><div class="av" id="avEl"><span id="avLetter">?</span></div><div class="av-ring"></div></div>
-        <div class="pi">
-          <div class="pname-row"><div class="pname" id="pNick">&mdash;</div><button class="btn-edit" id="btnEditNick" style="display:none" title="Изменить ник" onclick="openEditModal(&quot;nick&quot;)"><svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11.013 1.427a1.75 1.75 0 0 1 2.474 0l1.086 1.086a1.75 1.75 0 0 1 0 2.474l-8.61 8.61c-.21.21-.47.364-.756.445l-3.251.93a.75.75 0 0 1-.927-.928l.929-3.25c.081-.286.235-.547.445-.758l8.61-8.61zm1.414 1.06a.25.25 0 0 0-.354 0L10.811 3.75l1.439 1.44 1.263-1.263a.25.25 0 0 0 0-.354l-1.086-1.086zM11.189 6.25 9.75 4.81 3.23 11.33l-.479 1.679 1.679-.48 6.759-6.278z" fill="currentColor"/></svg></button></div>
-          <div class="badges" id="pBadges">
-            <span class="badge badge-ver" id="statusBadge"><span class="badge-dot green" id="statusDot"></span><span id="statusText">online</span></span>
-            <span class="badge badge-dc"><span class="badge-dot indigo"></span>&#127918; Discord</span>
-          </div>
-        </div>
-        <div class="ph-actions" id="phActions"></div>
-      </div>
-
-      <div class="sub-card no-sub" id="subCard">
-        <div class="sub-header-row">
-          <div class="sub-title">&#127259; Подписка Load Report</div>
-          <div class="sub-status loading-st" id="subStatusBadge"><span id="subStatusText">Проверяем...</span></div>
-        </div>
-        <div id="subBody"><div class="sub-loading-inner"><span class="sp"></span>Загружаем данные из базы...</div></div>
-      </div>
-
-      <div class="admin-panel" id="adminPanel" style="display:none"><div class="admin-panel-title">&#9881; Панель администратора</div><div class="admin-actions" id="adminActions"></div></div>
-      <div class="sg">
-        <div class="sc"><div class="si">&#128225;</div><div class="sv" id="sPing">—</div><div class="sl">Средний пинг</div></div>
-        <div class="sc"><div class="si">&#127381;</div><div class="sv" id="sCaught">—</div><div class="sl">Поймано репортов</div></div>
-        <div class="sc"><div class="si">&#127919;</div><div class="sv" id="sChance">—</div><div class="sl">Шанс поймать</div></div>
-      </div>
-      <div class="ac"><div class="sect">Время ловли репортов</div><div class="hunt-time-inner" id="huntTimeEl"><span style="color:var(--muted);font-size:.875rem">Загрузка...</span></div></div>
-    </div>
-
-  </div>
-</div>
-
+<script src="shared.js"></script>
 <script>
-const DISCORD_CLIENT_ID = '1481633911917514853';
-const DISCORD_REDIRECT  = 'https://saportbati.github.io/loadsite/';
-const DISCORD_SCOPE     = 'identify email';
-const WORKER_URL        = 'https://loadsite-api.grebenkinmatveyvyceslacovi2007.workers.dev';
-const XOR_KEY           = 'SaportBati_SecretKey_2024';
-const TRIAL_SECONDS     = 2 * 24 * 3600;
-const TRIAL_PREFIX      = '\u041f\u0440\u043e\u0431\u043d\u0430\u044f-\u043f\u043e\u0434\u043f\u0438\u0441\u043a\u0430';
-const TRIAL_COLOR       = '#7FFFD4';
-const DEV_PREFIX        = '\u0420\u0430\u0437\u0440\u0430\u0431\u043e\u0442\u0447\u0438\u043a'; // Разработчик
-
-// state
-let _viewingUser = null;
-let _cachedEntries = null;
-
-// ── CP1251 ──
-const CP1251_MAP=[0x0402,0x0403,0x201A,0x0453,0x201E,0x2026,0x2020,0x2021,0x20AC,0x2030,0x0409,0x2039,0x040A,0x040C,0x040B,0x040F,0x0452,0x2018,0x2019,0x201C,0x201D,0x2022,0x2013,0x2014,0x0000,0x2122,0x0459,0x203A,0x045A,0x045C,0x045B,0x045F,0x00A0,0x040E,0x045E,0x0408,0x00A4,0x0490,0x00A6,0x00A7,0x0401,0x00A9,0x0404,0x00AB,0x00AC,0x00AD,0x00AE,0x0407,0x00B0,0x00B1,0x0406,0x0456,0x0491,0x00B5,0x00B6,0x00B7,0x0451,0x2116,0x0454,0x00BB,0x0458,0x0405,0x0455,0x0457,0x0410,0x0411,0x0412,0x0413,0x0414,0x0415,0x0416,0x0417,0x0418,0x0419,0x041A,0x041B,0x041C,0x041D,0x041E,0x041F,0x0420,0x0421,0x0422,0x0423,0x0424,0x0425,0x0426,0x0427,0x0428,0x0429,0x042A,0x042B,0x042C,0x042D,0x042E,0x042F,0x0430,0x0431,0x0432,0x0433,0x0434,0x0435,0x0436,0x0437,0x0438,0x0439,0x043A,0x043B,0x043C,0x043D,0x043E,0x043F,0x0440,0x0441,0x0442,0x0443,0x0444,0x0445,0x0446,0x0447,0x0448,0x0449,0x044A,0x044B,0x044C,0x044D,0x044E,0x044F];
-const unicodeToCp1251=new Map();for(let i=0;i<128;i++)unicodeToCp1251.set(i,i);CP1251_MAP.forEach((u,i)=>{if(u)unicodeToCp1251.set(u,0x80+i);});
-const cp1251ToUnicode=new Array(256);for(let i=0;i<128;i++)cp1251ToUnicode[i]=i;CP1251_MAP.forEach((u,i)=>{cp1251ToUnicode[0x80+i]=u||0;});
-function strToCP1251Bytes(str){const b=[];for(let i=0;i<str.length;i++){const c=str.charCodeAt(i),by=unicodeToCp1251.get(c);b.push(by!==undefined?by:0x3F);}return b;}
-function cp1251BytesToStr(bytes){return bytes.map(b=>{const u=cp1251ToUnicode[b];return u!==undefined?String.fromCharCode(u):'?';}).join('');}
-
-// ── BASE64 / XOR ──
-const B64='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
-function b64decodeBytes(str){str=str.replace(/\s/g,'');const out=[];for(let i=0;i<str.length;i+=4){const a=B64.indexOf(str[i]),b=B64.indexOf(str[i+1]),c=str[i+2]==='='?0:B64.indexOf(str[i+2]),d=str[i+3]==='='?0:B64.indexOf(str[i+3]);out.push(a*4+Math.floor(b/16));if(str[i+2]!=='=')out.push((b%16)*16+Math.floor(c/4));if(str[i+3]!=='=')out.push((c%4)*64+d);}return out;}
-function b64encodeBytes(bytes){const chars=[];for(let i=0;i<bytes.length;i+=3){const b1=bytes[i],b2=bytes[i+1]??0,b3=bytes[i+2]??0,has2=i+1<bytes.length,has3=i+2<bytes.length,n=b1*65536+b2*256+b3;chars.push(B64[Math.floor(n/262144)]);chars.push(B64[Math.floor((n%262144)/4096)]);chars.push(has2?B64[Math.floor((n%4096)/64)]:'=');chars.push(has3?B64[n%64]:'=');}return chars.join('');}
-function xorDecrypt(bytes,key){const k=strToCP1251Bytes(key);return bytes.map((b,i)=>b^k[i%k.length]);}
-function xorEncrypt(str,key){const s=strToCP1251Bytes(str),k=strToCP1251Bytes(key);return s.map((b,i)=>b^k[i%k.length]);}
-
-// ── GITHUB via worker ──
-async function githubFetch(){
-  const r=await fetchWithTimeout(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'fetchSubs'})},10000);
-  if(!r.ok)throw new Error('Worker fetchSubs '+r.status);
-  const d=await r.json();if(d.error)throw new Error(d.error);
-  const fileRaw=atob(d.content.replace(/\s/g,''));
-  const entries=[];
-  for(const line of fileRaw.split(/\r?\n/)){const t=line.trim();if(!t)continue;try{const dec=cp1251BytesToStr(xorDecrypt(b64decodeBytes(t),XOR_KEY));if(dec.includes('|'))entries.push(dec);}catch(e){}}
-  return{sha:d.sha,entries};
+function showAlert(msg, type='err'){
+  const el=document.getElementById('alertBox');
+  el.className='alert show '+type;
+  el.textContent=msg;
 }
-async function githubPush(sha,entries,message){
-  const encLines=entries.map(e=>b64encodeBytes(xorEncrypt(e,XOR_KEY)));
-  const fileContent=encLines.join('\n')+'\n';
-  const fileBytes=Array.from(fileContent).map(c=>c.charCodeAt(0));
-  const raw=b64encodeBytes(fileBytes);
-  const lined=[];for(let j=0;j<raw.length;j+=60)lined.push(raw.slice(j,j+60));
-  const fileB64=lined.join('\n')+'\n';
-  const r=await fetchWithTimeout(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'pushSubs',sha,content:fileB64,message})},10000);
-  if(!r.ok)throw new Error('Worker pushSubs '+r.status);
-  const res=await r.json();if(res.error)throw new Error(res.error);
-}
-
-// ── PARSE / FORMAT ──
-function parseEntry(e){const p=e.split('|');return{nick:p[0]||'',ts:parseInt(p[1])||0,prefix:(p[2]&&p[2]!=='')?p[2]:null,color:(p[3]&&p[3]!=='')?p[3]:null};}
-function stripBracketPrefix(n){return n.replace(/^\[\d+\]/,'');}
-function isExpired(ts){return ts!==0&&Math.floor(Date.now()/1000)>ts;}
-function formatDate(ts){if(ts===0)return'\u221e Безлимит';const d=new Date(ts*1000),p=n=>String(n).padStart(2,'0');return p(d.getDate())+'.'+p(d.getMonth()+1)+'.'+d.getFullYear()+' '+p(d.getHours())+':'+p(d.getMinutes());}
-function formatTimeLeft(ts){if(ts===0)return null;const diff=ts-Math.floor(Date.now()/1000);if(diff<=0)return null;const d=Math.floor(diff/86400),h=Math.floor((diff%86400)/3600),m=Math.floor((diff%3600)/60);if(d>0)return d+'д '+h+'ч';if(h>0)return h+'ч '+m+'м';return m+'м';}
-
-// ── FETCH SUBSCRIPTIONS ──
-async function fetchSubscriptions(){
-  const r=await fetch(WORKER_URL+'/subs-api?t='+Date.now());
-  if(!r.ok)throw new Error('Worker error: '+r.status);
-  const fileRaw=await r.text();
-  if(fileRaw.startsWith('ERROR:'))throw new Error(fileRaw);
-  const entries=[];
-  for(const line of fileRaw.split(/\r?\n/)){const t=line.trim();if(!t)continue;try{const dec=cp1251BytesToStr(xorDecrypt(b64decodeBytes(t),XOR_KEY));if(dec.includes('|'))entries.push(dec);}catch(e){}}
-  return entries;
-}
-
-// ── FETCH PLAYER STATS ──
-async function fetchPlayerStats(nick){
-  try{
-    const safeNick=nick.replace(/[^a-zA-Z0-9_.\-]/g,'_');
-    const r=await fetchWithTimeout(WORKER_URL+'/stats?nick='+encodeURIComponent(safeNick)+'&t='+Date.now(),{},8000);
-    if(!r.ok)return null;
-    const d=await r.json();
-    if(d&&typeof d==='object'){
-      if('total_caught' in d||'avg_ping' in d)return d;
-      if(d.found&&d.data)return d.data;
-    }
-    return null;
-  }catch(e){return null;}
-}
-
-// ── COMPUTE STATS ──
-function computeStats(data){
-  if(!data)return{avgPing:null,totalCaught:null,chance:null};
-  const avgPing=(data.avg_ping&&data.avg_ping>0)?Math.round(data.avg_ping):null;
-  const totalCaught=(data.total_caught!=null)?data.total_caught:null;
-  const totalMissed=(data.total_missed!=null)?data.total_missed:0;
-  const total=(totalCaught!=null)?totalCaught+totalMissed:0;
-  const chance=total>0?Math.round((totalCaught/total)*100):null;
-  return{avgPing,totalCaught,chance};
-}
-
-// ── RENDER SUBSCRIPTION ──
-function renderSubscription(nick,entries,readonly){
-  readonly=readonly||false;
-  const cleanNick=stripBracketPrefix(nick).toLowerCase();
-  let found=null;
-  for(const raw of entries){const e=parseEntry(raw);if(stripBracketPrefix(e.nick).toLowerCase()===cleanNick){found=e;break;}}
-  const card=document.getElementById('subCard'),statusBadge=document.getElementById('subStatusBadge'),body=document.getElementById('subBody');
-  if(!found){
-    card.className='sub-card free-sub';statusBadge.className='sub-status free';statusBadge.innerHTML='<span>Free</span>';
-    if(readonly){
-      body.innerHTML='<div class="sub-body"><div class="sub-field"><div class="sub-field-label">Тариф</div><div class="sub-field-value" style="color:var(--blue)">🆓 Free</div></div></div>';
-    }else{
-      body.innerHTML=`<div class="free-plan-block"><div class="free-plan-features"><div class="free-feat"><div class="free-feat-label">Тариф</div><div class="free-feat-value">🆓 Free</div></div><div class="free-feat"><div class="free-feat-label">Отчётов в день</div><div class="free-feat-value limited">3 / день</div></div><div class="free-feat"><div class="free-feat-label">Префикс</div><div class="free-feat-value limited">&mdash;</div></div><div class="free-feat"><div class="free-feat-label">Статус</div><div class="free-feat-value" style="color:var(--blue)">Базовый доступ</div></div></div><div class="free-divider"></div><button class="btn-buy" onclick="handleBuySubscription()"><span class="btn-buy-icon">⚡</span>Купить подписку</button><button class="btn-trial" id="trialBtn" onclick="handleTrialSubscription()"><span class="btn-trial-icon">🎁</span>Получить пробную подписку · 2 дня</button></div>`;
-    }
-    return;
-  }
-  const expired=isExpired(found.ts),timeLeft=formatTimeLeft(found.ts);
-  const isCrit=found.ts!==0&&!expired&&(found.ts-Math.floor(Date.now()/1000))<86400*3;
-  if(expired){card.className='sub-card expired-sub';statusBadge.className='sub-status expired';statusBadge.innerHTML='<span>Истекла</span>';}
-  else{card.className='sub-card active-sub';statusBadge.className='sub-status active';statusBadge.innerHTML='<span>'+(found.ts===0?'Активна · Безлимит':'Активна')+'</span>';}
-  let prefixHTML='<span style="color:var(--muted)">&mdash;</span>';
-  if(found.prefix){const col=found.color?found.color.replace(/^#/,''):null;const style=col?'color:#'+col+';border-color:#'+col+'55;background:#'+col+'18':'';prefixHTML='<span class="prefix-badge" style="'+style+'">['+found.prefix+']</span>';}
-  let expireHTML;
-  if(expired)expireHTML='<span style="color:var(--red)">'+formatDate(found.ts)+'</span>';
-  else if(found.ts===0)expireHTML='<span style="color:var(--gold)">∞ Безлимит</span>';
-  else expireHTML='<span style="color:var(--green)">'+formatDate(found.ts)+'</span>';
-  const timeHTML=timeLeft?'<div class="sub-field"><div class="sub-field-label">Осталось</div><div class="sub-field-value'+(isCrit?' time-critical':'')+'" style="'+(isCrit?'':'color:var(--gold)')+'">'+timeLeft+'</div></div>':'';
-  // Карандашик у префикса
-  const isTrial=found.prefix===TRIAL_PREFIX;
-  let pfxPencil='';
-  if(!readonly&&!isTrial&&!expired){
-    const session2=loadSession();
-    const isDev2=_cp&&_cp.isDev;
-    const cdLeft2=isDev2?0:(session2?getCdLeft(session2):99999);
-    const locked2=!isDev2&&cdLeft2>0;
-    pfxPencil='<button class="btn-edit'+(locked2?' cd':'')+'" onclick="openEditModal(&quot;prefix&quot;)" title="'+(locked2?'КД: '+fmtCd(cdLeft2):'Изменить префикс')+'"><svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11.013 1.427a1.75 1.75 0 0 1 2.474 0l1.086 1.086a1.75 1.75 0 0 1 0 2.474l-8.61 8.61c-.21.21-.47.364-.756.445l-3.251.93a.75.75 0 0 1-.927-.928l.929-3.25c.081-.286.235-.547.445-.758l8.61-8.61zm1.414 1.06a.25.25 0 0 0-.354 0L10.811 3.75l1.439 1.44 1.263-1.263a.25.25 0 0 0 0-.354l-1.086-1.086zM11.189 6.25 9.75 4.81 3.23 11.33l-.479 1.679 1.679-.48 6.759-6.278z" fill="currentColor"/></svg></button>';
-  }
-  // Обновляем subEntry в _cp
-  if(_cp&&_cp.user&&_cp.user.nick.toLowerCase()===nick.toLowerCase()){
-    const cleanUpd=stripBracketPrefix(nick).toLowerCase();
-    _cp.subEntry=entries.find?entries.find(raw=>{const e=parseEntry(raw);return stripBracketPrefix(e.nick).toLowerCase()===cleanUpd;})||null:null;
-  }
-  body.innerHTML='<div class="sub-body"><div class="sub-field"><div class="sub-field-label">Игровой ник</div><div class="sub-field-value" style="font-weight:600">'+found.nick+'</div></div><div class="sub-field"><div class="sub-field-label">Префикс'+pfxPencil+'</div><div class="sub-field-value">'+prefixHTML+'</div></div><div class="sub-field"><div class="sub-field-label">'+(expired?'Истекла':'Действует до')+'</div><div class="sub-field-value">'+expireHTML+'</div></div>'+timeHTML+'</div>';
-}
-
-function handleBuySubscription(){alert('Для покупки подписки обратись к администратору в Discord!');}
-
-// ── TRIAL ──
-async function handleTrialSubscription(){
-  const session=loadSession();if(!session)return;
-  const btn=document.getElementById('trialBtn');if(!btn)return;
-  btn.disabled=true;btn.innerHTML='<span class="sp"></span>Проверяем...';
-  try{
-    const{sha,entries}=await githubFetch();
-    const cleanNick=stripBracketPrefix(session.nick).toLowerCase();
-    const alreadyExists=entries.some(raw=>{const e=parseEntry(raw);return stripBracketPrefix(e.nick).toLowerCase()===cleanNick;});
-    if(alreadyExists){btn.disabled=true;btn.innerHTML='<span class="btn-trial-icon">🚫</span>Пробная подписка уже была использована';return;}
-    btn.innerHTML='<span class="sp"></span>Активируем...';
-    const expireTs=Math.floor(Date.now()/1000)+TRIAL_SECONDS;
-    const entry=session.nick+'|'+expireTs+'|'+TRIAL_PREFIX+'|'+TRIAL_COLOR;
-    await githubPush(sha,[...entries,entry],'Trial: '+session.nick);
-    btn.innerHTML='<span class="btn-trial-icon">✅</span>Пробная подписка активирована!';
-    btn.style.color='#6ee7b7';btn.style.borderColor='rgba(16,185,129,0.5)';
-    setTimeout(async()=>{try{const fresh=await fetchSubscriptions();renderSubscription(session.nick,fresh,false);}catch(e){}},1200);
-  }catch(e){
-    btn.disabled=false;btn.innerHTML='<span class="btn-trial-icon">🎁</span>Получить пробную подписку · 2 дня';
-    const ex=document.getElementById('trialErrMsg');if(ex)ex.remove();
-    const msg=document.createElement('div');msg.id='trialErrMsg';msg.style.cssText='color:#fca5a5;font-size:.78rem;text-align:center;margin-top:8px;';msg.textContent='Ошибка: '+e.message;btn.after(msg);
-  }
-}
-
-// ── WORKER DB ──
-async function readDB(){try{const r=await fetchWithTimeout(WORKER_URL,{},5000);if(!r.ok)throw new Error('Worker '+r.status);return await r.json();}catch(e){return{users:[],sha:null};}}
-async function writeDB(users,sha){const r=await fetch(WORKER_URL,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({users,sha})});if(!r.ok){const e=await r.json();throw new Error(e.error||'Write failed');}}
-
-// ── SESSION ──
-function saveSession(u){localStorage.setItem('lr_user',JSON.stringify(u));}
-function loadSession(){try{return JSON.parse(localStorage.getItem('lr_user'));}catch{return null;}}
-function clearSession(){localStorage.removeItem('lr_user');}
-function showAlert(msg,type='err'){const el=document.getElementById('alertBox');el.className='alert show '+type;el.textContent=msg;}
 function hideAlert(){document.getElementById('alertBox').className='alert';}
-function goStep(name){document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));document.getElementById('step'+name).classList.add('active');hideAlert();}
-function hideLoading(){const el=document.getElementById('loadingScreen');el.classList.add('hidden');setTimeout(()=>el.style.display='none',350);}
-function fetchWithTimeout(url,options={},ms=8000){const c=new AbortController();const t=setTimeout(()=>c.abort(),ms);return fetch(url,{...options,signal:c.signal}).finally(()=>clearTimeout(t));}
-
-// ── SESSION WATCHDOG — каждые 15с проверяет что аккаунт ещё существует ──
-let _watchdog=null;
-function startWatchdog(session){
-  stopWatchdog();
-  _watchdog=setInterval(async()=>{
-    try{
-      const{users}=await readDB();
-      const still=users.find(u=>u.id===session.id);
-      // Обновляем бан-статус в сессии
-      if(still&&still.banned!==undefined){session.banned=still.banned;session.bannedUntil=still.bannedUntil;saveSession(session);}
-      else if(still){delete session.banned;delete session.bannedUntil;saveSession(session);}
-      if(!still){
-        stopWatchdog();stopAutoRefresh();clearSession();_viewingUser=null;_cachedEntries=null;
-        showAuthPage();goStep('Login');
-        showAlert('Твой аккаунт был удалён. Войди снова или зарегистрируйся.','err');
-      }
-    }catch(e){/* сетевая ошибка — не выкидываем */}
-  },15000);
+function goStep(name){
+  document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
+  document.getElementById('step'+name).classList.add('active');
+  hideAlert();
 }
-function stopWatchdog(){if(_watchdog){clearInterval(_watchdog);_watchdog=null;}}
+function hideLoading(){
+  const el=document.getElementById('loadingScreen');
+  el.classList.add('hidden');
+  setTimeout(()=>el.style.display='none',350);
+}
 
-// ── DISCORD OAUTH ──
+// ── Discord OAuth ──
 function loginDiscord(){
-  const btn=document.getElementById('dcAuthBtn');btn.disabled=true;btn.innerHTML='<span class="sp"></span>Перенаправление...';
-  const p=new URLSearchParams({client_id:DISCORD_CLIENT_ID,redirect_uri:DISCORD_REDIRECT,response_type:'token',scope:DISCORD_SCOPE});
+  const btn=document.getElementById('dcAuthBtn');
+  btn.disabled=true;
+  btn.innerHTML='<span class="sp"></span>Перенаправление...';
+  const p=new URLSearchParams({
+    client_id:DISCORD_CLIENT_ID,
+    redirect_uri:DISCORD_REDIRECT,
+    response_type:'token',
+    scope:DISCORD_SCOPE
+  });
   window.location.href='https://discord.com/api/oauth2/authorize?'+p;
 }
+
 let pendingDC=null;
+
 async function handleDiscordCallback(){
   const params=new URLSearchParams(window.location.hash.slice(1));
   const token=params.get('access_token');
-  if(!token){hideLoading();showAuthPage();return;}
+  if(!token){hideLoading();return;}
   history.replaceState(null,'',window.location.pathname);
   showAlert('Получаем данные Discord...','info');
   try{
-    const res=await fetchWithTimeout('https://discord.com/api/users/@me',{headers:{Authorization:'Bearer '+token}},8000);
+    const res=await fetchWithTimeout('https://discord.com/api/users/@me',
+      {headers:{Authorization:'Bearer '+token}},8000);
     if(!res.ok)throw new Error('Discord API '+res.status);
     const dc=await res.json();
     let avatarUrl=null;
-    if(dc.avatar){const ext=dc.avatar.startsWith('a_')?'gif':'png';avatarUrl='https://cdn.discordapp.com/avatars/'+dc.id+'/'+dc.avatar+'.'+ext+'?size=512';}
-    else{const idx=dc.discriminator&&dc.discriminator!=='0'?parseInt(dc.discriminator)%5:Number(BigInt(dc.id)>>22n)%6;avatarUrl='https://cdn.discordapp.com/embed/avatars/'+idx+'.png';}
+    if(dc.avatar){
+      const ext=dc.avatar.startsWith('a_')?'gif':'png';
+      avatarUrl='https://cdn.discordapp.com/avatars/'+dc.id+'/'+dc.avatar+'.'+ext+'?size=512';
+    }else{
+      const idx=dc.discriminator&&dc.discriminator!=='0'
+        ?parseInt(dc.discriminator)%5
+        :Number(BigInt(dc.id)>>22n)%6;
+      avatarUrl='https://cdn.discordapp.com/embed/avatars/'+idx+'.png';
+    }
     const{users,sha}=await readDB();
     let user=users.find(u=>u.discordId===dc.id);
-    if(user){user.avatar=avatarUrl;user.lastLogin=new Date().toISOString();await writeDB(users,sha);saveSession(user);hideAlert();hideLoading();await showProfile(user);}
-    else{pendingDC={id:dc.id,email:dc.email||null,name:dc.global_name||dc.username,avatarUrl};hideAlert();hideLoading();showAuthPage();document.getElementById('dcNick').value=pendingDC.name;goStep('PickNick');}
-  }catch(e){hideLoading();showAuthPage();showAlert('Ошибка Discord: '+e.message);}
+    if(user){
+      user.avatar=avatarUrl;
+      user.lastLogin=new Date().toISOString();
+      await writeDB(users,sha);
+      saveSession(user);
+      hideAlert();
+      hideLoading();
+      goMyProfile();
+    }else{
+      pendingDC={id:dc.id,email:dc.email||null,name:dc.global_name||dc.username,avatarUrl};
+      hideAlert();
+      hideLoading();
+      document.getElementById('dcNick').value=pendingDC.name;
+      goStep('PickNick');
+    }
+  }catch(e){
+    hideLoading();
+    showAlert('Ошибка Discord: '+e.message);
+  }
 }
+
 async function finishDiscordReg(){
   const nick=document.getElementById('dcNick').value.trim();
   if(!nick){showAlert('Введи ник');return;}
   if(!/^[a-zA-Z0-9_.[\]-]{2,36}$/.test(nick)){showAlert('Ник: буквы, цифры, _ . - [] (2–36 символов)');return;}
-  const btn=document.getElementById('dcBtn');btn.disabled=true;btn.innerHTML='<span class="sp"></span>Создаём...';
+  const btn=document.getElementById('dcBtn');
+  btn.disabled=true;
+  btn.innerHTML='<span class="sp"></span>Создаём...';
   try{
     const{users,sha}=await readDB();
-    if(users.find(u=>u.nick.toLowerCase()===nick.toLowerCase())){showAlert('Этот ник уже занят');return;}
-    const u={id:Date.now().toString(36),nick,email:pendingDC.email||'',discordId:pendingDC.id,avatar:pendingDC.avatarUrl,via:'discord',createdAt:new Date().toISOString(),lastLogin:new Date().toISOString()};
-    users.push(u);await writeDB(users,sha);saveSession(u);pendingDC=null;await showProfile(u);
-  }catch(e){showAlert('Ошибка: '+e.message);}
-  finally{btn.disabled=false;btn.innerHTML='Создать профиль &rarr;';}
-}
-
-// ── SIDEBAR ──
-async function loadSidebar(myNick){
-  const ul=document.getElementById('userList');
-  try{
-    const[{users},entries]=await Promise.all([readDB(),fetchSubscriptions()]);
-    _cachedEntries=entries;
-    if(!users||!users.length){ul.innerHTML='<div class="sidebar-empty">Пока нет игроков</div>';return;}
-    ul.innerHTML='';
-    for(const u of users){
-      const subEntry=entries.find(raw=>{const e=parseEntry(raw);return stripBracketPrefix(e.nick).toLowerCase()===stripBracketPrefix(u.nick).toLowerCase();});
-      const prefix=subEntry?parseEntry(subEntry).prefix:null;
-      const isDev=prefix===DEV_PREFIX;
-      const isMe=u.nick.toLowerCase()===myNick.toLowerCase();
-      const isViewing=_viewingUser&&_viewingUser.nick.toLowerCase()===u.nick.toLowerCase()&&!isMe;
-      const item=document.createElement('div');
-      item.className='user-item'+(isMe?' is-me':'')+(isViewing?' is-viewing':'');
-      item.onclick=()=>viewUserProfile(u);
-      const avHTML=u.avatar
-        ?'<div class="uav"><img src="'+u.avatar+'" alt="" onerror="this.parentNode.innerHTML=\''+u.nick[0].toUpperCase()+'\'"></div>'
-        :'<div class="uav">'+u.nick[0].toUpperCase()+'</div>';
-      const pfxHTML=prefix
-        ?'<div class="upfx'+(isDev?' is-dev':'')+'">'+(isDev?'&#9881; ':'')+'['+prefix+']</div>'
-        :'<div class="upfx">Free</div>';
-      item.innerHTML=avHTML+'<div class="uinfo"><div class="uname">'+u.nick+'</div>'+pfxHTML+'</div>';
-      ul.appendChild(item);
+    if(users.find(u=>u.nick.toLowerCase()===nick.toLowerCase())){
+      showAlert('Этот ник уже занят');return;
     }
-  }catch(e){ul.innerHTML='<div class="sidebar-empty" style="color:#fca5a5">Ошибка</div>';}
-}
-function setSidebarHighlight(viewingNick,myNick){
-  document.querySelectorAll('.user-item').forEach(el=>{
-    const n=el.querySelector('.uname');if(!n)return;
-    const nick=n.textContent.toLowerCase();
-    el.classList.remove('is-me','is-viewing');
-    if(nick===myNick.toLowerCase())el.classList.add('is-me');
-    else if(nick===viewingNick.toLowerCase())el.classList.add('is-viewing');
-  });
-}
-
-// ── VIEW USER PROFILE ──
-async function viewUserProfile(user){
-  const session=loadSession();if(!session)return;
-  const isOwn=user.nick.toLowerCase()===session.nick.toLowerCase();
-  _viewingUser=isOwn?null:user;
-  setSidebarHighlight(user.nick,session.nick);
-
-  // banner
-  const banner=document.getElementById('viewingBanner'),vtext=document.getElementById('viewingText');
-  if(isOwn){banner.style.display='none';}
-  else{vtext.textContent='👁 Профиль: '+user.nick;banner.style.display='flex';}
-
-  // header
-  document.getElementById('pNick').textContent=user.nick;
-  const avEl=document.getElementById('avEl'),letter=document.getElementById('avLetter');
-  avEl.querySelectorAll('img').forEach(i=>i.remove());
-  if(user.avatar){letter.style.display='none';const img=document.createElement('img');img.alt=user.nick;img.src=user.avatar;img.onerror=()=>{img.remove();letter.style.display='';letter.textContent=user.nick[0].toUpperCase();};avEl.insertBefore(img,avEl.firstChild);}
-  else{letter.style.display='';letter.textContent=user.nick[0].toUpperCase();}
-
-  // spinners
-  setStatsLoading();
-
-  // check if current user is dev
-  let myPrefix=null;
-  try{
-    const entries=_cachedEntries||await fetchSubscriptions();
-    const myEntry=entries.find(raw=>{const e=parseEntry(raw);return stripBracketPrefix(e.nick).toLowerCase()===stripBracketPrefix(session.nick).toLowerCase();});
-    if(myEntry)myPrefix=parseEntry(myEntry).prefix;
-  }catch(e){}
-  const isDev=myPrefix===DEV_PREFIX;
-
-  // Инициализируем _cp (subEntry обновится после загрузки)
-  _cp={user,isOwn,isDev,subEntry:null};
-
-  // delete button
-  const phActions=document.getElementById('phActions');phActions.innerHTML='';
-  if(isDev){
-    const btn=document.createElement('button');btn.className='btn-del-acc';
-    btn.textContent=isOwn?'🗑 Удалить мой аккаунт':'🗑 Удалить аккаунт';
-    btn.onclick=()=>promptDelete(user,session,isOwn);
-    phActions.appendChild(btn);
+    const u={
+      id:Date.now().toString(36),
+      nick,
+      email:pendingDC.email||'',
+      discordId:pendingDC.id,
+      avatar:pendingDC.avatarUrl,
+      via:'discord',
+      createdAt:new Date().toISOString(),
+      lastLogin:new Date().toISOString()
+    };
+    users.push(u);
+    await writeDB(users,sha);
+    saveSession(u);
+    pendingDC=null;
+    goMyProfile();
+  }catch(e){
+    showAlert('Ошибка: '+e.message);
+  }finally{
+    btn.disabled=false;
+    btn.innerHTML='Создать профиль &rarr;';
   }
-
-  // Карандашик у ника (свой профиль или dev смотрит чужой)
-  const nickPencilBtn=document.getElementById('btnEditNick');
-  if(isOwn||isDev){
-    nickPencilBtn.style.display='inline-flex';
-    // Получаем актуальный КД из свежей БД
-    let cdUser=isOwn?session:user;
-    try{const{users:dbU}=await readDB();const fresh=dbU.find(u=>u.id===(isOwn?session.id:user.id));if(fresh)cdUser=fresh;if(isOwn&&fresh){Object.assign(session,fresh);saveSession(session);}}catch(e){}
-    const cdLeft=isDev?0:getCdLeft(cdUser);
-    if(!isDev&&cdLeft>0){nickPencilBtn.classList.add('cd');nickPencilBtn.title='КД: '+fmtCd(cdLeft);}
-    else{nickPencilBtn.classList.remove('cd');nickPencilBtn.title='Изменить ник';}
-    nickPencilBtn.onclick=()=>openEditModal('nick');
-  }else{
-    nickPencilBtn.style.display='none';
-  }
-
-  // load sub + stats
-  const[er,sr]=await Promise.allSettled([fetchSubscriptions(),fetchPlayerStats(user.nick)]);
-  const entries=er.status==='fulfilled'?er.value:(_cachedEntries||[]);
-  _cachedEntries=entries;
-  // Найдём subEntry и сохраним в _cp
-  const cleanNickVup=stripBracketPrefix(user.nick).toLowerCase();
-  const foundRawVup=entries.find(raw=>{const e=parseEntry(raw);return stripBracketPrefix(e.nick).toLowerCase()===cleanNickVup;})||null;
-  _cp.subEntry=foundRawVup;
-  renderSubscription(user.nick,entries,!isOwn);
-  applyStats(sr.status==='fulfilled'?sr.value:null);
-  // Admin panel
-  renderAdminPanel(user,isOwn,isDev);
-}
-
-function goOwnProfile(){const s=loadSession();if(s)viewUserProfile(s);}
-
-// ── DELETE ACCOUNT ──
-function promptDelete(targetUser,session,isOwn){
-  if(document.getElementById('_delModal'))return;
-  const ov=document.createElement('div');ov.className='modal-overlay';ov.id='_delModal';
-  ov.innerHTML=`<div class="modal-box"><div class="modal-ttl">⚠️ Удалить аккаунт</div><div class="modal-txt">Аккаунт <strong>${targetUser.nick}</strong> будет удалён безвозвратно. Продолжить?</div><div class="modal-acts"><button class="mbtn mbtn-cancel" onclick="document.getElementById('_delModal').remove()">Отмена</button><button class="mbtn mbtn-del" id="_delOk">Удалить</button></div></div>`;
-  document.body.appendChild(ov);
-  document.getElementById('_delOk').onclick=()=>execDelete(targetUser,session,isOwn);
-}
-async function execDelete(targetUser,session,isOwn){
-  const btn=document.getElementById('_delOk');if(btn){btn.disabled=true;btn.textContent='Удаляем...';}
-  try{
-    const{users,sha}=await readDB();
-    await writeDB(users.filter(u=>u.id!==targetUser.id),sha);
-    document.getElementById('_delModal')&&document.getElementById('_delModal').remove();
-    if(isOwn){
-      stopWatchdog();stopAutoRefresh();clearSession();_viewingUser=null;_cachedEntries=null;
-      showAuthPage();goStep('Login');
-    }else{
-      _viewingUser=null;
-      const s=loadSession();
-      await loadSidebar(s?s.nick:'');
-      goOwnProfile();
-    }
-  }catch(e){if(btn){btn.disabled=false;btn.textContent='Удалить';}alert('Ошибка: '+e.message);}
-}
-
-// ── STATS HELPERS ──
-function setStatsLoading(){
-  document.getElementById('sPing').innerHTML='<span class="sp" style="width:12px;height:12px;margin:0"></span>';
-  document.getElementById('sCaught').innerHTML='<span class="sp" style="width:12px;height:12px;margin:0"></span>';
-  document.getElementById('sChance').innerHTML='<span class="sp" style="width:12px;height:12px;margin:0"></span>';
-  document.getElementById('huntTimeEl').innerHTML='<span style="color:var(--muted);font-size:.875rem">Загрузка...</span>';
-  document.getElementById('subCard').className='sub-card no-sub';
-  document.getElementById('subStatusBadge').className='sub-status loading-st';
-  document.getElementById('subStatusBadge').innerHTML='<span>Проверяем...</span>';
-  document.getElementById('subBody').innerHTML='<div class="sub-loading-inner"><span class="sp"></span>Загружаем данные из базы...</div>';
-}
-function applyStats(data){
-  const{avgPing,totalCaught,chance}=computeStats(data);
-  document.getElementById('sPing').textContent=avgPing!==null?avgPing+' мс':'—';
-  document.getElementById('sCaught').textContent=totalCaught!==null?totalCaught:'—';
-  document.getElementById('sChance').textContent=chance!==null?chance+'%':'—';
-  renderHuntTime(data&&data.total_time_sec?data.total_time_sec:0);
-  updateOnlineStatus(data);
-}
-
-// ── ONLINE / OFFLINE STATUS BADGE ──
-function updateOnlineStatus(data){
-  const badge=document.getElementById('statusBadge');
-  const dot=document.getElementById('statusDot');
-  const txt=document.getElementById('statusText');
-  if(!badge||!dot||!txt)return;
-  const lastUpdated=data&&data.last_updated?data.last_updated:null;
-  const nowSec=Math.floor(Date.now()/1000);
-  const isOnline=lastUpdated&&(nowSec-lastUpdated)<70;
-  if(isOnline){
-    badge.style.background='rgba(16,185,129,.1)';
-    badge.style.border='1px solid rgba(16,185,129,.2)';
-    badge.style.color='#6ee7b7';
-    dot.className='badge-dot green';
-    txt.textContent='online';
-  }else{
-    badge.style.background='rgba(239,68,68,.1)';
-    badge.style.border='1px solid rgba(239,68,68,.25)';
-    badge.style.color='#fca5a5';
-    dot.className='badge-dot red';
-    txt.textContent='offline';
-  }
-}
-
-// ── MAIN SHOW PROFILE ──
-function showAuthPage(){document.getElementById('authWrap').style.display='flex';document.getElementById('profileWrap').style.display='none';document.getElementById('nav').classList.remove('show');}
-async function showProfile(user){
-  hideLoading();
-  document.getElementById('authWrap').style.display='none';document.getElementById('profileWrap').style.display='flex';document.getElementById('nav').classList.add('show');
-  document.getElementById('navNick').textContent='@'+user.nick;
-  _viewingUser=null;
-
-  await Promise.all([loadSidebar(user.nick),viewUserProfile(user)]);
-  startWatchdog(user);
-
-  stopAutoRefresh();
-  window._autoRefreshTimer=setInterval(async()=>{
-    const target=_viewingUser||loadSession();if(!target)return;
-    const s=loadSession();
-    const isOwn=!_viewingUser;
-    const[er,sr]=await Promise.allSettled([fetchSubscriptions(),fetchPlayerStats(target.nick)]);
-    if(er.status==='fulfilled'){_cachedEntries=er.value;renderSubscription(target.nick,er.value,!isOwn);}
-    if(sr.status==='fulfilled')applyStats(sr.value);
-    // sidebar refresh every ~30s
-    if(!window._sbTick)window._sbTick=0;window._sbTick++;
-    if(window._sbTick>=6){window._sbTick=0;if(s)loadSidebar(s.nick);}
-  },5000);
-  // ── STATUS CHECK every 80s ──
-  window._statusCheckTimer=setInterval(async()=>{
-    const target=_viewingUser||loadSession();if(!target)return;
-    const sr=await fetchPlayerStats(target.nick);
-    updateOnlineStatus(sr);
-  },80000);
-}
-function stopAutoRefresh(){if(window._autoRefreshTimer){clearInterval(window._autoRefreshTimer);window._autoRefreshTimer=null;}if(window._statusCheckTimer){clearInterval(window._statusCheckTimer);window._statusCheckTimer=null;}}
-function logout(){clearSession();stopAutoRefresh();stopWatchdog();_viewingUser=null;_cachedEntries=null;showAuthPage();goStep('Login');}
-
-// ── HUNT TIME ──
-function formatHuntTime(secs){if(!secs||secs<=0)return null;const d=Math.floor(secs/86400),h=Math.floor((secs%86400)/3600),m=Math.floor((secs%3600)/60),s=secs%60;return{d,h,m,s};}
-function renderHuntTime(secs){
-  const el=document.getElementById('huntTimeEl');
-  const t=formatHuntTime(secs);
-  if(!t){el.innerHTML='<span style="color:var(--muted);font-size:.875rem">Нет данных — начни ловлю!</span>';return;}
-  const parts=[];if(t.d>0)parts.push({val:t.d,lbl:'дней'});parts.push({val:t.h,lbl:'часов'});parts.push({val:t.m,lbl:'минут'});parts.push({val:t.s,lbl:'секунд'});
-  el.innerHTML=parts.map((p,i)=>(i>0?'<span class="hunt-sep">:</span>':'')+'<div class="hunt-seg"><div class="hunt-val">'+String(p.val).padStart(2,'0')+'</div><div class="hunt-lbl">'+p.lbl+'</div></div>').join('');
 }
 
 // ── INIT ──
 window.addEventListener('DOMContentLoaded',async()=>{
-  const emergency=setTimeout(()=>{hideLoading();showAuthPage();},6000);
+  const emergency=setTimeout(()=>hideLoading(),6000);
   try{
-    if(window.location.hash.includes('access_token')){showAuthPage();clearTimeout(emergency);await handleDiscordCallback();return;}
+    // If already logged in — redirect straight to profile
     const saved=loadSession();
-    if(saved){hideLoading();clearTimeout(emergency);await showProfile(saved);return;}
-    hideLoading();clearTimeout(emergency);showAuthPage();
-  }catch(e){clearTimeout(emergency);hideLoading();showAuthPage();}
+    if(saved&&!window.location.hash.includes('access_token')){
+      clearTimeout(emergency);
+      hideLoading();
+      goMyProfile();
+      return;
+    }
+    if(window.location.hash.includes('access_token')){
+      clearTimeout(emergency);
+      await handleDiscordCallback();
+      return;
+    }
+    clearTimeout(emergency);
+    hideLoading();
+  }catch(e){
+    clearTimeout(emergency);
+    hideLoading();
+  }
 });
-
-// ── CONSTANTS ──
-const EDIT_CD_SEC   = 24*3600;
-const EDIT_LOCK_SEC = 30;
-
-// ── CURRENT PROFILE STATE ──
-let _cp = null; // {user, isOwn, isDev, subEntry}
-let _cdTimer = null;
-
-// ── COOLDOWN HELPERS ──
-function getCdLeft(user){
-  if(!user||!user.editCooldown)return 0;
-  const diff=EDIT_CD_SEC-(Math.floor(Date.now()/1000)-(user.editCooldown.lastEdit||0));
-  return diff>0?diff:0;
-}
-function fmtCd(s){const h=Math.floor(s/3600),m=Math.floor((s%3600)/60);return h>0?h+'ч '+m+'м':m+'м '+Math.floor(s%60)+'с';}
-
-// ── OPEN EDIT MODAL ──
-function openEditModal(type){
-  if(document.getElementById('_em'))return;
-  const session=loadSession();if(!session)return;
-  if(!_cp)return;
-  const{user,isOwn,isDev,subEntry}=_cp;
-  const targetUser=isOwn?session:user;
-
-  if(!isDev){
-    const cd=getCdLeft(targetUser);
-    if(cd>0){
-      showCdBlock(cd);return;
-    }
-  }
-  if(type==='prefix'){
-    if(!subEntry){alert('Смена префикса доступна только с активной подпиской.');return;}
-    const e=parseEntry(subEntry);
-    if(isExpired(e.ts)){alert('Подписка истекла — обнови её для смены префикса.');return;}
-    if(e.prefix===TRIAL_PREFIX){alert('На пробной подписке смена префикса недоступна.');return;}
-  }
-
-  const isNick=(type==='nick');
-  const curVal=isNick?targetUser.nick:(subEntry?parseEntry(subEntry).prefix||'':'');
-  const title=isNick?'✏️ Изменить ник':'✏️ Изменить префикс';
-
-  const ov=document.createElement('div');ov.className='modal-overlay';ov.id='_em';
-  ov.innerHTML=`<div class="modal-box edit-box">
-    <div class="modal-ttl">${title}</div>
-    <div class="modal-warn">
-      <strong>⚠️ Внимание!</strong>
-      После сохранения редактирование будет заблокировано на <strong>24 часа</strong>.${isDev?'<br><span style="color:#6ee7b7;font-size:.76rem">👑 Ты разработчик — КД не применяется.</span>':''}
-    </div>
-    <input class="modal-input" id="_ei" type="text" maxlength="${isNick?36:24}" value="${curVal}" placeholder="${isNick?'Your_Nickname':'МойПрефикс'}">
-    <div class="modal-acts">
-      <button class="mbtn mbtn-cancel" onclick="closeEm()">Отмена</button>
-      <button class="mbtn mbtn-save" id="_esave" disabled>Сохранить (<span id="_ecdnum">${EDIT_LOCK_SEC}</span>с)</button>
-    </div>
-    <div class="modal-cd" id="_ecdtxt">Кнопка разблокируется через <span class="cdnum" id="_ecdnum2">${EDIT_LOCK_SEC}</span> сек.</div>
-  </div>`;
-  document.body.appendChild(ov);
-  ov.addEventListener('click',e=>{if(e.target===ov)closeEm();});
-  document.getElementById('_ei').focus();
-  document.getElementById('_ei').addEventListener('keydown',e=>{if(e.key==='Enter'){const b=document.getElementById('_esave');if(!b.disabled)doEdit(type,targetUser,isDev);}});
-  document.getElementById('_esave').onclick=()=>doEdit(type,targetUser,isDev);
-
-  let sec=EDIT_LOCK_SEC;
-  _cdTimer=setInterval(()=>{
-    sec--;
-    const n=document.getElementById('_ecdnum'),n2=document.getElementById('_ecdnum2');
-    if(n)n.textContent=sec;if(n2)n2.textContent=sec;
-    if(sec<=0){
-      clearInterval(_cdTimer);_cdTimer=null;
-      const b=document.getElementById('_esave');if(b){b.disabled=false;b.textContent='Сохранить';}
-      const t=document.getElementById('_ecdtxt');if(t)t.textContent='';
-    }
-  },1000);
-}
-
-function closeEm(){if(_cdTimer){clearInterval(_cdTimer);_cdTimer=null;}const m=document.getElementById('_em');if(m)m.remove();}
-
-function showCdBlock(cd){
-  if(document.getElementById('_cdb'))return;
-  const ov=document.createElement('div');ov.className='modal-overlay';ov.id='_cdb';
-  ov.innerHTML=`<div class="modal-box edit-box" style="border-color:rgba(245,158,11,.35)"><div class="modal-ttl">⏳ Недоступно</div><div class="modal-txt">Редактирование заблокировано на <span style="color:var(--gold);font-weight:700">${fmtCd(cd)}</span>.</div><div class="modal-acts"><button class="mbtn mbtn-cancel" onclick="document.getElementById('_cdb').remove()">Понятно</button></div></div>`;
-  document.body.appendChild(ov);
-  ov.addEventListener('click',e=>{if(e.target===ov)ov.remove();});
-}
-
-// ── DO EDIT ──
-async function doEdit(type,targetUser,isDev){
-  const inp=document.getElementById('_ei');if(!inp)return;
-  const val=inp.value.trim();
-  const saveBtn=document.getElementById('_esave');
-
-  // Валидация
-  if(type==='nick'&&!/^[a-zA-Z0-9_.[\]-]{2,36}$/.test(val)){
-    inp.style.borderColor='var(--red)';inp.focus();return;
-  }
-  if(type==='prefix'&&(val.length<1||val.length>24)){
-    inp.style.borderColor='var(--red)';inp.focus();return;
-  }
-  // Защита: префикс "Разработчик" зарезервирован
-  if(type==='prefix'&&val===DEV_PREFIX&&!isDev){
-    inp.style.borderColor='var(--red)';inp.focus();
-    let errEl=document.getElementById('_eierr');
-    if(!errEl){errEl=document.createElement('div');errEl.id='_eierr';errEl.style.cssText='color:#fca5a5;font-size:.78rem;margin-top:-8px;margin-bottom:8px;';inp.after(errEl);}
-    errEl.textContent='Префикс «'+DEV_PREFIX+'» зарезервирован и недоступен.';
-    return;
-  }
-
-  if(saveBtn){saveBtn.disabled=true;saveBtn.innerHTML='<span class="sp" style="width:11px;height:11px;margin-right:4px"></span>Сохраняем...';}
-  try{
-    if(type==='nick') await _editNick(targetUser,val,isDev);
-    else               await _editPrefix(targetUser,val,isDev);
-    closeEm();
-  }catch(e){
-    if(saveBtn){saveBtn.disabled=false;saveBtn.textContent='Сохранить';}
-    inp.style.borderColor='var(--red)';
-    let errEl=document.getElementById('_eierr');
-    if(!errEl){errEl=document.createElement('div');errEl.id='_eierr';errEl.style.cssText='color:#fca5a5;font-size:.78rem;margin-top:-8px;margin-bottom:8px;';inp.after(errEl);}
-    errEl.textContent='Ошибка: '+e.message;
-  }
-}
-
-async function _editNick(targetUser,newNick,isDev){
-  const{users,sha}=await readDB();
-  if(users.find(u=>u.nick.toLowerCase()===newNick.toLowerCase()&&u.id!==targetUser.id))
-    throw new Error('Этот ник уже занят');
-  const idx=users.findIndex(u=>u.id===targetUser.id);
-  if(idx===-1)throw new Error('Пользователь не найден');
-  users[idx].nick=newNick;
-  if(!isDev)users[idx].editCooldown={lastEdit:Math.floor(Date.now()/1000)};
-  await writeDB(users,sha);
-  // Обновляем сессию если это мой аккаунт
-  const session=loadSession();
-  if(session&&session.id===targetUser.id){
-    session.nick=newNick;
-    if(!isDev)session.editCooldown={lastEdit:Math.floor(Date.now()/1000)};
-    saveSession(session);
-    document.getElementById('navNick').textContent='@'+newNick;
-  }
-  const updUser=Object.assign({},targetUser,{nick:newNick});
-  if(!isDev)updUser.editCooldown={lastEdit:Math.floor(Date.now()/1000)};
-  await viewUserProfile(updUser);
-  const s=loadSession();if(s)loadSidebar(s.nick);
-}
-
-async function _editPrefix(targetUser,newPrefix,isDev){
-  // Защита: префикс "Разработчик" может установить только администратор (isDev)
-  if(newPrefix===DEV_PREFIX&&!isDev){
-    throw new Error('Префикс «'+DEV_PREFIX+'» зарезервирован и не может быть установлен вручную.');
-  }
-  const{sha,entries}=await githubFetch();
-  const cleanNick=stripBracketPrefix(targetUser.nick).toLowerCase();
-  const idx=entries.findIndex(raw=>{const e=parseEntry(raw);return stripBracketPrefix(e.nick).toLowerCase()===cleanNick;});
-  if(idx===-1)throw new Error('Запись подписки не найдена');
-  const e=parseEntry(entries[idx]);
-  entries[idx]=e.nick+'|'+e.ts+'|'+newPrefix+'|'+(e.color||'');
-  await githubPush(sha,entries,'PrefixEdit:'+targetUser.nick+'->'+newPrefix);
-  if(!isDev){
-    const{users,sha:us}=await readDB();
-    const ui=users.findIndex(u=>u.id===targetUser.id);
-    if(ui!==-1){users[ui].editCooldown={lastEdit:Math.floor(Date.now()/1000)};await writeDB(users,us);}
-    const session=loadSession();
-    if(session&&session.id===targetUser.id){
-      session.editCooldown={lastEdit:Math.floor(Date.now()/1000)};saveSession(session);
-    }
-  }
-  _cachedEntries=null;
-  const fresh=await fetchSubscriptions();
-  _cachedEntries=fresh;
-  renderSubscription(targetUser.nick,fresh,_cp?!_cp.isOwn:true);
-}
-
-
-// ══════════════════════════════════════════════
-// ── ADMIN PANEL ──
-// ══════════════════════════════════════════════
-
-function renderAdminPanel(targetUser, isOwn, isDev){
-  const panel=document.getElementById('adminPanel');
-  const acts=document.getElementById('adminActions');
-  if(!isDev){panel.style.display='none';return;}
-  panel.style.display='block';
-  acts.innerHTML='';
-  const btns=[
-    {label:'📋 Информация об аккаунте', cls:'abtn-blue',    fn:()=>adminShowInfo(targetUser)},
-    {label:'✏️ Изменить префикс',       cls:'abtn-violet',  fn:()=>openEditModal("prefix")},
-    {label:'📊 Редактировать статистику',cls:'abtn-orange',  fn:()=>adminEditStats(targetUser)},
-    {label:targetUser.banned?'✅ Снять блокировку':'🚫 Заблокировать', cls:targetUser.banned?'abtn-green':'abtn-red', fn:()=>adminToggleBan(targetUser)},
-  ];
-  btns.forEach(b=>{
-    const btn=document.createElement('button');
-    btn.className='admin-btn '+b.cls;
-    btn.textContent=b.label;
-    btn.onclick=b.fn;
-    acts.appendChild(btn);
-  });
-}
-
-// ── INFO MODAL ──
-async function adminShowInfo(user){
-  if(document.getElementById('_am'))return;
-  // Получаем свежие данные из БД
-  let fullUser=user;
-  try{const{users}=await readDB();const f=users.find(u=>u.id===user.id);if(f)fullUser=f;}catch(e){}
-  const banned=fullUser.banned;
-  const banInfo=banned?(fullUser.bannedUntil===0?'Навсегда':new Date(fullUser.bannedUntil*1000).toLocaleString('ru')):'Нет';
-
-  const ov=document.createElement('div');ov.className='modal-overlay';ov.id='_am';
-  ov.innerHTML=`<div class="modal-box admin-box">
-    <div class="modal-ttl">📋 Информация: ${fullUser.nick}</div>
-    <div class="admin-info-grid">
-      <div class="aig-field"><div class="aig-label">Ник</div><div class="aig-value">${fullUser.nick}</div></div>
-      <div class="aig-field"><div class="aig-label">ID в системе</div><div class="aig-value mono">${fullUser.id}</div></div>
-      <div class="aig-field"><div class="aig-label">Discord ID</div><div class="aig-value mono">${fullUser.discordId||'—'}</div></div>
-      <div class="aig-field"><div class="aig-label">Email</div><div class="aig-value mono">${fullUser.email||'—'}</div></div>
-      <div class="aig-field"><div class="aig-label">Способ входа</div><div class="aig-value">${fullUser.via||'—'}</div></div>
-      <div class="aig-field"><div class="aig-label">Регистрация</div><div class="aig-value mono">${fullUser.createdAt?new Date(fullUser.createdAt).toLocaleString('ru'):'—'}</div></div>
-      <div class="aig-field"><div class="aig-label">Последний вход</div><div class="aig-value mono">${fullUser.lastLogin?new Date(fullUser.lastLogin).toLocaleString('ru'):'—'}</div></div>
-      <div class="aig-field"><div class="aig-label">КД редактирования</div><div class="aig-value">${fullUser.editCooldown?fmtCd(getCdLeft(fullUser)):'—'}</div></div>
-      <div class="aig-field" style="grid-column:1/-1"><div class="aig-label">Статус блокировки</div><div class="aig-value">${banned?`<span class="banned-badge">🚫 Заблокирован до: ${banInfo}</span>`:'<span style="color:var(--green)">Активен</span>'}</div></div>
-      <div class="aig-field" style="grid-column:1/-1"><div class="aig-label">Avatar URL</div><div class="aig-value mono" style="font-size:.7rem">${fullUser.avatar||'—'}</div></div>
-    </div>
-    <div class="modal-acts">
-      <button class="mbtn mbtn-cancel" onclick="closeAm()">Закрыть</button>
-    </div>
-  </div>`;
-  document.body.appendChild(ov);
-  ov.addEventListener('click',e=>{if(e.target===ov)closeAm();});
-}
-
-// ── EDIT STATS MODAL ──
-async function adminEditStats(user){
-  if(document.getElementById('_am'))return;
-  let currentData={total_caught:0,total_missed:0,total_time_sec:0,avg_ping:0};
-  try{
-    const d=await fetchPlayerStats(user.nick);
-    if(d)currentData=Object.assign(currentData,d);
-  }catch(e){}
-  const ov=document.createElement('div');ov.className='modal-overlay';ov.id='_am';
-  ov.innerHTML=`<div class="modal-box admin-box">
-    <div class="modal-ttl">📊 Статистика: ${user.nick}</div>
-    <div class="stats-edit-grid">
-      <div class="seg-field"><div class="seg-label">Поймано</div><input class="seg-input" id="_se_caught" type="number" min="0" value="${currentData.total_caught}"></div>
-      <div class="seg-field"><div class="seg-label">Пропущено</div><input class="seg-input" id="_se_missed" type="number" min="0" value="${currentData.total_missed}"></div>
-      <div class="seg-field"><div class="seg-label">Время (сек)</div><input class="seg-input" id="_se_time" type="number" min="0" value="${currentData.total_time_sec}"></div>
-      <div class="seg-field"><div class="seg-label">Средний пинг</div><input class="seg-input" id="_se_ping" type="number" min="0" value="${currentData.avg_ping}"></div>
-    </div>
-    <div class="modal-acts">
-      <button class="mbtn mbtn-cancel" onclick="closeAm()">Отмена</button>
-      <button class="mbtn mbtn-save" id="_se_save" onclick="adminSaveStats('${user.nick}')">Сохранить</button>
-    </div>
-  </div>`;
-  document.body.appendChild(ov);
-  ov.addEventListener('click',e=>{if(e.target===ov)closeAm();});
-}
-
-async function adminSaveStats(nick){
-  const btn=document.getElementById('_se_save');
-  if(btn){btn.disabled=true;btn.innerHTML='<span class="sp" style="width:11px;height:11px;margin-right:4px"></span>Сохраняем...';}
-  try{
-    const data={
-      total_caught: parseInt(document.getElementById('_se_caught').value)||0,
-      total_missed: parseInt(document.getElementById('_se_missed').value)||0,
-      total_time_sec: parseInt(document.getElementById('_se_time').value)||0,
-      avg_ping: parseInt(document.getElementById('_se_ping').value)||0,
-    };
-    // POST /stats через worker
-    const safeNick=nick.replace(/[^a-zA-Z0-9_.\-]/g,'_');
-    const r=await fetchWithTimeout(WORKER_URL+'/stats',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({nick:safeNick,data})
-    },10000);
-    if(!r.ok)throw new Error('Worker error '+r.status);
-    const res=await r.json();
-    if(res.error)throw new Error(res.error);
-    closeAm();
-    // Обновляем отображение
-    applyStats(data);
-  }catch(e){
-    if(btn){btn.disabled=false;btn.textContent='Сохранить';}
-    alert('Ошибка: '+e.message);
-  }
-}
-
-// ── BAN / UNBAN MODAL ──
-async function adminToggleBan(user){
-  if(document.getElementById('_am'))return;
-  let fullUser=user;
-  try{const{users}=await readDB();const f=users.find(u=>u.id===user.id);if(f)fullUser=f;}catch(e){}
-  const isBanned=!!fullUser.banned;
-
-  const ov=document.createElement('div');ov.className='modal-overlay';ov.id='_am';
-  if(isBanned){
-    ov.innerHTML=`<div class="modal-box admin-box">
-      <div class="modal-ttl">✅ Снять блокировку</div>
-      <div class="modal-txt">Разблокировать аккаунт <strong>${fullUser.nick}</strong> и восстановить доступ к обновлению статусов?</div>
-      <div class="modal-acts">
-        <button class="mbtn mbtn-cancel" onclick="closeAm()">Отмена</button>
-        <button class="mbtn mbtn-save" onclick="adminExecUnban('${fullUser.id}')">Разблокировать</button>
-      </div>
-    </div>`;
-  }else{
-    ov.innerHTML=`<div class="modal-box admin-box">
-      <div class="modal-ttl">🚫 Заблокировать</div>
-      <div class="modal-txt">Заблокировать возможность обновлять статус для <strong>${fullUser.nick}</strong>.</div>
-      <div class="ban-row">
-        <input class="ban-input" id="_ban_dur" type="number" min="1" placeholder="Срок (0 = навсегда)">
-        <select class="ban-unit" id="_ban_unit">
-          <option value="3600">часов</option>
-          <option value="86400" selected>дней</option>
-          <option value="604800">недель</option>
-        </select>
-      </div>
-      <div style="font-size:.75rem;color:var(--muted);margin-bottom:16px;text-align:left">Введи 0 для бессрочной блокировки.</div>
-      <div class="modal-acts">
-        <button class="mbtn mbtn-cancel" onclick="closeAm()">Отмена</button>
-        <button class="mbtn mbtn-del" onclick="adminExecBan('${fullUser.id}')">Заблокировать</button>
-      </div>
-    </div>`;
-  }
-  document.body.appendChild(ov);
-  ov.addEventListener('click',e=>{if(e.target===ov)closeAm();});
-}
-
-async function adminExecBan(userId){
-  const durInput=document.getElementById('_ban_dur');
-  const unitSel=document.getElementById('_ban_unit');
-  const dur=parseInt(durInput?durInput.value:0)||0;
-  const unit=unitSel?parseInt(unitSel.value):86400;
-  const bannedUntil=dur===0?0:Math.floor(Date.now()/1000)+dur*unit;
-
-  const btn=document.querySelector('#_am .mbtn-del');
-  if(btn){btn.disabled=true;btn.textContent='Блокируем...';}
-  try{
-    const{users,sha}=await readDB();
-    const idx=users.findIndex(u=>u.id===userId);
-    if(idx===-1)throw new Error('Пользователь не найден');
-    users[idx].banned=true;
-    users[idx].bannedUntil=bannedUntil;
-    await writeDB(users,sha);
-    closeAm();
-    const s=loadSession();if(s)viewUserProfile(_viewingUser||s);
-  }catch(e){if(btn){btn.disabled=false;btn.textContent='Заблокировать';}alert('Ошибка: '+e.message);}
-}
-
-async function adminExecUnban(userId){
-  const btn=document.querySelector('#_am .mbtn-save');
-  if(btn){btn.disabled=true;btn.textContent='Разблокируем...';}
-  try{
-    const{users,sha}=await readDB();
-    const idx=users.findIndex(u=>u.id===userId);
-    if(idx===-1)throw new Error('Пользователь не найден');
-    delete users[idx].banned;
-    delete users[idx].bannedUntil;
-    await writeDB(users,sha);
-    closeAm();
-    const s=loadSession();if(s)viewUserProfile(_viewingUser||s);
-  }catch(e){if(btn){btn.disabled=false;btn.textContent='Разблокировать';}alert('Ошибка: '+e.message);}
-}
-
-function closeAm(){const m=document.getElementById('_am');if(m)m.remove();}
-
-// ── CHECK BAN ON LOGIN & WATCHDOG ──
-function checkBanStatus(user){
-  if(!user.banned)return false;
-  if(user.bannedUntil===0)return true; // навсегда
-  return Math.floor(Date.now()/1000)<user.bannedUntil;
-}
-
 </script>
 </body>
 </html>
