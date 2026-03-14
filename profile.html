@@ -674,7 +674,7 @@ async function execDelete(){
 }
 
 // ── BUY / TRIAL ──
-function handleBuySubscription(){alert('Для покупки подписки обратись к администратору в Discord!');}
+function handleBuySubscription(){window.location.href='buy.html';}
 
 async function handleTrialSubscription(){
   const btn=document.getElementById('trialBtn');if(!btn)return;
@@ -1210,7 +1210,4 @@ window.addEventListener('DOMContentLoaded',async()=>{
     <a href="legal.html#refund" style="color:var(--muted);font-size:.78rem;text-decoration:none" onmouseover="this.style.color='var(--blue)'" onmouseout="this.style.color='var(--muted)'">Возврат и отмена</a>
     <a href="legal.html#delivery" style="color:var(--muted);font-size:.78rem;text-decoration:none" onmouseover="this.style.color='var(--blue)'" onmouseout="this.style.color='var(--muted)'">Условия услуг</a>
   </div>
-  <div style="color:var(--muted);font-size:.72rem;opacity:.6">© 2025 Load-Repoer · г. Ижевск · grebenkinmatveyvyceslacovi2007@gmail.com</div>
-</footer>
-</body>
-</html>
+  <div style="color:var(--muted);font-size:.72rem;opacity:.6">© 2025 Load-Repoer · г. Ижевск · <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="

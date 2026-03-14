@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Купить подписку — Load-Repoer</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+<style>
+.buy-wrap{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:90px 24px 60px}
+.buy-title{font-family:'Bebas Neue',sans-serif;font-size:2.4rem;letter-spacing:.08em;background:linear-gradient(90deg,#fff,var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-align:center;margin-bottom:6px}
+.buy-sub{color:var(--muted);font-size:.875rem;text-align:center;margin-bottom:36px}
+.plans{display:grid;grid-template-columns:1fr 1fr;gap:16px;width:100%;max-width:500px}
+.plan{background:var(--surf);border:2px solid var(--border);border-radius:20px;padding:28px 24px;cursor:pointer;transition:all .25s;position:relative;overflow:hidden;text-align:center}
+.plan:hover{transform:translateY(-4px);box-shadow:0 16px 48px rgba(0,0,0,.4)}
+.plan.selected{border-color:var(--blue);background:rgba(59,130,246,.08);box-shadow:0 0 0 1px rgba(59,130,246,.3),0 16px 48px rgba(59,130,246,.15)}
+.plan-badge{position:absolute;top:12px;right:12px;background:var(--blue);color:#fff;font-size:.6rem;font-weight:700;padding:3px 8px;border-radius:6px;letter-spacing:.06em}
+.plan-name{font-size:.7rem;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+.plan-price{font-family:'Bebas Neue',sans-serif;font-size:3rem;letter-spacing:.05em;color:var(--text);line-height:1}
+.plan-price span{font-size:1.4rem;color:var(--muted)}
+.plan-period{font-size:.8rem;color:var(--cyan);margin:8px 0 14px;font-weight:500}
+.plan-features{list-style:none;padding:0;margin:0}
+.plan-features li{font-size:.8rem;color:rgba(226,232,240,.7);padding:4px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.plan-features li:last-child{border:none}
+.plan-features li::before{content:'✓ ';color:var(--green);font-weight:700}
+.plan-check{width:22px;height:22px;border-radius:50%;border:2px solid var(--border);margin:16px auto 0;transition:all .2s;display:flex;align-items:center;justify-content:center}
+.plan.selected .plan-check{background:var(--blue);border-color:var(--blue)}
+.plan.selected .plan-check::after{content:'';width:6px;height:10px;border:2px solid #fff;border-top:none;border-left:none;transform:rotate(45deg);margin-bottom:2px}
+
+.order-box{width:100%;max-width:500px;margin-top:20px;background:var(--surf);border:1px solid var(--border);border-radius:16px;padding:20px 24px}
+.order-row{display:flex;justify-content:space-between;align-items:center;font-size:.875rem;margin-bottom:8px}
+.order-row:last-of-type{margin-bottom:0;padding-top:10px;border-top:1px solid var(--border);font-weight:600;font-size:.95rem}
+.order-label{color:var(--muted)}
+.order-value{color:var(--text)}
+
+.btn-pay{width:100%;max-width:500px;margin-top:14px;padding:16px;background:linear-gradient(135deg,var(--blue),var(--violet));border:none;border-radius:14px;color:#fff;font-family:'Outfit',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center;gap:10px;letter-spacing:.03em}
+.btn-pay:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(59,130,246,.4)}
+.btn-pay:disabled{opacity:.5;cursor:not-allowed;transform:none}
+
+.payment-methods{width:100%;max-width:500px;margin-top:12px;display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap}
+.pm-badge{background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:8px;padding:5px 10px;display:flex;align-items:center;gap:5px;font-size:.72rem;color:var(--muted)}
+
+.back-link{margin-top:24px;color:var(--muted);font-size:.82rem;text-decoration:none;transition:color .2s}
+.back-link:hover{color:var(--blue)}
+
+@media(max-width:480px){.plans{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="bg"><div class="grid-lines"></div><div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div><div class="noise"></div></div>
+
+<nav class="nav">
+  <a class="nav-brand" href="index.html">LOAD-REPOER</a>
+  <div class="nav-right">
+    <span class="nav-nick" id="navNick"></span>
+  </div>
+</nav>
+
+<div class="buy-wrap">
+  <div class="buy-title">Выбери тариф</div>
+  <div class="buy-sub">Доступ активируется автоматически сразу после оплаты</div>
+
+  <div class="plans">
+    <!-- Стандартный -->
+    <div class="plan" id="plan-30" onclick="selectPlan(30)">
+      <div class="plan-name">Стандартный</div>
+      <div class="plan-price">100<span> ₽</span></div>
+      <div class="plan-period">30 дней</div>
+      <ul class="plan-features">
+        <li>Полный доступ</li>
+        <li>Личная статистика</li>
+        <li>Свой префикс</li>
+      </ul>
+      <div class="plan-check"></div>
+    </div>
+
+    <!-- Навсегда -->
+    <div class="plan selected" id="plan-forever" onclick="selectPlan('forever')">
+      <div class="plan-badge">ВЫГОДНО</div>
+      <div class="plan-name">Навсегда</div>
+      <div class="plan-price">300<span> ₽</span></div>
+      <div class="plan-period">Бессрочно</div>
+      <ul class="plan-features">
+        <li>Полный доступ</li>
+        <li>Личная статистика</li>
+        <li>Свой префикс</li>
+        <li>Без продлений</li>
+      </ul>
+      <div class="plan-check"></div>
+    </div>
+  </div>
+
+  <!-- Итог заказа -->
+  <div class="order-box">
+    <div class="order-row">
+      <span class="order-label">Тариф</span>
+      <span class="order-value" id="orderPlan">Навсегда</span>
+    </div>
+    <div class="order-row">
+      <span class="order-label">Срок</span>
+      <span class="order-value" id="orderPeriod">Бессрочно</span>
+    </div>
+    <div class="order-row">
+      <span class="order-label">Пользователь</span>
+      <span class="order-value" id="orderNick">—</span>
+    </div>
+    <div class="order-row">
+      <span class="order-label">Итого</span>
+      <span class="order-value" id="orderTotal" style="color:var(--blue);font-size:1.1rem">300 ₽</span>
+    </div>
+  </div>
+
+  <!-- Кнопка оплаты -->
+  <button class="btn-pay" id="btnPay" onclick="handlePay()">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="1" y="4" width="22" height="16" rx="2"/><path d="M1 10h22"/></svg>
+    Оплатить
+  </button>
+
+  <!-- Методы оплаты -->
+  <div class="payment-methods">
+    <div class="pm-badge">
+      <svg width="22" height="10" viewBox="0 0 60 26"><rect width="60" height="26" rx="3" fill="#1A9F47"/><text x="7" y="19" font-family="Arial" font-size="14" font-weight="700" fill="white">МИР</text></svg>
+    </div>
+    <div class="pm-badge">
+      <svg width="28" height="10" viewBox="0 0 80 26"><text x="2" y="20" font-family="Arial" font-size="20" font-weight="700" font-style="italic" fill="#1A1F71">VISA</text></svg>
+    </div>
+    <div class="pm-badge">
+      <svg width="20" height="14" viewBox="0 0 28 18"><circle cx="10" cy="9" r="9" fill="#EB001B"/><circle cx="18" cy="9" r="9" fill="#F79E1B"/><path d="M14 3.8a9 9 0 0 1 0 10.4A9 9 0 0 1 14 3.8z" fill="#FF5F00"/></svg>
+    </div>
+    <div class="pm-badge">
+      <svg width="14" height="14" viewBox="0 0 14 16" fill="none"><path d="M0 5.5L5 0h4L4 5.5H0z" fill="#3BC34B"/><path d="M14 5.5L9 0H5l5 5.5h4z" fill="#24A3D9"/><path d="M0 10.5L5 16h4L4 10.5H0z" fill="#FFD12E"/><path d="M14 10.5L9 16H5l5-5.5h4z" fill="#FF4F42"/><path d="M0 5.5h4l3 2.5-3 2.5H0V5.5z" fill="#24A3D9"/><path d="M14 5.5h-4l-3 2.5 3 2.5h4V5.5z" fill="#3BC34B"/></svg>
+      <span>СБП</span>
+    </div>
+    <span style="font-size:.7rem;color:var(--muted)">через enot.io</span>
+  </div>
+
+  <a href="profile.html" class="back-link">← Вернуться в профиль</a>
+</div>
+
+<script src="shared.js"></script>
+<script>
+let _selectedPlan = 'forever';
+
+// Показываем ник пользователя
+const _s = loadSession();
+if (_s) {
+  document.getElementById('navNick').textContent = '@' + _s.nick;
+  document.getElementById('orderNick').textContent = _s.nick;
+} else {
+  window.location.href = 'index.html';
+}
+
+function selectPlan(plan) {
+  _selectedPlan = plan;
+  document.querySelectorAll('.plan').forEach(el => el.classList.remove('selected'));
+  document.getElementById('plan-' + plan).classList.add('selected');
+
+  if (plan === 'forever') {
+    document.getElementById('orderPlan').textContent = 'Навсегда';
+    document.getElementById('orderPeriod').textContent = 'Бессрочно';
+    document.getElementById('orderTotal').textContent = '300 ₽';
+  } else {
+    document.getElementById('orderPlan').textContent = 'Стандартный';
+    document.getElementById('orderPeriod').textContent = '30 дней';
+    document.getElementById('orderTotal').textContent = '100 ₽';
+  }
+}
+
+function handlePay() {
+  if (!_s) { window.location.href = 'index.html'; return; }
+  const btn = document.getElementById('btnPay');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="sp"></span>Подключение к платёжному шлюзу...';
+
+  // TODO: здесь будет запрос к enot.io для создания платежа
+  // Пример:
+  // const amount = _selectedPlan === 'forever' ? 300 : 100;
+  // const r = await fetch('https://api.enot.io/invoice/create', { ... });
+  // window.location.href = r.payment_url;
+
+  setTimeout(() => {
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="1" y="4" width="22" height="16" rx="2"/><path d="M1 10h22"/></svg> Оплатить';
+    alert('Оплата будет доступна после подключения платёжного шлюза enot.io');
+  }, 1500);
+}
+</script>
+
+<footer style="position:relative;z-index:1;text-align:center;padding:20px 24px 32px;border-top:1px solid rgba(96,165,250,0.08)">
+  <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:20px;margin-bottom:10px">
+    <a href="legal.html#oferta" style="color:var(--muted);font-size:.78rem;text-decoration:none" onmouseover="this.style.color='var(--blue)'" onmouseout="this.style.color='var(--muted)'">Договор оферты</a>
+    <a href="legal.html#refund" style="color:var(--muted);font-size:.78rem;text-decoration:none" onmouseover="this.style.color='var(--blue)'" onmouseout="this.style.color='var(--muted)'">Возврат и отмена</a>
+    <a href="legal.html#contacts" style="color:var(--muted);font-size:.78rem;text-decoration:none" onmouseover="this.style.color='var(--blue)'" onmouseout="this.style.color='var(--muted)'">Контакты</a>
+  </div>
+  <div style="color:var(--muted);font-size:.72rem;opacity:.6">© 2025 Load-Repoer · Оплата защищена enot.io</div>
+</footer>
+</body>
+</html>
