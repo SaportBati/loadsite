@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Правовые документы — Load-Repoer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+<style>
+.docs-wrap{position:relative;z-index:1;max-width:860px;margin:0 auto;padding:100px 24px 60px}
+.docs-nav{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:40px}
+.docs-nav a{padding:7px 16px;border-radius:8px;font-size:.8rem;font-weight:500;letter-spacing:.05em;text-transform:uppercase;background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--muted);text-decoration:none;transition:all .2s}
+.docs-nav a:hover,.docs-nav a.active{background:rgba(59,130,246,.12);border-color:rgba(59,130,246,.35);color:var(--blue)}
+.doc-section{display:none;animation:appear .4s cubic-bezier(.22,1,.36,1) both}
+.doc-section.show{display:block}
+.doc-title{font-family:'Bebas Neue',sans-serif;font-size:2.2rem;letter-spacing:.06em;background:linear-gradient(90deg,var(--blue),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px}
+.doc-date{font-size:.8rem;color:var(--muted);margin-bottom:32px}
+.doc-section h2{font-size:1rem;font-weight:600;color:var(--cyan);text-transform:uppercase;letter-spacing:.08em;margin:32px 0 12px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.doc-section h3{font-size:.9rem;font-weight:600;color:var(--text);margin:20px 0 8px}
+.doc-section p{font-size:.9rem;line-height:1.75;color:rgba(226,232,240,.8);margin-bottom:10px}
+.doc-section ul,ol{padding-left:20px;margin-bottom:10px}
+.doc-section li{font-size:.9rem;line-height:1.75;color:rgba(226,232,240,.8);margin-bottom:4px}
+.doc-section table{width:100%;border-collapse:collapse;margin:12px 0}
+.doc-section td,th{padding:10px 14px;border:1px solid var(--border);font-size:.85rem;text-align:left}
+.doc-section th{background:rgba(59,130,246,.08);color:var(--cyan);font-weight:600}
+.doc-section td{color:rgba(226,232,240,.8)}
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0}
+.contact-card{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:12px;padding:16px 20px}
+.contact-card .label{font-size:.7rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.contact-card .value{font-size:.9rem;color:var(--text)}
+.contact-card a{color:var(--blue);text-decoration:none}
+.highlight-box{background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.2);border-radius:12px;padding:16px 20px;margin:16px 0}
+.highlight-box p{margin:0;color:rgba(147,197,253,.9)}
+@media(max-width:600px){.contact-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="bg"><div class="grid-lines"></div><div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div><div class="noise"></div></div>
+
+<nav class="nav">
+  <a class="nav-brand" href="index.html">LOAD-REPOER</a>
+  <div class="nav-right">
+    <a href="index.html" style="color:var(--muted);font-size:.85rem;text-decoration:none">← На главную</a>
+  </div>
+</nav>
+
+<div class="docs-wrap">
+  <div class="docs-nav">
+    <a href="#contacts"   class="active" onclick="show('contacts',this)">Контакты</a>
+    <a href="#oferta"     onclick="show('oferta',this)">Договор оферты</a>
+    <a href="#privacy"    onclick="show('privacy',this)">Политика персданных</a>
+    <a href="#refund"     onclick="show('refund',this)">Возврат и отмена</a>
+    <a href="#delivery"   onclick="show('delivery',this)">Условия оказания услуг</a>
+    <a href="#license"    onclick="show('license',this)">Лицензия</a>
+  </div>
+
+  <!-- КОНТАКТЫ -->
+  <div id="contacts" class="doc-section show">
+    <div class="doc-title">Контактная информация</div>
+    <div class="doc-date">Сервис Load-Repoer</div>
+
+    <div class="contact-grid">
+      <div class="contact-card">
+        <div class="label">Сервис</div>
+        <div class="value">Load-Repoer</div>
+      </div>
+      <div class="contact-card">
+        <div class="label">Правовой статус</div>
+        <div class="value">Физическое лицо</div>
+      </div>
+      <div class="contact-card">
+        <div class="label">Email</div>
+        <div class="value"><a href="mailto:grebenkinmatveyvyceslacovi2007@gmail.com">grebenkinmatveyvyceslacovi2007@gmail.com</a></div>
+      </div>
+      <div class="contact-card">
+        <div class="label">Телефон</div>
+        <div class="value"><a href="tel:+79042455080">+7 (904) 245-50-80</a></div>
+      </div>
+      <div class="contact-card">
+        <div class="label">Адрес</div>
+        <div class="value">г. Ижевск, Россия</div>
+      </div>
+      <div class="contact-card">
+        <div class="label">Служба поддержки</div>
+        <div class="value"><a href="mailto:grebenkinmatveyvyceslacovi2007@gmail.com">Написать в поддержку</a></div>
+      </div>
+    </div>
+
+    <h2>Время работы поддержки</h2>
+    <p>Служба поддержки работает ежедневно. Ответ на обращения предоставляется в течение 24 часов с момента получения запроса.</p>
+
+    <div class="highlight-box">
+      <p>По всем вопросам, связанным с оплатой, активацией подписки или техническими проблемами — пишите на email или звоните по телефону выше.</p>
+    </div>
+  </div>
+
+  <!-- ДОГОВОР ОФЕРТЫ -->
+  <div id="oferta" class="doc-section">
+    <div class="doc-title">Договор публичной оферты</div>
+    <div class="doc-date">Редакция от 14 марта 2025 г.</div>
+
+    <h2>1. Общие положения</h2>
+    <p>1.1. Настоящий документ является публичной офертой физического лица, осуществляющего деятельность под наименованием <strong>Load-Repoer</strong> (далее — «Исполнитель»), и содержит все существенные условия договора на оказание услуг доступа к программному инструменту.</p>
+    <p>1.2. Акцептом настоящей оферты является совершение Пользователем оплаты услуги на сайте <strong>loadrepr.ru</strong>.</p>
+    <p>1.3. С момента акцепта оферты Пользователь считается ознакомленным и согласным со всеми условиями настоящего договора.</p>
+
+    <h2>2. Предмет договора</h2>
+    <p>2.1. Исполнитель предоставляет Пользователю доступ к сервису <strong>Load-Repoer</strong> — веб-инструменту для отслеживания игровой статистики в онлайн-игре Arizona Role Play (платформа SA:MP).</p>
+    <p>2.2. Услуга предоставляется в виде активации подписки на учётную запись Пользователя в течение выбранного периода.</p>
+    <p>2.3. Услуга не является программным обеспечением для модификации или взлома игровых процессов.</p>
+
+    <h2>3. Стоимость и порядок оплаты</h2>
+    <table>
+      <tr><th>Тариф</th><th>Срок</th><th>Стоимость</th></tr>
+      <tr><td>Стандартный</td><td>30 дней</td><td>100 ₽</td></tr>
+      <tr><td>Навсегда</td><td>Бессрочно</td><td>300 ₽</td></tr>
+    </table>
+    <p>3.1. Оплата производится в рублях РФ через платёжные системы, представленные на сайте.</p>
+    <p>3.2. Доступ активируется автоматически после подтверждения платежа.</p>
+
+    <h2>4. Права и обязанности сторон</h2>
+    <h3>Исполнитель обязан:</h3>
+    <ul>
+      <li>Обеспечить доступ к сервису в течение оплаченного периода</li>
+      <li>Обеспечить техническую поддержку пользователей</li>
+      <li>Уведомлять о плановых технических работах</li>
+    </ul>
+    <h3>Пользователь обязан:</h3>
+    <ul>
+      <li>Использовать сервис только в личных некоммерческих целях</li>
+      <li>Не передавать доступ к аккаунту третьим лицам</li>
+      <li>Соблюдать правила платформы Arizona Role Play</li>
+    </ul>
+
+    <h2>5. Ответственность</h2>
+    <p>5.1. Исполнитель не несёт ответственности за действия третьих лиц, а также за сбои в работе сервиса, вызванные обстоятельствами непреодолимой силы.</p>
+    <p>5.2. Совокупная ответственность Исполнителя ограничена суммой, уплаченной Пользователем за текущий период подписки.</p>
+
+    <h2>6. Срок действия</h2>
+    <p>6.1. Оферта действует бессрочно до момента её отзыва Исполнителем.</p>
+    <p>6.2. Исполнитель вправе изменять условия оферты, уведомив Пользователей путём размещения новой редакции на сайте.</p>
+
+    <h2>7. Контакты</h2>
+    <p>Email: grebenkinmatveyvyceslacovi2007@gmail.com<br>Телефон: +7 (904) 245-50-80<br>Адрес: г. Ижевск, Россия</p>
+  </div>
+
+  <!-- ПОЛИТИКА ПЕРСДАННЫХ -->
+  <div id="privacy" class="doc-section">
+    <div class="doc-title">Политика конфиденциальности</div>
+    <div class="doc-date">Редакция от 14 марта 2025 г.</div>
+
+    <h2>1. Общие положения</h2>
+    <p>1.1. Настоящая Политика конфиденциальности описывает порядок сбора, хранения, использования и защиты персональных данных пользователей сервиса <strong>Load-Repoer</strong> (loadrepr.ru).</p>
+    <p>1.2. Используя сервис, Пользователь даёт согласие на обработку своих персональных данных в соответствии с настоящей Политикой.</p>
+
+    <h2>2. Какие данные мы собираем</h2>
+    <ul>
+      <li>Discord ID и публичные данные профиля Discord (имя, аватар)</li>
+      <li>Адрес электронной почты (при авторизации через Discord)</li>
+      <li>Игровой никнейм в Arizona Role Play</li>
+      <li>Статистика использования сервиса (внутриигровые показатели)</li>
+      <li>Дата регистрации и последнего входа</li>
+    </ul>
+
+    <h2>3. Как мы используем данные</h2>
+    <ul>
+      <li>Идентификация пользователя в системе</li>
+      <li>Отображение статистики и профиля</li>
+      <li>Проверка активности подписки</li>
+      <li>Связь с пользователем по вопросам поддержки</li>
+    </ul>
+
+    <h2>4. Хранение данных</h2>
+    <p>4.1. Данные хранятся на серверах Cloudflare (США/ЕС) с применением шифрования.</p>
+    <p>4.2. Данные хранятся в течение всего времени существования учётной записи и 90 дней после её удаления.</p>
+
+    <h2>5. Передача третьим лицам</h2>
+    <p>5.1. Мы не продаём и не передаём персональные данные третьим лицам, за исключением случаев, предусмотренных законодательством РФ.</p>
+    <p>5.2. Для авторизации используется сервис Discord (discord.com). На него распространяется политика конфиденциальности Discord.</p>
+
+    <h2>6. Права пользователя</h2>
+    <p>Пользователь вправе в любой момент:</p>
+    <ul>
+      <li>Запросить информацию о хранимых данных</li>
+      <li>Потребовать исправления или удаления данных</li>
+      <li>Отозвать согласие на обработку данных</li>
+    </ul>
+    <p>Для реализации прав — обратитесь на email: grebenkinmatveyvyceslacovi2007@gmail.com</p>
+
+    <h2>7. Cookies</h2>
+    <p>Сайт использует localStorage браузера для хранения сессии пользователя. Данные хранятся локально на устройстве пользователя.</p>
+
+    <h2>8. Контакты</h2>
+    <p>По вопросам обработки персональных данных:<br>Email: grebenkinmatveyvyceslacovi2007@gmail.com<br>Телефон: +7 (904) 245-50-80</p>
+  </div>
+
+  <!-- ВОЗВРАТ -->
+  <div id="refund" class="doc-section">
+    <div class="doc-title">Условия возврата и отмены</div>
+    <div class="doc-date">Редакция от 14 марта 2025 г.</div>
+
+    <h2>1. Право на возврат</h2>
+    <p>1.1. Пользователь вправе запросить возврат денежных средств в течение <strong>2 (двух) календарных дней</strong> с момента оплаты.</p>
+    <p>1.2. Возврат осуществляется при условии, что сервис не использовался или использовался менее 24 часов с момента активации.</p>
+
+    <h2>2. Основания для возврата</h2>
+    <ul>
+      <li>Техническая неисправность сервиса, не устранённая в течение 48 часов</li>
+      <li>Случайная или ошибочная оплата</li>
+      <li>Оплата произведена, но доступ не был активирован</li>
+    </ul>
+
+    <h2>3. Основания для отказа в возврате</h2>
+    <ul>
+      <li>Прошло более 2 календарных дней с момента оплаты</li>
+      <li>Подписка активно использовалась более 24 часов</li>
+      <li>Нарушение Пользователем условий договора оферты</li>
+    </ul>
+
+    <h2>4. Порядок возврата</h2>
+    <p>4.1. Для запроса возврата необходимо написать на email: <a href="mailto:grebenkinmatveyvyceslacovi2007@gmail.com" style="color:var(--blue)">grebenkinmatveyvyceslacovi2007@gmail.com</a></p>
+    <p>4.2. В письме укажите: никнейм, дату и сумму оплаты, причину возврата.</p>
+    <p>4.3. Возврат осуществляется тем же способом, которым была произведена оплата, в течение 10 рабочих дней.</p>
+
+    <h2>5. Отмена подписки</h2>
+    <p>5.1. Подписка не продлевается автоматически. По истечении срока доступ прекращается без дополнительных списаний.</p>
+    <p>5.2. При тарифе «Навсегда» отмена не предусмотрена по истечении 2-дневного периода возврата.</p>
+  </div>
+
+  <!-- УСЛОВИЯ УСЛУГ -->
+  <div id="delivery" class="doc-section">
+    <div class="doc-title">Условия оказания услуг</div>
+    <div class="doc-date">Редакция от 14 марта 2025 г.</div>
+
+    <h2>Описание услуги</h2>
+    <p>Load-Repoer — сервис для отслеживания и отображения игровой статистики участников сервера Arizona Role Play (SA:MP). Сервис предоставляет доступ к личному профилю, истории сессий и аналитике.</p>
+
+    <h2>Способ оказания услуги</h2>
+    <p>Услуга предоставляется <strong>в цифровом виде</strong> через сайт loadrepr.ru. Физическая доставка товаров не осуществляется.</p>
+
+    <h2>Срок активации</h2>
+    <table>
+      <tr><th>Событие</th><th>Срок</th></tr>
+      <tr><td>Активация после оплаты</td><td>Автоматически, до 5 минут</td></tr>
+      <tr><td>Ответ поддержки</td><td>До 24 часов</td></tr>
+      <tr><td>Решение технических проблем</td><td>До 48 часов</td></tr>
+    </table>
+
+    <h2>Регионы</h2>
+    <p>Сервис доступен для пользователей из любой точки мира. Оплата принимается в рублях РФ.</p>
+
+    <h2>Тарифные планы</h2>
+    <table>
+      <tr><th>Тариф</th><th>Срок действия</th><th>Стоимость</th><th>Что включено</th></tr>
+      <tr><td>Стандартный</td><td>30 дней</td><td>100 ₽</td><td>Полный доступ к сервису</td></tr>
+      <tr><td>Навсегда</td><td>Бессрочно</td><td>300 ₽</td><td>Полный доступ без ограничений</td></tr>
+    </table>
+
+    <h2>Требования</h2>
+    <ul>
+      <li>Наличие аккаунта Discord для авторизации</li>
+      <li>Наличие игрового никнейма на сервере Arizona Role Play</li>
+      <li>Современный браузер с поддержкой JavaScript</li>
+    </ul>
+  </div>
+
+  <!-- ЛИЦЕНЗИЯ -->
+  <div id="license" class="doc-section">
+    <div class="doc-title">Лицензия и права</div>
+    <div class="doc-date">Редакция от 14 марта 2025 г.</div>
+
+    <h2>Объект лицензии</h2>
+    <p>Load-Repoer является самостоятельно разработанным сервисом. Все программные компоненты, дизайн и алгоритмы сервиса являются интеллектуальной собственностью владельца сервиса.</p>
+
+    <h2>Предоставляемые права</h2>
+    <p>Пользователю предоставляется простая (неисключительная) лицензия на использование сервиса в личных некоммерческих целях на условиях подписки.</p>
+
+    <h2>Ограничения</h2>
+    <ul>
+      <li>Запрещается копировать, воспроизводить или распространять элементы сервиса</li>
+      <li>Запрещается использовать сервис в коммерческих целях без письменного согласия правообладателя</li>
+      <li>Запрещается декомпилировать или производить реверс-инжиниринг программных компонентов</li>
+      <li>Запрещается передавать права пользования третьим лицам</li>
+    </ul>
+
+    <h2>Отношение к платформам</h2>
+    <p>Load-Repoer является независимым сервисом и не аффилирован с проектом Arizona Role Play, SA:MP или Rockstar Games. Все упоминания игровых брендов используются исключительно в информационных целях.</p>
+
+    <h2>Контакт правообладателя</h2>
+    <p>По вопросам лицензирования: grebenkinmatveyvyceslacovi2007@gmail.com</p>
+  </div>
+
+</div>
+
+<script>
+function show(id, el) {
+  document.querySelectorAll('.doc-section').forEach(s => s.classList.remove('show'));
+  document.querySelectorAll('.docs-nav a').forEach(a => a.classList.remove('active'));
+  document.getElementById(id).classList.add('show');
+  el.classList.add('active');
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+// Открыть раздел по хешу
+const hash = location.hash.replace('#','');
+if (hash) {
+  const el = document.getElementById(hash);
+  const link = document.querySelector('.docs-nav a[href="#'+hash+'"]');
+  if (el && link) show(hash, link);
+}
+</script>
+</body>
+</html>
