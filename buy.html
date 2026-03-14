@@ -132,7 +132,7 @@
       <svg width="14" height="14" viewBox="0 0 14 16" fill="none"><path d="M0 5.5L5 0h4L4 5.5H0z" fill="#3BC34B"/><path d="M14 5.5L9 0H5l5 5.5h4z" fill="#24A3D9"/><path d="M0 10.5L5 16h4L4 10.5H0z" fill="#FFD12E"/><path d="M14 10.5L9 16H5l5-5.5h4z" fill="#FF4F42"/><path d="M0 5.5h4l3 2.5-3 2.5H0V5.5z" fill="#24A3D9"/><path d="M14 5.5h-4l-3 2.5 3 2.5h4V5.5z" fill="#3BC34B"/></svg>
       <span>СБП</span>
     </div>
-    <span style="font-size:.7rem;color:var(--muted)">через enot.io</span>
+    <span style="font-size:.7rem;color:var(--muted)">через FreeKassa</span>
   </div>
 
   <a href="profile.html" class="back-link">← Вернуться в профиль</a>
@@ -169,21 +169,23 @@ function selectPlan(plan) {
 
 function handlePay() {
   if (!_s) { window.location.href = 'index.html'; return; }
-  const btn = document.getElementById('btnPay');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="sp"></span>Подключение к платёжному шлюзу...';
 
-  // TODO: здесь будет запрос к enot.io для создания платежа
-  // Пример:
-  // const amount = _selectedPlan === 'forever' ? 300 : 100;
-  // const r = await fetch('https://api.enot.io/invoice/create', { ... });
-  // window.location.href = r.payment_url;
+  const FK_MERCHANT_ID = '70999';
+  const amount  = _selectedPlan === 'forever' ? 300 : 100;
+  const subSuffix = _selectedPlan === 'forever' ? 'unlim' : '30';
+  const orderId = _s.nick + '__' + subSuffix;
+  const currency = 'RUB';
 
-  setTimeout(() => {
-    btn.disabled = false;
-    btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="1" y="4" width="22" height="16" rx="2"/><path d="M1 10h22"/></svg> Оплатить';
-    alert('Оплата будет доступна после подключения платёжного шлюза enot.io');
-  }, 1500);
+  // Формируем ссылку на оплату FreeKassa
+  const params = new URLSearchParams({
+    m:   FK_MERCHANT_ID,
+    oa:  amount,
+    o:   orderId,
+    currency: currency,
+    lang: 'ru',
+  });
+
+  window.location.href = 'https://pay.freekassa.com/?' + params.toString();
 }
 </script>
 
@@ -193,7 +195,7 @@ function handlePay() {
     <a href="legal.html#refund" style="color:var(--muted);font-size:.78rem;text-decoration:none" onmouseover="this.style.color='var(--blue)'" onmouseout="this.style.color='var(--muted)'">Возврат и отмена</a>
     <a href="legal.html#contacts" style="color:var(--muted);font-size:.78rem;text-decoration:none" onmouseover="this.style.color='var(--blue)'" onmouseout="this.style.color='var(--muted)'">Контакты</a>
   </div>
-  <div style="color:var(--muted);font-size:.72rem;opacity:.6">© 2025 Load-Repoer · Оплата защищена enot.io</div>
+  <div style="color:var(--muted);font-size:.72rem;opacity:.6">© 2025 Load-Repoer · Оплата защищена FreeKassa</div>
 </footer>
 </body>
 </html>
