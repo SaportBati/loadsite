@@ -323,6 +323,10 @@ function renderSubscription(nick, entries, readonly){
   // Apply theme if viewing own profile or if color is set
   if(found.color) {
     applyThemeColor(found.color);
+    if(_isOwn) {
+      _session.themeColor = found.color;
+      saveSession(_session);
+    }
   }
   
   if(expired){
@@ -417,19 +421,6 @@ const ACHIEVEMENTS = [
   { id: 'm500', type: 'missed', threshold: 500, title: 'Спящий режим', desc: 'Пропущено 500 репортов', icon: 'skull', color: '#450a0a' },
 ];
 
-function hexToRgb(hex) {
-  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : null;
-}
-
-function applyThemeColor(hex) {
-  if(!hex) return;
-  const rgb = hexToRgb(hex);
-  document.documentElement.style.setProperty('--theme-color', hex);
-  document.documentElement.style.setProperty('--theme-color-rgb', rgb);
-  document.documentElement.style.setProperty('--theme-glow', `rgba(${rgb}, 0.4)`);
-}
-
 async function setThemeColor(hex) {
   if(!_isOwn) return;
   if(!_subEntry) {
@@ -460,6 +451,11 @@ async function setThemeColor(hex) {
     await githubPush(sha, entries, 'ThemeUpdate:' + _session.nick + '->' + hex);
     
     _subEntry = entries[idx];
+    
+    // Save to session for persistence across pages
+    _session.themeColor = hex;
+    saveSession(_session);
+    
     applyThemeColor(hex);
     
     // Re-render achievements to show the new active theme

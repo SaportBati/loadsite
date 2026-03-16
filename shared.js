@@ -116,7 +116,30 @@ function computeStats(data){if(!data)return{avgPing:null,totalCaught:null,chance
 function formatHuntTime(secs){if(!secs||secs<=0)return null;const d=Math.floor(secs/86400),h=Math.floor((secs%86400)/3600),m=Math.floor((secs%3600)/60),s=secs%60;return{d,h,m,s};}
 
 // ── SESSION ──
-function saveSession(u){localStorage.setItem('lr_user',JSON.stringify(u));}
+function saveSession(u){
+  localStorage.setItem('lr_user',JSON.stringify(u));
+  if(u && u.themeColor) applyThemeColor(u.themeColor);
+}
+
+function hexToRgb(hex) {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : '59, 130, 246';
+}
+
+function applyThemeColor(hex) {
+  if(!hex) hex = '#3b82f6';
+  const rgb = hexToRgb(hex);
+  document.documentElement.style.setProperty('--theme-color', hex);
+  document.documentElement.style.setProperty('--theme-color-rgb', rgb);
+  document.documentElement.style.setProperty('--theme-glow', `rgba(${rgb}, 0.4)`);
+}
+
+// Apply theme on load if session exists
+(function(){
+  const u = loadSession();
+  if(u && u.themeColor) applyThemeColor(u.themeColor);
+  else applyThemeColor('#3b82f6');
+})();
 function loadSession(){try{return JSON.parse(localStorage.getItem('lr_user'));}catch{return null;}}
 function clearSession(){localStorage.removeItem('lr_user');}
 function getCdLeft(user){if(!user||!user.editCooldown)return 0;const diff=EDIT_CD_SEC-(Math.floor(Date.now()/1000)-(user.editCooldown.lastEdit||0));return diff>0?diff:0;}
