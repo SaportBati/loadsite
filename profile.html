@@ -32,6 +32,74 @@
 .ticket-form input:focus{border-color:var(--blue)}
 /* dev ticket list */
 .dev-ticket-nick{font-size:.75rem;color:var(--muted);margin-top:2px}
+
+/* ── ACHIEVEMENTS ── */
+.pname-badges { display: flex; gap: 4px; align-items: center; margin-left: 12px; flex-wrap: wrap; max-width: 200px; }
+.ach-badge { width: 22px; height: 22px; cursor: help; display: flex; align-items: center; justify-content: center; transition: transform 0.2s; }
+.ach-badge:hover { transform: scale(1.15); }
+.ach-badge svg { width: 100%; height: 100%; }
+
+.ach-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px; margin-top: 14px; }
+.ach-item { 
+  background: rgba(255,255,255,0.02); 
+  border: 1px solid var(--border); 
+  border-radius: 14px; 
+  padding: 14px 10px; 
+  text-align: center; 
+  opacity: 0.2; 
+  filter: grayscale(1); 
+  transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  position: relative;
+  overflow: hidden;
+}
+.ach-item.unlocked { 
+  opacity: 1; 
+  filter: none; 
+  background: rgba(59,130,246,0.04); 
+  border-color: rgba(59,130,246,0.25); 
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+.ach-item.unlocked:hover {
+  transform: translateY(-3px);
+  background: rgba(59,130,246,0.08);
+  border-color: rgba(59,130,246,0.4);
+}
+.ach-icon-large { width: 36px; height: 36px; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; }
+.ach-icon-large svg { width: 100%; height: 100%; }
+.ach-title { font-size: 0.78rem; font-weight: 700; color: var(--text); line-height: 1.2; margin-bottom: 4px; }
+.ach-desc { font-size: 0.68rem; color: var(--muted); line-height: 1.3; }
+
+/* Tooltip style */
+[data-tooltip] { position: relative; }
+[data-tooltip]::before {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 130%;
+  left: 50%;
+  transform: translateX(-50%) translateY(5px);
+  padding: 8px 12px;
+  background: #0f172a;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 500;
+  border-radius: 8px;
+  white-space: pre-wrap;
+  width: max-content;
+  max-width: 180px;
+  text-align: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s ease;
+  z-index: 1000;
+  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+  pointer-events: none;
+}
+[data-tooltip]:hover::before {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
 </style>
 </head>
 <body>
@@ -88,6 +156,7 @@
         <div class="pi">
           <div class="pname-row">
             <div class="pname" id="pNick">&mdash;</div>
+            <div class="pname-badges" id="pNameBadges"></div>
             <button class="btn-edit" id="btnEditNick" style="display:none" title="Изменить ник"
                     onclick="openEditModal('nick')">
               <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -139,6 +208,14 @@
         <div class="sect">Время ловли репортов</div>
         <div class="hunt-time-inner" id="huntTimeEl">
           <span style="color:var(--muted);font-size:.875rem">Загрузка...</span>
+        </div>
+      </div>
+
+      <!-- Achievements -->
+      <div class="ac">
+        <div class="sect">Достижения</div>
+        <div class="ach-grid" id="achGrid">
+          <!-- Will be filled by JS -->
         </div>
       </div>
 
@@ -287,6 +364,65 @@ function applyStats(data){
   document.getElementById('sChance').textContent=chance!==null?chance+'%':'—';
   renderHuntTime(data&&data.total_time_sec?data.total_time_sec:0);
   updateOnlineStatus(data);
+  renderAchievements(data);
+}
+
+// ── ACHIEVEMENTS ──
+const ACH_ICONS = {
+  target: (color) => `<svg viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>`,
+  trophy: (color) => `<svg viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path></svg>`,
+  alert: (color) => `<svg viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`,
+  ghost: (color) => `<svg viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 10L9.01 10"></path><path d="M15 10L15.01 10"></path><path d="M12 2a8 8 0 0 0-8 8v12l3-3 2.5 2.5L12 19l2.5 2.5L17 19l3 3V10a8 8 0 0 0-8-8z"></path></svg>`,
+  skull: (color) => `<svg viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 10L9.01 10"></path><path d="M15 10L15.01 10"></path><path d="M10 20C10 20 10 21 12 21C14 21 14 20 14 20"></path><path d="M12 2C7.03 2 3 6.03 3 11C3 13.5 4.5 15.5 6 17V20C6 21.1 6.9 22 8 22H16C17.1 22 18 21.1 18 20V17C19.5 15.5 21 13.5 21 11C21 6.03 16.97 2 12 2Z"></path></svg>`
+};
+
+const ACHIEVEMENTS = [
+  { id: 'c10',  type: 'caught', threshold: 10,  title: 'Первые шаги', desc: 'Поймано 10 репортов', icon: 'target', color: '#3b82f6' },
+  { id: 'c50',  type: 'caught', threshold: 50,  title: 'Опытный ловец', desc: 'Поймано 50 репортов', icon: 'target', color: '#10b981' },
+  { id: 'c100', type: 'caught', threshold: 100, title: 'Мастер репортов', desc: 'Поймано 100 репортов', icon: 'target', color: '#f59e0b' },
+  { id: 'c200', type: 'caught', threshold: 200, title: 'Гроза нарушителей', desc: 'Поймано 200 репортов', icon: 'trophy', color: '#8b5cf6' },
+  { id: 'c500', type: 'caught', threshold: 500, title: 'Легенда сервера', desc: 'Поймано 500 репортов', icon: 'trophy', color: '#facc15' },
+  { id: 'm10',  type: 'missed', threshold: 10,  title: 'Бывает и такое', desc: 'Пропущено 10 репортов', icon: 'alert', color: '#94a3b8' },
+  { id: 'm50',  type: 'missed', threshold: 50,  title: 'Нужна тренировка', desc: 'Пропущено 50 репортов', icon: 'alert', color: '#64748b' },
+  { id: 'm100', type: 'missed', threshold: 100, title: 'Не сегодня', desc: 'Пропущено 100 репортов', icon: 'ghost', color: '#ef4444' },
+  { id: 'm200', type: 'missed', threshold: 200, title: 'Почти успел', desc: 'Пропущено 200 репортов', icon: 'ghost', color: '#b91c1c' },
+  { id: 'm500', type: 'missed', threshold: 500, title: 'Спящий режим', desc: 'Пропущено 500 репортов', icon: 'skull', color: '#450a0a' },
+];
+
+function renderAchievements(data){
+  const caught = data?.total_caught || 0;
+  const missed = data?.total_missed || 0;
+  
+  const grid = document.getElementById('achGrid');
+  const badgeContainer = document.getElementById('pNameBadges');
+  if(!grid || !badgeContainer) return;
+  
+  grid.innerHTML = '';
+  badgeContainer.innerHTML = '';
+  
+  ACHIEVEMENTS.forEach(ach => {
+    const val = ach.type === 'caught' ? caught : missed;
+    const isUnlocked = val >= ach.threshold;
+    
+    // 1. Grid item
+    const item = document.createElement('div');
+    item.className = 'ach-item' + (isUnlocked ? ' unlocked' : '');
+    item.innerHTML = `
+      <div class="ach-icon-large">${ACH_ICONS[ach.icon](isUnlocked ? ach.color : 'rgba(255,255,255,0.1)')}</div>
+      <div class="ach-title">${ach.title}</div>
+      <div class="ach-desc">${ach.desc}</div>
+    `;
+    grid.appendChild(item);
+    
+    // 2. Name badge (only if unlocked)
+    if(isUnlocked) {
+      const badge = document.createElement('div');
+      badge.className = 'ach-badge';
+      badge.setAttribute('data-tooltip', `${ach.title}\n${ach.desc}`);
+      badge.innerHTML = ACH_ICONS[ach.icon](ach.color);
+      badgeContainer.appendChild(badge);
+    }
+  });
 }
 
 function renderHuntTime(secs){
