@@ -544,15 +544,15 @@ async function adminSaveStats(){
     };
     
     const r = await fetch(WORKER_URL + '/admin-action', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({
-        adminNick: _session.nick,
-        action: 'editStats',
-        targetUserId: _target.id,
-        payload: data
-      })
-    });
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            adminNick: _session.nick,
+            action: 'editStats',
+            targetNick: _target.nick,
+            payload: data
+          })
+        });
     const res = await r.json();
     if (!r.ok) throw new Error(res.error || 'Worker error ' + r.status);
 
@@ -611,15 +611,15 @@ async function adminExecBan(userId){
   if(btn){btn.disabled=true;btn.textContent='Блокируем...';}
   try{
     const r = await fetch(WORKER_URL + '/admin-action', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({
-        adminNick: _session.nick,
-        action: 'ban',
-        targetUserId: userId,
-        payload: { bannedUntil }
-      })
-    });
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            adminNick: _session.nick,
+            action: 'ban',
+            targetNick: _target.nick,
+            payload: { bannedUntil }
+          })
+        });
     const res = await r.json();
     if (!r.ok) throw new Error(res.error || 'Worker error ' + r.status);
     
@@ -639,7 +639,7 @@ async function adminExecUnban(userId){
           body: JSON.stringify({
             adminNick: _session.nick,
             action: 'unban',
-            targetUserId: userId
+            targetNick: _target.nick
           })
         });
         const res = await r.json();
@@ -679,7 +679,7 @@ async function execDelete(){
           body: JSON.stringify({
             adminNick: _session.nick,
             action: 'deleteUser',
-            targetUserId: _target.id
+            targetNick: _target.nick
           })
         });
         const res = await r.json();
