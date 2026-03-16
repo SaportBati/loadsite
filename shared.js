@@ -123,15 +123,34 @@ function saveSession(u){
 
 function hexToRgb(hex) {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : '59, 130, 246';
+  return result ? {
+    r: parseInt(result[1], 16),
+    g: parseInt(result[2], 16),
+    b: parseInt(result[3], 16)
+  } : {r: 59, g: 130, b: 246};
 }
 
 function applyThemeColor(hex) {
   if(!hex) hex = '#3b82f6';
   const rgb = hexToRgb(hex);
-  document.documentElement.style.setProperty('--theme-color', hex);
-  document.documentElement.style.setProperty('--theme-color-rgb', rgb);
-  document.documentElement.style.setProperty('--theme-glow', `rgba(${rgb}, 0.4)`);
+  const root = document.documentElement;
+  
+  // Base accent
+  root.style.setProperty('--theme-color', hex);
+  root.style.setProperty('--theme-color-rgb', `${rgb.r}, ${rgb.g}, ${rgb.b}`);
+  
+  // Backgrounds (Very dark version of theme color)
+  root.style.setProperty('--bg', `rgb(${Math.floor(rgb.r * 0.04)}, ${Math.floor(rgb.g * 0.05)}, ${Math.floor(rgb.b * 0.08)})`);
+  root.style.setProperty('--bg2', `rgb(${Math.floor(rgb.r * 0.06)}, ${Math.floor(rgb.g * 0.08)}, ${Math.floor(rgb.b * 0.12)})`);
+  
+  // Surface & Borders
+  root.style.setProperty('--surf', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.04)`);
+  root.style.setProperty('--border', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.15)`);
+  root.style.setProperty('--theme-glow', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.4)`);
+  
+  // Text & Accents
+  root.style.setProperty('--text', `rgb(${Math.min(255, 200 + rgb.r * 0.2)}, ${Math.min(255, 210 + rgb.g * 0.2)}, ${Math.min(255, 230 + rgb.b * 0.1)})`);
+  root.style.setProperty('--muted', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.5)`);
 }
 
 // Apply theme on load if session exists
