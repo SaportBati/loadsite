@@ -58,11 +58,33 @@
   background: rgba(59,130,246,0.04); 
   border-color: rgba(59,130,246,0.25); 
   box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  cursor: pointer;
+}
+.ach-item.unlocked.active-theme {
+  border-color: var(--theme-color);
+  background: rgba(var(--theme-color-rgb), 0.1);
+  box-shadow: 0 0 15px var(--theme-glow);
 }
 .ach-item.unlocked:hover {
   transform: translateY(-3px);
   background: rgba(59,130,246,0.08);
   border-color: rgba(59,130,246,0.4);
+}
+.theme-badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: var(--theme-color);
+  color: #fff;
+  font-size: 0.6rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 700;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.ach-item.unlocked.active-theme .theme-badge {
+  opacity: 1;
 }
 .ach-icon-large { width: 36px; height: 36px; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; }
 .ach-icon-large svg { width: 100%; height: 100%; }
@@ -297,6 +319,12 @@ function renderSubscription(nick, entries, readonly){
 
   const expired=isExpired(found.ts), timeLeft=formatTimeLeft(found.ts);
   const isCrit=found.ts!==0&&!expired&&(found.ts-Math.floor(Date.now()/1000))<86400*3;
+  
+  // Apply theme if viewing own profile or if color is set
+  if(found.color) {
+    applyThemeColor(found.color);
+  }
+  
   if(expired){
     card.className='sub-card expired-sub';
     statusBadge.className='sub-status expired';
@@ -389,7 +417,61 @@ const ACHIEVEMENTS = [
   { id: 'm500', type: 'missed', threshold: 500, title: 'Спящий режим', desc: 'Пропущено 500 репортов', icon: 'skull', color: '#450a0a' },
 ];
 
+function hexToRgb(hex) {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : null;
+}
+
+function applyThemeColor(hex) {
+  if(!hex) return;
+  const rgb = hexToRgb(hex);
+  document.documentElement.style.setProperty('--theme-color', hex);
+  document.documentElement.style.setProperty('--theme-color-rgb', rgb);
+  document.documentElement.style.setProperty('--theme-glow', `rgba(${rgb}, 0.4)`);
+}
+
+async function setThemeColor(hex) {
+  if(!_isOwn) return;
+  if(!_subEntry) {
+    alert('Смена оформления доступна только с активной подпиской.');
+    return;
+  }
+  const e = parseEntry(_subEntry);
+  if(isExpired(e.ts)) {
+    alert('Подписка истекла — обнови её для смены оформления.');
+    return;
+  }
+
+  const items = document.querySelectorAll('.ach-item');
+  items.forEach(it => it.classList.remove('active-theme'));
+
+  try {
+    const {sha, entries} = await githubFetch();
+    const cleanNick = stripBracketPrefix(_session.nick).toLowerCase();
+    const idx = entries.findIndex(raw => {
+      const e = parseEntry(raw);
+      return stripBracketPrefix(e.nick).toLowerCase() === cleanNick;
+    });
+    if(idx === -1) throw new Error('Запись подписки не найдена');
+    
+    const entry = parseEntry(entries[idx]);
+    entries[idx] = entry.nick + '|' + entry.ts + '|' + (entry.prefix || '') + '|' + hex;
+    
+    await githubPush(sha, entries, 'ThemeUpdate:' + _session.nick + '->' + hex);
+    
+    _subEntry = entries[idx];
+    applyThemeColor(hex);
+    
+    // Re-render achievements to show the new active theme
+    renderAchievements(_targetStats);
+  } catch(e) {
+    alert('Ошибка при сохранении темы: ' + e.message);
+  }
+}
+
+let _targetStats = null;
 function renderAchievements(data){
+  _targetStats = data;
   const caught = data?.total_caught || 0;
   const missed = data?.total_missed || 0;
   
@@ -400,14 +482,23 @@ function renderAchievements(data){
   grid.innerHTML = '';
   badgeContainer.innerHTML = '';
   
+  const currentTheme = _subEntry ? parseEntry(_subEntry).color : null;
+  
   ACHIEVEMENTS.forEach(ach => {
     const val = ach.type === 'caught' ? caught : missed;
     const isUnlocked = val >= ach.threshold;
+    const isActive = currentTheme && currentTheme.toLowerCase() === ach.color.toLowerCase();
     
     // 1. Grid item
     const item = document.createElement('div');
-    item.className = 'ach-item' + (isUnlocked ? ' unlocked' : '');
+    item.className = 'ach-item' + (isUnlocked ? ' unlocked' : '') + (isActive ? ' active-theme' : '');
+    if(isUnlocked && _isOwn) {
+      item.onclick = () => setThemeColor(ach.color);
+      item.title = 'Нажмите, чтобы установить этот цвет как тему сайта';
+    }
+    
     item.innerHTML = `
+      <div class="theme-badge">Тема</div>
       <div class="ach-icon-large">${ACH_ICONS[ach.icon](isUnlocked ? ach.color : 'rgba(255,255,255,0.1)')}</div>
       <div class="ach-title">${ach.title}</div>
       <div class="ach-desc">${ach.desc}</div>
