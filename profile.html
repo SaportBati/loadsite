@@ -409,16 +409,8 @@ async function renderProfile(){
   // Nav nick
   if(_session) document.getElementById('navNick').textContent='@'+_session.nick;
 
-  // Check if session user is dev
-  try{
-    const entries=_cachedEntries||await fetchSubscriptions();
-    _cachedEntries=entries;
-    const myEntry=entries.find(raw=>{
-      const e=parseEntry(raw);
-      return stripBracketPrefix(e.nick).toLowerCase()===stripBracketPrefix(_session.nick).toLowerCase();
-    });
-    _isDev=myEntry?parseEntry(myEntry).prefix===DEV_PREFIX:false;
-  }catch(e){_isDev=false;}
+  // Check if session user is admin
+  _isDev = _session && Array.isArray(_session.roles) && _session.roles.includes('admin');
 
   // Delete button (only devs)
   const phActions=document.getElementById('phActions');
@@ -622,19 +614,26 @@ async function adminExecBan(userId){
 }
 
 async function adminExecUnban(userId){
-  const btn=document.querySelector('#_am .mbtn-save');
-  if(btn){btn.disabled=true;btn.textContent='Разблокируем...';}
-  try{
-    const{users,sha}=await readDB();
-    const idx=users.findIndex(u=>u.id===userId);
-    if(idx===-1)throw new Error('Пользователь не найден');
-    delete users[idx].banned;delete users[idx].bannedUntil;
-    await writeDB(users,sha);
-    closeAm();
-    delete _target.banned;delete _target.bannedUntil;
-    renderAdminPanel();
-  }catch(e){if(btn){btn.disabled=false;btn.textContent='Разблокировать';}alert('Ошибка: '+e.message);}
-}
+      const btn=document.querySelector('#_am .mbtn-save');
+      if(btn){btn.disabled=true;btn.textContent='Разблокируем...';}
+      try{
+        const r = await fetch(WORKER_URL + '/admin-action', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            adminNick: _session.nick,
+            action: 'unban',
+            targetUserId: userId
+          })
+        });
+        const res = await r.json();
+        if (!r.ok) throw new Error(res.error || 'Worker error ' + r.status);
+
+        closeAm();
+        delete _target.banned;delete _target.bannedUntil;
+        renderAdminPanel();
+      }catch(e){if(btn){btn.disabled=false;btn.textContent='Разблокировать';}alert('Ошибка: '+e.message);}
+    }
 
 function closeAm(){const m=document.getElementById('_am');if(m)m.remove();}
 
@@ -655,23 +654,33 @@ function promptDelete(){
 }
 
 async function execDelete(){
-  const btn=document.getElementById('_delOk');
-  if(btn){btn.disabled=true;btn.textContent='Удаляем...';}
-  try{
-    const{users,sha}=await readDB();
-    await writeDB(users.filter(u=>u.id!==_target.id),sha);
-    document.getElementById('_delModal')?.remove();
-    if(_isOwn){
-      stopTimers();clearSession();
-      window.location.href='index.html';
-    }else{
-      window.location.href='profile.html';
+      const btn=document.getElementById('_delOk');
+      if(btn){btn.disabled=true;btn.textContent='Удаляем...';}
+      try{
+        const r = await fetch(WORKER_URL + '/admin-action', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            adminNick: _session.nick,
+            action: 'deleteUser',
+            targetUserId: _target.id
+          })
+        });
+        const res = await r.json();
+        if (!r.ok) throw new Error(res.error || 'Worker error ' + r.status);
+
+        document.getElementById('_delModal')?.remove();
+        if(_isOwn){
+          stopTimers();clearSession();
+          window.location.href='index.html';
+        }else{
+          window.location.href='profile.html';
+        }
+      }catch(e){
+        if(btn){btn.disabled=false;btn.textContent='Удалить';}
+        alert('Ошибка: '+e.message);
+      }
     }
-  }catch(e){
-    if(btn){btn.disabled=false;btn.textContent='Удалить';}
-    alert('Ошибка: '+e.message);
-  }
-}
 
 // ── BUY / TRIAL ──
 function handleBuySubscription(){window.location.href='buy.html';}
