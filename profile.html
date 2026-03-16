@@ -347,7 +347,7 @@ async function loadSidebar(){
         return stripBracketPrefix(e.nick).toLowerCase()===stripBracketPrefix(u.nick).toLowerCase();
       });
       const prefix=subEntry?parseEntry(subEntry).prefix:null;
-      const isDev=prefix===DEV_PREFIX;
+      const isDev = u.roles && u.roles.includes('admin');
       const isMe=_session&&u.nick.toLowerCase()===_session.nick.toLowerCase();
       const isViewing=_target&&_target.nick.toLowerCase()===u.nick.toLowerCase();
 
@@ -534,7 +534,7 @@ async function adminEditStats(){
 
 async function adminSaveStats(){
   const btn=document.getElementById('_se_save');
-  if(btn){btn.disabled=true;btn.innerHTML='<span class="sp" style="width:11px;height:11px;margin-right:4px"></span>Сохраняем...';}
+  if(btn){btn.disabled=true;btn.innerHTML='<span class="sp"></span>Сохраняем...';}
   try{
     const data={
       total_caught:parseInt(document.getElementById('_se_caught').value)||0,
@@ -542,14 +542,22 @@ async function adminSaveStats(){
       total_time_sec:parseInt(document.getElementById('_se_time').value)||0,
       avg_ping:parseInt(document.getElementById('_se_ping').value)||0,
     };
-    const safeNick=_target.nick.replace(/[^a-zA-Z0-9_.\-]/g,'_');
-    const r=await fetchWithTimeout(WORKER_URL+'/stats',{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({nick:safeNick,data})
-    },10000);
-    if(!r.ok)throw new Error('Worker error '+r.status);
-    const res=await r.json();if(res.error)throw new Error(res.error);
-    closeAm();applyStats(data);
+    
+    const r = await fetch(WORKER_URL + '/admin-action', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        adminNick: _session.nick,
+        action: 'editStats',
+        targetUserId: _target.id,
+        payload: data
+      })
+    });
+    const res = await r.json();
+    if (!r.ok) throw new Error(res.error || 'Worker error ' + r.status);
+
+    closeAm();
+    applyStats(data);
   }catch(e){
     if(btn){btn.disabled=false;btn.textContent='Сохранить';}
     alert('Ошибка: '+e.message);
@@ -602,11 +610,19 @@ async function adminExecBan(userId){
   const btn=document.querySelector('#_am .mbtn-del');
   if(btn){btn.disabled=true;btn.textContent='Блокируем...';}
   try{
-    const{users,sha}=await readDB();
-    const idx=users.findIndex(u=>u.id===userId);
-    if(idx===-1)throw new Error('Пользователь не найден');
-    users[idx].banned=true;users[idx].bannedUntil=bannedUntil;
-    await writeDB(users,sha);
+    const r = await fetch(WORKER_URL + '/admin-action', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        adminNick: _session.nick,
+        action: 'ban',
+        targetUserId: userId,
+        payload: { bannedUntil }
+      })
+    });
+    const res = await r.json();
+    if (!r.ok) throw new Error(res.error || 'Worker error ' + r.status);
+    
     closeAm();
     Object.assign(_target,{banned:true,bannedUntil});
     renderAdminPanel();
