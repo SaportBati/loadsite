@@ -3,7 +3,7 @@
 // ═══════════════════════════════════════════
 
 const DISCORD_CLIENT_ID = '1481633911917514853';
-const DISCORD_REDIRECT  = 'https://saportbati.github.io/loadsite/';
+const DISCORD_REDIRECT  = 'https://loadrep.ru/';
 const DISCORD_SCOPE     = 'identify email';
 const WORKER_URL        = 'https://loadsite-api.grebenkinmatveyvyceslacovi2007.workers.dev';
 const XOR_KEY           = 'SaportBati_SecretKey_2024';
