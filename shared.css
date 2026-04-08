@@ -87,7 +87,7 @@ input::placeholder{color:rgba(100,116,139,.5)}
 .modal-cd .cdnum{color:var(--gold);font-weight:700}
 
 /* PROFILE LAYOUT */
-.main-layout{max-width:1600px;margin:0 auto;display:flex;gap:20px;align-items:flex-start}
+.main-layout{display:flex;gap:20px;align-items:flex-start}
 
 /* SIDEBAR */
 .sidebar{width:248px;flex-shrink:0;position:sticky;top:84px}
