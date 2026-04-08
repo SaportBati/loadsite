@@ -154,7 +154,7 @@
   <div class="main-layout" id="mainLayout" style="display:none;animation:appear .55s cubic-bezier(.22,1,.36,1) both">
 
     <!-- LEFT SIDEBAR: Download + Instructions -->
-    <aside class="sidebar sidebar-left">
+    <aside class="sidebar sidebar-download">
       <div class="sidebar-card" id="downloadWrap">
         <div class="sidebar-ttl">&#128229; Скачать</div>
         <div style="display:flex;flex-direction:column;gap:14px">
@@ -177,7 +177,11 @@
           </div>
         </div>
       </div>
-      <div class="sidebar-card" style="margin-top:16px">
+    </aside>
+
+    <!-- PLAYERS SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-card">
         <div class="sidebar-ttl">&#128101; Игроки</div>
         <div class="user-list" id="userList">
           <div class="sidebar-empty"><span class="sp" style="width:11px;height:11px;margin-right:5px"></span>Загрузка...</div>
@@ -276,8 +280,8 @@
 
     </div><!-- /profile-wrap -->
 
-    <!-- RIGHT SIDEBAR: Support -->
-    <aside class="sidebar sidebar-right">
+    <!-- RIGHT SIDEBAR: Support (fixed bottom-right) -->
+    <aside class="sidebar-support-fixed">
       <!-- Support button (only on own profile) -->
       <div id="supportBtnWrap" style="display:none">
         <div class="sidebar-card">
@@ -289,7 +293,7 @@
         </div>
       </div>
       <!-- Dev support panel -->
-      <div id="devSupportWrap" style="display:none;margin-top:16px">
+      <div id="devSupportWrap" style="display:none;margin-top:10px">
         <div class="sidebar-card">
           <div class="sidebar-ttl">&#9881; Тикеты</div>
           <button class="support-btn" style="background:rgba(139,92,246,.1);border-color:rgba(139,92,246,.3);color:var(--violet);margin-top:0" onclick="openDevTickets()">

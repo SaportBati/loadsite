@@ -87,12 +87,13 @@ input::placeholder{color:rgba(100,116,139,.5)}
 .modal-cd .cdnum{color:var(--gold);font-weight:700}
 
 /* PROFILE LAYOUT */
-.main-layout{max-width:1400px;margin:0 auto;display:flex;gap:24px;align-items:flex-start}
+.main-layout{max-width:1600px;margin:0 auto;display:flex;gap:20px;align-items:flex-start}
 
 /* SIDEBAR */
 .sidebar{width:248px;flex-shrink:0;position:sticky;top:84px}
-.sidebar-right{width:220px}
-.sidebar-left{display:flex;flex-direction:column;gap:0}
+.sidebar-download{width:220px;flex-shrink:0;position:sticky;top:84px}
+.sidebar-right{width:220px;flex-shrink:0;position:sticky;top:84px}
+.sidebar-support-fixed{position:fixed;bottom:28px;right:28px;z-index:40;display:flex;flex-direction:column;gap:0;width:200px}
 .sidebar-card{background:var(--surf);border:1px solid var(--border);border-radius:16px;padding:18px;backdrop-filter:blur(20px)}
 .sidebar-ttl{font-family:'Bebas Neue',sans-serif;font-size:.88rem;letter-spacing:.12em;color:var(--muted);margin-bottom:12px;display:flex;align-items:center;gap:8px}
 .sidebar-ttl::after{content:'';flex:1;height:1px;background:var(--border)}
@@ -237,14 +238,10 @@ input::placeholder{color:rgba(100,116,139,.5)}
 .btn-back{padding:6px 14px;background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.3);color:#c4b5fd;border-radius:8px;font-family:'Outfit',sans-serif;font-size:.78rem;font-weight:600;cursor:pointer;transition:all .18s;white-space:nowrap;flex-shrink:0}
 .btn-back:hover{background:rgba(139,92,246,.2)}
 
-@media(max-width:1100px){.sidebar-right{width:200px}}
 @media(max-width:900px){
   .main-layout{flex-direction:column}
-  .sidebar{width:100%;position:static}
-  .sidebar-right{width:100%;order:10}
-  /* На мобиле: скачать первым, потом игроки */
-  .sidebar-left .sidebar-card:first-child{order:0}
-  .sidebar-left .sidebar-card:last-child{order:1}
+  .sidebar,.sidebar-download,.sidebar-right{width:100%;position:static}
+  .sidebar-download{order:-1}
   .user-list{max-height:160px;display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:4px}
 }
 @media(max-width:600px){.card,.ph{padding:24px 20px}.ph{flex-direction:column;align-items:flex-start}.sg{grid-template-columns:1fr 1fr}.sub-body{grid-template-columns:1fr 1fr}.free-plan-features{grid-template-columns:1fr 1fr}}
