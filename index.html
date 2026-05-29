@@ -8,10 +8,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="shared.css">
 <style>
-/* ─── RESET OVERRIDES ─── */
 body { overflow-x: hidden; }
 
-/* ─── LOADING SCREEN ─── */
+/* ─── LOADING ─── */
 #loadingScreen {
   position: fixed; inset: 0; z-index: 9999;
   background: var(--bg);
@@ -24,46 +23,44 @@ body { overflow-x: hidden; }
 
 .ls-logo {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: clamp(2.5rem, 8vw, 5rem);
-  letter-spacing: .14em;
+  font-size: clamp(2.8rem, 8vw, 5.5rem);
+  letter-spacing: .14em; line-height: 1;
+  position: relative; overflow: hidden;
   color: transparent;
-  -webkit-text-stroke: 1px rgba(59,130,246,.4);
-  position: relative;
-  overflow: hidden;
-  line-height: 1;
+  -webkit-text-stroke: 1px rgba(59,130,246,.25);
 }
 .ls-logo-fill {
   position: absolute; inset: 0;
-  background: linear-gradient(90deg, var(--cyan) 0%, var(--blue) 50%, var(--violet) 100%);
+  background: linear-gradient(90deg, var(--cyan), var(--blue) 50%, var(--violet));
   -webkit-background-clip: text; background-clip: text;
   color: transparent; -webkit-text-fill-color: transparent;
   clip-path: inset(0 100% 0 0);
-  transition: none;
 }
 .ls-sub {
-  font-size: .7rem; letter-spacing: .35em; text-transform: uppercase;
-  color: var(--muted); margin-top: 10px; opacity: 0;
+  font-size: .68rem; letter-spacing: .35em; text-transform: uppercase;
+  color: var(--muted); margin-top: 12px; opacity: 0;
   font-family: 'Outfit', sans-serif; font-weight: 500;
+  transition: opacity .5s ease;
 }
 .ls-bar-wrap {
-  margin-top: 40px; width: 200px; height: 2px;
+  margin-top: 36px; width: 220px; height: 2px;
   background: rgba(255,255,255,.06); border-radius: 99px; overflow: hidden;
 }
 .ls-bar {
   height: 100%; width: 0%;
   background: linear-gradient(90deg, var(--cyan), var(--blue), var(--violet));
   border-radius: 99px;
-  box-shadow: 0 0 12px var(--blue);
+  box-shadow: 0 0 10px rgba(59,130,246,.8);
+  transition: width .05s linear;
 }
 .ls-pct {
   margin-top: 10px; font-family: 'Bebas Neue', sans-serif;
   font-size: 1rem; letter-spacing: .1em; color: var(--muted);
 }
 
-/* ─── CANVAS PARTICLES ─── */
+/* ─── CANVAS ─── */
 #particleCanvas {
-  position: fixed; inset: 0; z-index: 0; pointer-events: none;
-  opacity: .35;
+  position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: .3;
 }
 
 /* ─── BG ─── */
@@ -77,422 +74,240 @@ body { overflow-x: hidden; }
   animation: gridMove 25s linear infinite;
 }
 @keyframes gridMove { to { background-position: 60px 60px; } }
-.orb {
-  position: absolute; border-radius: 50%; filter: blur(120px);
-  animation: drift 18s ease-in-out infinite;
-}
-.o1 { width: 700px; height: 700px; background: radial-gradient(circle, rgba(59,130,246,.18), transparent); top: -200px; left: -200px; }
-.o2 { width: 600px; height: 600px; background: radial-gradient(circle, rgba(139,92,246,.12), transparent); bottom: -150px; right: -150px; animation-delay: -6s; }
-.o3 { width: 400px; height: 400px; background: radial-gradient(circle, rgba(6,182,212,.08), transparent); top: 45%; left: 55%; animation-delay: -11s; }
+.orb { position: absolute; border-radius: 50%; filter: blur(120px); animation: drift 18s ease-in-out infinite; }
+.o1 { width: 700px; height: 700px; background: radial-gradient(circle, rgba(59,130,246,.18), transparent); top:-200px; left:-200px; }
+.o2 { width: 600px; height: 600px; background: radial-gradient(circle, rgba(139,92,246,.12), transparent); bottom:-150px; right:-150px; animation-delay:-6s; }
+.o3 { width: 400px; height: 400px; background: radial-gradient(circle, rgba(6,182,212,.08), transparent); top:45%; left:55%; animation-delay:-11s; }
 @keyframes drift {
-  0%,100% { transform: translate(0,0) scale(1); }
-  33% { transform: translate(50px,-60px) scale(1.05); }
-  66% { transform: translate(-40px,40px) scale(.95); }
+  0%,100%{transform:translate(0,0) scale(1);}
+  33%{transform:translate(50px,-60px) scale(1.05);}
+  66%{transform:translate(-40px,40px) scale(.95);}
 }
-.noise { position: fixed; inset: 0; background: url('https://grainy-gradients.vercel.app/noise.svg'); opacity: .03; pointer-events: none; z-index: 9998; }
-
-/* ─── MAIN LAYOUT ─── */
-.page-root {
-  position: relative; z-index: 1;
-  min-height: 100vh;
-  display: flex; flex-direction: column;
-  align-items: center;
-  padding: 0 24px 60px;
-  opacity: 0;
-}
-.page-root.visible { opacity: 1; }
-
-/* ─── HERO ─── */
-.hero {
-  text-align: center;
-  padding: 80px 0 48px;
-  position: relative;
-}
-.hero-eyebrow {
-  font-size: .68rem; letter-spacing: .4em; text-transform: uppercase;
-  color: var(--cyan); font-weight: 600; font-family: 'Outfit', sans-serif;
-  margin-bottom: 18px; opacity: 0; transform: translateY(10px);
-  display: inline-flex; align-items: center; gap: 10px;
-}
-.hero-eyebrow::before, .hero-eyebrow::after {
-  content: ''; display: block; width: 28px; height: 1px;
-  background: linear-gradient(90deg, transparent, var(--cyan));
-}
-.hero-eyebrow::after { background: linear-gradient(90deg, var(--cyan), transparent); }
-
-.hero-title {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: clamp(3.5rem, 10vw, 7rem);
-  letter-spacing: .1em; line-height: .95;
-  background: linear-gradient(135deg, #fff 20%, var(--blue) 55%, var(--cyan) 100%);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-  display: block; position: relative;
-  filter: drop-shadow(0 0 40px rgba(59,130,246,.25));
-}
-.hero-title .word { display: inline-block; overflow: hidden; }
-.hero-title .word-inner { display: inline-block; transform: translateY(100%); }
-
-.hero-line {
-  display: block; height: 2px; margin: 12px auto 0;
-  background: linear-gradient(90deg, transparent, var(--cyan), var(--blue), transparent);
-  width: 0; opacity: 0;
-}
-.hero-desc {
-  margin-top: 20px; color: var(--muted); font-size: .88rem;
-  letter-spacing: .06em; opacity: 0; transform: translateY(12px);
-  line-height: 1.7;
-}
-
-/* ─── MAIN CARD ─── */
-.card-wrap {
-  width: 100%; max-width: 420px;
-  perspective: 1200px;
-}
-.card {
-  background: rgba(255,255,255,.03);
-  border: 1px solid rgba(59,130,246,.18);
-  border-radius: 24px;
-  padding: 44px 44px 40px;
-  width: 100%;
-  backdrop-filter: blur(40px);
-  box-shadow: 
-    0 0 0 1px rgba(255,255,255,.03),
-    0 24px 80px rgba(0,0,0,.5),
-    inset 0 1px 0 rgba(255,255,255,.07);
-  position: relative; overflow: hidden;
-  opacity: 0; transform: translateY(32px) rotateX(4deg);
-  transform-origin: top center;
-}
-.card::before {
-  content: ''; position: absolute;
-  top: -1px; left: 20%; right: 20%; height: 1px;
-  background: linear-gradient(90deg, transparent, var(--cyan), var(--blue), transparent);
-  opacity: .8;
-}
-.card-glow {
-  position: absolute; inset: 0; pointer-events: none; z-index: 0;
-  background: radial-gradient(ellipse 60% 40% at 50% 0%, rgba(59,130,246,.08), transparent);
-}
-.card > *:not(.card-glow) { position: relative; z-index: 1; }
-
-/* ─── STEP TRANSITIONS ─── */
-.step { display: none; }
-.step.active { display: block; animation: stepIn .45s cubic-bezier(.22,1,.36,1) both; }
-@keyframes stepIn {
-  from { opacity: 0; transform: translateY(20px) scale(.98); }
-  to   { opacity: 1; transform: none; }
-}
-
-/* ─── CARD TITLE ─── */
-.card-ttl {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 1.9rem; letter-spacing: .06em;
-  background: linear-gradient(90deg, #fff 40%, var(--blue));
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  background-clip: text; margin-bottom: 6px;
-  text-align: left;
-}
-.card-sub {
-  color: var(--muted); font-size: .84rem;
-  line-height: 1.65; margin-bottom: 30px; text-align: left;
-}
-
-/* ─── DISCORD BUTTON ─── */
-.btn-discord {
-  width: 100%; padding: 16px 20px;
-  background: rgba(88,101,242,.1);
-  border: 1px solid rgba(88,101,242,.3);
-  border-radius: 16px;
-  display: flex; align-items: center; justify-content: center; gap: 14px;
-  color: var(--text); font-family: 'Outfit', sans-serif;
-  font-size: .95rem; font-weight: 600; cursor: pointer;
-  position: relative; overflow: hidden;
-  transition: border-color .3s, background .3s, transform .25s, box-shadow .3s;
-  letter-spacing: .02em;
-}
-.btn-discord:hover {
-  background: rgba(88,101,242,.22);
-  border-color: rgba(88,101,242,.55);
-  transform: translateY(-3px);
-  box-shadow: 0 12px 40px rgba(88,101,242,.3);
-}
-.btn-discord:active { transform: translateY(-1px) scale(.99); }
-.btn-discord-shimmer {
-  position: absolute; inset: 0;
-  background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,.08) 50%, transparent 60%);
-  transform: translateX(-100%);
-  pointer-events: none;
-}
-.btn-discord:hover .btn-discord-shimmer {
-  animation: shimmer .6s ease forwards;
-}
-@keyframes shimmer {
-  to { transform: translateX(100%); }
-}
-.dc-icon-wrap {
-  width: 32px; height: 32px; border-radius: 8px;
-  background: rgba(88,101,242,.2); border: 1px solid rgba(88,101,242,.35);
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0; transition: transform .3s;
-}
-.btn-discord:hover .dc-icon-wrap { transform: rotate(-8deg) scale(1.1); }
-
-/* ─── HINT ─── */
-.hint {
-  color: var(--muted); font-size: .73rem;
-  margin-top: 16px; line-height: 1.6; text-align: center;
-  opacity: .7;
-}
-.hint a { color: var(--blue); text-decoration: none; }
-
-/* ─── FORM ─── */
-.fg { margin-bottom: 18px; text-align: left; }
-.fg label {
-  display: block; font-size: .7rem; font-weight: 600;
-  letter-spacing: .14em; text-transform: uppercase;
-  color: var(--muted); margin-bottom: 8px;
-}
-.fg input[type=text] {
-  width: 100%; padding: 13px 16px;
-  background: rgba(0,0,0,.25);
-  border: 1px solid var(--border);
-  border-radius: 12px; color: var(--text);
-  font-family: 'Outfit', sans-serif; font-size: .92rem;
-  outline: none; transition: all .25s;
-}
-.fg input:focus {
-  border-color: var(--blue);
-  background: rgba(59,130,246,.06);
-  box-shadow: 0 0 0 3px rgba(59,130,246,.12);
-}
-.btn-primary-full {
-  width: 100%; padding: 14px;
-  background: linear-gradient(135deg, var(--blue) 0%, var(--violet) 100%);
-  border: none; border-radius: 14px;
-  color: #fff; font-family: 'Outfit', sans-serif;
-  font-size: .92rem; font-weight: 700; cursor: pointer;
-  position: relative; overflow: hidden; margin-top: 4px;
-  transition: transform .25s, box-shadow .25s;
-  box-shadow: 0 4px 24px rgba(59,130,246,.3);
-  letter-spacing: .03em;
-}
-.btn-primary-full::after {
-  content: ''; position: absolute; inset: 0;
-  background: linear-gradient(135deg, rgba(255,255,255,.15), transparent);
-  opacity: 0; transition: opacity .2s;
-}
-.btn-primary-full:hover { transform: translateY(-2px); box-shadow: 0 8px 36px rgba(59,130,246,.5); }
-.btn-primary-full:hover::after { opacity: 1; }
-.btn-primary-full:active { transform: translateY(0) scale(.99); }
-.btn-primary-full:disabled { opacity: .45; cursor: not-allowed; transform: none; box-shadow: none; }
-
-/* ─── ALERT ─── */
-.alert {
-  padding: 12px 14px; border-radius: 12px;
-  font-size: .84rem; margin-bottom: 18px;
-  display: none; text-align: left;
-  animation: stepIn .3s ease both;
-}
-.alert.show { display: block; }
-.err  { background: rgba(239,68,68,.08); border: 1px solid rgba(239,68,68,.2); color: #fca5a5; }
-.ok   { background: rgba(16,185,129,.08); border: 1px solid rgba(16,185,129,.2); color: #6ee7b7; }
-.info { background: rgba(59,130,246,.08); border: 1px solid rgba(59,130,246,.2); color: #93c5fd; }
-
-/* ─── DIVIDER ─── */
-.divider {
-  width: 100%; height: 1px; margin: 36px 0 32px;
-  background: linear-gradient(90deg, transparent, rgba(59,130,246,.15), transparent);
-}
-
-/* ─── PRICING ─── */
-.pricing-section {
-  width: 100%; max-width: 420px;
-  opacity: 0; transform: translateY(24px);
-}
-.section-label {
-  font-size: .65rem; font-weight: 700; letter-spacing: .25em;
-  text-transform: uppercase; color: var(--muted);
-  text-align: center; margin-bottom: 16px;
-  display: flex; align-items: center; gap: 14px;
-}
-.section-label::before, .section-label::after {
-  content: ''; flex: 1; height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(59,130,246,.15));
-}
-.section-label::after { background: linear-gradient(90deg, rgba(59,130,246,.15), transparent); }
-
-.pricing-grid {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
-  margin-bottom: 12px;
-}
-.plan-card {
-  background: rgba(255,255,255,.025);
-  border: 1px solid var(--border);
-  border-radius: 18px; padding: 22px 18px;
-  text-align: center; position: relative; overflow: hidden;
-  cursor: default;
-  transition: transform .3s cubic-bezier(.34,1.56,.64,1), box-shadow .3s, border-color .3s;
-}
-.plan-card:hover {
-  transform: translateY(-5px) scale(1.02);
-  box-shadow: 0 16px 48px rgba(59,130,246,.18);
-  border-color: rgba(59,130,246,.35);
-}
-.plan-card.featured {
-  background: rgba(59,130,246,.07);
-  border-color: rgba(59,130,246,.28);
-}
-.plan-card.featured:hover { box-shadow: 0 16px 48px rgba(59,130,246,.28); }
-.plan-card::before {
-  content: ''; position: absolute; inset: 0;
-  background: radial-gradient(circle at 50% 0%, rgba(59,130,246,.1), transparent 60%);
-  opacity: 0; transition: opacity .3s;
-}
-.plan-card:hover::before { opacity: 1; }
-.plan-badge {
-  position: absolute; top: 10px; right: 10px;
-  background: linear-gradient(135deg, var(--blue), var(--violet));
-  color: #fff; font-size: .58rem; font-weight: 700;
-  padding: 3px 8px; border-radius: 6px;
-  letter-spacing: .06em; text-transform: uppercase;
-}
-.plan-name {
-  font-size: .65rem; color: var(--muted);
-  text-transform: uppercase; letter-spacing: .14em;
-  margin-bottom: 10px; font-weight: 600;
-}
-.plan-price {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 2.4rem; letter-spacing: .04em;
-  line-height: 1;
-  background: linear-gradient(135deg, #fff, var(--blue));
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-.plan-price sup { font-size: 1.1rem; -webkit-text-fill-color: var(--muted); vertical-align: top; margin-top: 4px; display: inline-block; }
-.plan-period {
-  font-size: .73rem; color: var(--cyan);
-  margin: 6px 0 10px; font-weight: 500;
-}
-.plan-desc { font-size: .72rem; color: var(--muted); line-height: 1.5; }
-
-/* ─── PAYMENT CARD ─── */
-.payment-card {
-  background: rgba(255,255,255,.02);
-  border: 1px solid var(--border);
-  border-radius: 16px; padding: 16px 18px;
-}
-.payment-label {
-  font-size: .65rem; color: var(--muted);
-  text-transform: uppercase; letter-spacing: .14em;
-  font-weight: 600; margin-bottom: 12px;
-}
-.payment-icons {
-  display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
-  margin-bottom: 10px;
-}
-.pay-chip {
-  background: rgba(255,255,255,.06);
-  border: 1px solid rgba(255,255,255,.08);
-  border-radius: 8px; padding: 5px 10px;
-  display: flex; align-items: center; gap: 5px;
-  transition: transform .2s, background .2s;
-  cursor: default;
-}
-.pay-chip:hover { transform: translateY(-2px); background: rgba(255,255,255,.1); }
-.payment-note { font-size: .71rem; color: var(--muted); line-height: 1.5; }
-
-/* ─── FOOTER ─── */
-.site-footer {
-  position: relative; z-index: 1; width: 100%;
-  text-align: center; padding: 28px 24px 36px;
-  border-top: 1px solid rgba(59,130,246,.06);
-  margin-top: auto;
-}
-.footer-links {
-  display: flex; flex-wrap: wrap; justify-content: center;
-  gap: 6px 20px; margin-bottom: 12px;
-}
-.footer-links a {
-  color: var(--muted); font-size: .75rem; text-decoration: none;
-  transition: color .2s; position: relative; padding-bottom: 2px;
-}
-.footer-links a::after {
-  content: ''; position: absolute; bottom: 0; left: 0; right: 0;
-  height: 1px; background: var(--blue);
-  transform: scaleX(0); transition: transform .25s;
-}
-.footer-links a:hover { color: var(--blue); }
-.footer-links a:hover::after { transform: scaleX(1); }
-.footer-copy { color: var(--muted); font-size: .68rem; opacity: .5; }
-
-/* ─── FLOATING PARTICLES ─── */
-.particle {
-  position: fixed; border-radius: 50%; pointer-events: none;
-  background: var(--blue); opacity: 0;
-}
+.noise { position:fixed;inset:0;background:url('https://grainy-gradients.vercel.app/noise.svg');opacity:.03;pointer-events:none;z-index:9998; }
 
 /* ─── CURSOR GLOW ─── */
 .cursor-glow {
-  position: fixed; pointer-events: none; z-index: 9997;
-  width: 300px; height: 300px;
-  border-radius: 50%; margin: -150px 0 0 -150px;
-  background: radial-gradient(circle, rgba(59,130,246,.06), transparent 70%);
-  transition: transform .1s;
-  top: 0; left: 0;
+  position:fixed;pointer-events:none;z-index:9997;
+  width:300px;height:300px;border-radius:50%;margin:-150px 0 0 -150px;
+  background:radial-gradient(circle,rgba(59,130,246,.06),transparent 70%);
+  top:0;left:0;
 }
+
+/* ─── PAGE ─── */
+.page-root {
+  position:relative;z-index:1;min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;
+  padding:0 24px 60px; opacity:0; transition: opacity .4s ease;
+}
+.page-root.visible { opacity:1; }
+
+/* ─── HERO ─── */
+.hero { text-align:center; padding:80px 0 48px; }
+.hero-eyebrow {
+  font-size:.68rem;letter-spacing:.4em;text-transform:uppercase;
+  color:var(--cyan);font-weight:600;font-family:'Outfit',sans-serif;
+  margin-bottom:18px;opacity:0;transform:translateY(10px);
+  display:inline-flex;align-items:center;gap:10px;
+  transition:opacity .6s ease,transform .6s ease;
+}
+.hero-eyebrow::before,.hero-eyebrow::after {
+  content:'';display:block;width:28px;height:1px;
+  background:linear-gradient(90deg,transparent,var(--cyan));
+}
+.hero-eyebrow::after{background:linear-gradient(90deg,var(--cyan),transparent);}
+.hero-eyebrow.show{opacity:1;transform:translateY(0);}
+
+.hero-title {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(3.5rem,10vw,7rem);
+  letter-spacing:.1em;line-height:.95;
+  background:linear-gradient(135deg,#fff 20%,var(--blue) 55%,var(--cyan) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  filter:drop-shadow(0 0 40px rgba(59,130,246,.25));
+  overflow:hidden;
+}
+.hero-word { display:inline-block;overflow:hidden; }
+.hero-word-inner {
+  display:inline-block;
+  transform:translateY(110%);
+  transition:transform .7s cubic-bezier(.22,1,.36,1);
+}
+.hero-word-inner.show { transform:translateY(0); }
+
+.hero-line {
+  display:block;height:2px;margin:12px auto 0;
+  background:linear-gradient(90deg,transparent,var(--cyan),var(--blue),transparent);
+  width:0;opacity:0;
+  transition:width .7s ease,opacity .4s ease;
+}
+.hero-line.show{width:200px;opacity:1;}
+
+.hero-desc {
+  margin-top:20px;color:var(--muted);font-size:.88rem;
+  letter-spacing:.06em;opacity:0;transform:translateY(12px);
+  transition:opacity .6s ease,transform .6s ease;line-height:1.7;
+}
+.hero-desc.show{opacity:1;transform:translateY(0);}
+
+/* ─── CARD ─── */
+.card-wrap { width:100%;max-width:420px;perspective:1200px; }
+.card {
+  background:rgba(255,255,255,.03);
+  border:1px solid rgba(59,130,246,.18);
+  border-radius:24px; padding:44px 44px 40px;
+  width:100%;backdrop-filter:blur(40px);
+  box-shadow:0 0 0 1px rgba(255,255,255,.03),0 24px 80px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.07);
+  position:relative;overflow:hidden;
+  opacity:0;transform:translateY(32px);
+  transition:opacity .7s ease,transform .7s cubic-bezier(.22,1,.36,1);
+}
+.card::before {
+  content:'';position:absolute;top:-1px;left:20%;right:20%;height:1px;
+  background:linear-gradient(90deg,transparent,var(--cyan),var(--blue),transparent);opacity:.8;
+}
+.card.show{opacity:1;transform:translateY(0);}
+.card-glow {
+  position:absolute;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse 60% 40% at 50% 0%,rgba(59,130,246,.08),transparent);
+}
+.card > *:not(.card-glow){position:relative;z-index:1;}
+
+/* ─── STEPS ─── */
+.step{display:none;}
+.step.active{display:block;animation:stepIn .45s cubic-bezier(.22,1,.36,1) both;}
+@keyframes stepIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+
+/* ─── CARD TEXT ─── */
+.card-ttl {
+  font-family:'Bebas Neue',sans-serif;font-size:1.9rem;letter-spacing:.06em;
+  background:linear-gradient(90deg,#fff 40%,var(--blue));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  margin-bottom:6px;text-align:left;
+}
+.card-sub{color:var(--muted);font-size:.84rem;line-height:1.65;margin-bottom:30px;text-align:left;}
+
+/* ─── DISCORD BTN ─── */
+.btn-discord {
+  width:100%;padding:16px 20px;
+  background:rgba(88,101,242,.1);border:1px solid rgba(88,101,242,.3);
+  border-radius:16px;display:flex;align-items:center;justify-content:center;gap:14px;
+  color:var(--text);font-family:'Outfit',sans-serif;font-size:.95rem;font-weight:600;
+  cursor:pointer;position:relative;overflow:hidden;letter-spacing:.02em;
+  transition:border-color .3s,background .3s,transform .25s,box-shadow .3s;
+}
+.btn-discord:hover{background:rgba(88,101,242,.22);border-color:rgba(88,101,242,.55);transform:translateY(-3px);box-shadow:0 12px 40px rgba(88,101,242,.3);}
+.btn-discord:active{transform:translateY(-1px) scale(.99);}
+.btn-discord-shimmer{position:absolute;inset:0;background:linear-gradient(105deg,transparent 40%,rgba(255,255,255,.08) 50%,transparent 60%);transform:translateX(-100%);pointer-events:none;}
+.btn-discord:hover .btn-discord-shimmer{animation:shimmer .65s ease forwards;}
+@keyframes shimmer{to{transform:translateX(200%);}}
+.dc-icon-wrap{width:32px;height:32px;border-radius:8px;background:rgba(88,101,242,.2);border:1px solid rgba(88,101,242,.35);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .3s;}
+.btn-discord:hover .dc-icon-wrap{transform:rotate(-8deg) scale(1.1);}
+
+/* ─── HINT ─── */
+.hint{color:var(--muted);font-size:.73rem;margin-top:16px;line-height:1.6;text-align:center;opacity:.7;}
+
+/* ─── FORM ─── */
+.fg{margin-bottom:18px;text-align:left;}
+.fg label{display:block;font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+.fg input[type=text]{width:100%;padding:13px 16px;background:rgba(0,0,0,.25);border:1px solid var(--border);border-radius:12px;color:var(--text);font-family:'Outfit',sans-serif;font-size:.92rem;outline:none;transition:all .25s;}
+.fg input:focus{border-color:var(--blue);background:rgba(59,130,246,.06);box-shadow:0 0 0 3px rgba(59,130,246,.12);}
+.fg input::placeholder{color:rgba(100,116,139,.4);}
+
+.btn-primary-full{width:100%;padding:14px;background:linear-gradient(135deg,var(--blue) 0%,var(--violet) 100%);border:none;border-radius:14px;color:#fff;font-family:'Outfit',sans-serif;font-size:.92rem;font-weight:700;cursor:pointer;position:relative;overflow:hidden;margin-top:4px;transition:transform .25s,box-shadow .25s;box-shadow:0 4px 24px rgba(59,130,246,.3);letter-spacing:.03em;}
+.btn-primary-full::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.15),transparent);opacity:0;transition:opacity .2s;}
+.btn-primary-full:hover{transform:translateY(-2px);box-shadow:0 8px 36px rgba(59,130,246,.5);}
+.btn-primary-full:hover::after{opacity:1;}
+.btn-primary-full:active{transform:scale(.99);}
+.btn-primary-full:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none;}
+
+/* ─── ALERT ─── */
+.alert{padding:12px 14px;border-radius:12px;font-size:.84rem;margin-bottom:18px;display:none;text-align:left;}
+.alert.show{display:block;animation:stepIn .3s ease both;}
+.err{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);color:#fca5a5;}
+.ok{background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);color:#6ee7b7;}
+.info{background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);color:#93c5fd;}
+
+/* ─── DIVIDER ─── */
+.divider{width:100%;height:1px;margin:36px 0 32px;background:linear-gradient(90deg,transparent,rgba(59,130,246,.15),transparent);}
+
+/* ─── PRICING ─── */
+.pricing-section{width:100%;max-width:420px;opacity:0;transform:translateY(24px);transition:opacity .6s ease,transform .6s ease;}
+.pricing-section.show{opacity:1;transform:translateY(0);}
+.section-label{font-size:.65rem;font-weight:700;letter-spacing:.25em;text-transform:uppercase;color:var(--muted);text-align:center;margin-bottom:16px;display:flex;align-items:center;gap:14px;}
+.section-label::before,.section-label::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(59,130,246,.15));}
+.section-label::after{background:linear-gradient(90deg,rgba(59,130,246,.15),transparent);}
+.pricing-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+.plan-card{background:rgba(255,255,255,.025);border:1px solid var(--border);border-radius:18px;padding:22px 18px;text-align:center;position:relative;overflow:hidden;cursor:default;transition:transform .35s cubic-bezier(.34,1.56,.64,1),box-shadow .35s,border-color .35s;opacity:0;transform:translateY(20px);}
+.plan-card.show{opacity:1;transform:translateY(0);}
+.plan-card:hover{transform:translateY(-5px) scale(1.02);box-shadow:0 16px 48px rgba(59,130,246,.18);border-color:rgba(59,130,246,.35);}
+.plan-card.featured{background:rgba(59,130,246,.07);border-color:rgba(59,130,246,.28);}
+.plan-card.featured:hover{box-shadow:0 16px 48px rgba(59,130,246,.28);}
+.plan-card::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 0%,rgba(59,130,246,.1),transparent 60%);opacity:0;transition:opacity .3s;}
+.plan-card:hover::before{opacity:1;}
+.plan-badge{position:absolute;top:10px;right:10px;background:linear-gradient(135deg,var(--blue),var(--violet));color:#fff;font-size:.58rem;font-weight:700;padding:3px 8px;border-radius:6px;letter-spacing:.06em;text-transform:uppercase;}
+.plan-name{font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.14em;margin-bottom:10px;font-weight:600;}
+.plan-price{font-family:'Bebas Neue',sans-serif;font-size:2.4rem;letter-spacing:.04em;line-height:1;background:linear-gradient(135deg,#fff,var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.plan-price sup{font-size:1.1rem;-webkit-text-fill-color:var(--muted);vertical-align:top;margin-top:4px;display:inline-block;}
+.plan-period{font-size:.73rem;color:var(--cyan);margin:6px 0 10px;font-weight:500;}
+.plan-desc{font-size:.72rem;color:var(--muted);line-height:1.5;}
+.payment-card{background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:16px;padding:16px 18px;}
+.payment-label{font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.14em;font-weight:600;margin-bottom:12px;}
+.payment-icons{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px;}
+.pay-chip{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:5px 10px;display:flex;align-items:center;gap:5px;transition:transform .2s,background .2s;cursor:default;}
+.pay-chip:hover{transform:translateY(-2px);background:rgba(255,255,255,.1);}
+.payment-note{font-size:.71rem;color:var(--muted);line-height:1.5;}
+
+/* ─── FOOTER ─── */
+.site-footer{position:relative;z-index:1;width:100%;text-align:center;padding:28px 24px 36px;border-top:1px solid rgba(59,130,246,.06);margin-top:auto;}
+.footer-links{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 20px;margin-bottom:12px;}
+.footer-links a{color:var(--muted);font-size:.75rem;text-decoration:none;transition:color .2s;position:relative;padding-bottom:2px;}
+.footer-links a::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:var(--blue);transform:scaleX(0);transition:transform .25s;}
+.footer-links a:hover{color:var(--blue);}
+.footer-links a:hover::after{transform:scaleX(1);}
+.footer-copy{color:var(--muted);font-size:.68rem;opacity:.5;}
 </style>
 </head>
 <body>
 
-<!-- CURSOR GLOW -->
 <div class="cursor-glow" id="cursorGlow"></div>
 
-<!-- LOADING SCREEN -->
+<!-- LOADING -->
 <div id="loadingScreen">
   <div class="ls-logo">
     LOAD REPORT
     <span class="ls-logo-fill" id="lsLogoFill">LOAD REPORT</span>
   </div>
   <div class="ls-sub" id="lsSub">Аналитика · Прогресс · Данные</div>
-  <div class="ls-bar-wrap">
-    <div class="ls-bar" id="lsBar"></div>
-  </div>
+  <div class="ls-bar-wrap"><div class="ls-bar" id="lsBar"></div></div>
   <div class="ls-pct" id="lsPct">0%</div>
 </div>
 
-<!-- BACKGROUND -->
+<!-- BG -->
 <div class="bg">
   <div class="grid-lines"></div>
-  <div class="orb o1"></div>
-  <div class="orb o2"></div>
-  <div class="orb o3"></div>
+  <div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div>
 </div>
 <canvas id="particleCanvas"></canvas>
 <div class="noise"></div>
 
-<!-- PAGE ROOT -->
+<!-- PAGE -->
 <div class="page-root" id="pageRoot">
-
-  <!-- HERO -->
   <div class="hero">
     <div class="hero-eyebrow" id="heroEyebrow">Игровая аналитика нового уровня</div>
-    <div class="hero-title" id="heroTitle">
-      <span class="word"><span class="word-inner">LOAD</span></span>
-      <span style="display:inline-block; width:.2em"></span>
-      <span class="word"><span class="word-inner">REPORT</span></span>
+    <div class="hero-title">
+      <span class="hero-word"><span class="hero-word-inner" id="hw1">LOAD</span></span>
+      <span style="display:inline-block;width:.18em"></span>
+      <span class="hero-word"><span class="hero-word-inner" id="hw2">REPORT</span></span>
     </div>
     <span class="hero-line" id="heroLine"></span>
     <p class="hero-desc" id="heroDesc">Аналитика · Прогресс · Данные</p>
   </div>
 
-  <!-- LOGIN CARD -->
   <div class="card-wrap">
     <div class="card" id="mainCard">
       <div class="card-glow"></div>
       <div id="alertBox" class="alert"></div>
 
-      <!-- Step 1: Discord -->
       <div class="step active" id="stepLogin">
         <div class="card-ttl">Добро пожаловать</div>
         <div class="card-sub">Войди через Discord, чтобы получить доступ к своему профилю и статистике.</div>
@@ -508,7 +323,6 @@ body { overflow-x: hidden; }
         <div class="hint">Нужен игровой ник (как в SAMP) &mdash; введёшь после входа.</div>
       </div>
 
-      <!-- Step 2: Nickname -->
       <div class="step" id="stepPickNick">
         <div class="card-ttl">Твой игровой ник</div>
         <div class="card-sub">Введи ник из SAMP &mdash; он используется для поиска подписки в базе.</div>
@@ -524,18 +338,15 @@ body { overflow-x: hidden; }
 
   <div class="divider"></div>
 
-  <!-- PRICING -->
   <div class="pricing-section" id="pricingSection">
     <div class="section-label">Тарифы и стоимость</div>
     <div class="pricing-grid">
-
       <div class="plan-card" id="planStd">
         <div class="plan-name">Стандартный</div>
         <div class="plan-price">100<sup>₽</sup></div>
         <div class="plan-period">30 дней</div>
         <div class="plan-desc">Полный доступ к сервису</div>
       </div>
-
       <div class="plan-card featured" id="planPro">
         <div class="plan-badge">Выгодно</div>
         <div class="plan-name">Навсегда</div>
@@ -544,35 +355,19 @@ body { overflow-x: hidden; }
         <div class="plan-desc">Полный доступ навсегда</div>
       </div>
     </div>
-
     <div class="payment-card">
       <div class="payment-label">Методы оплаты</div>
       <div class="payment-icons">
-        <!-- МИР -->
-        <div class="pay-chip">
-          <svg width="32" height="14" viewBox="0 0 60 26" fill="none"><rect width="60" height="26" rx="3" fill="#1A9F47"/><text x="7" y="19" font-family="Arial" font-size="14" font-weight="700" fill="white">МИР</text></svg>
-        </div>
-        <!-- VISA -->
-        <div class="pay-chip" style="background:#1A1F71; border-color:rgba(255,255,255,.15)">
-          <svg width="38" height="14" viewBox="0 0 80 26" fill="none"><text x="2" y="20" font-family="Arial" font-size="20" font-weight="700" font-style="italic" fill="white">VISA</text></svg>
-        </div>
-        <!-- MC -->
-        <div class="pay-chip">
-          <svg width="28" height="18" viewBox="0 0 28 18"><circle cx="10" cy="9" r="9" fill="#EB001B"/><circle cx="18" cy="9" r="9" fill="#F79E1B"/><path d="M14 3.8a9 9 0 0 1 0 10.4A9 9 0 0 1 14 3.8z" fill="#FF5F00"/></svg>
-        </div>
-        <!-- СБП -->
-        <div class="pay-chip">
-          <svg width="14" height="16" viewBox="0 0 14 16" fill="none"><path d="M0 5.5L5 0h4L4 5.5H0z" fill="#3BC34B"/><path d="M14 5.5L9 0H5l5 5.5h4z" fill="#24A3D9"/><path d="M0 10.5L5 16h4L4 10.5H0z" fill="#FFD12E"/><path d="M14 10.5L9 16H5l5-5.5h4z" fill="#FF4F42"/><path d="M0 5.5h4l3 2.5-3 2.5H0V5.5z" fill="#24A3D9"/><path d="M14 5.5h-4l-3 2.5 3 2.5h4V5.5z" fill="#3BC34B"/></svg>
-          <span style="font-size:.68rem;font-weight:700;color:rgba(255,255,255,.8)">СБП</span>
-        </div>
+        <div class="pay-chip"><svg width="32" height="14" viewBox="0 0 60 26" fill="none"><rect width="60" height="26" rx="3" fill="#1A9F47"/><text x="7" y="19" font-family="Arial" font-size="14" font-weight="700" fill="white">МИР</text></svg></div>
+        <div class="pay-chip" style="background:#1A1F71;border-color:rgba(255,255,255,.15)"><svg width="38" height="14" viewBox="0 0 80 26" fill="none"><text x="2" y="20" font-family="Arial" font-size="20" font-weight="700" font-style="italic" fill="white">VISA</text></svg></div>
+        <div class="pay-chip"><svg width="28" height="18" viewBox="0 0 28 18"><circle cx="10" cy="9" r="9" fill="#EB001B"/><circle cx="18" cy="9" r="9" fill="#F79E1B"/><path d="M14 3.8a9 9 0 0 1 0 10.4A9 9 0 0 1 14 3.8z" fill="#FF5F00"/></svg></div>
+        <div class="pay-chip"><svg width="14" height="16" viewBox="0 0 14 16" fill="none"><path d="M0 5.5L5 0h4L4 5.5H0z" fill="#3BC34B"/><path d="M14 5.5L9 0H5l5 5.5h4z" fill="#24A3D9"/><path d="M0 10.5L5 16h4L4 10.5H0z" fill="#FFD12E"/><path d="M14 10.5L9 16H5l5-5.5h4z" fill="#FF4F42"/><path d="M0 5.5h4l3 2.5-3 2.5H0V5.5z" fill="#24A3D9"/><path d="M14 5.5h-4l-3 2.5 3 2.5h4V5.5z" fill="#3BC34B"/></svg><span style="font-size:.68rem;font-weight:700;color:rgba(255,255,255,.8)">СБП</span></div>
       </div>
       <div class="payment-note">Для приобретения подписки напишите разработчику в Discord</div>
     </div>
   </div>
+</div>
 
-</div><!-- /page-root -->
-
-<!-- FOOTER -->
 <footer class="site-footer">
   <div class="footer-links">
     <a href="legal.html#contacts">Контакты</a>
@@ -585,255 +380,239 @@ body { overflow-x: hidden; }
 </footer>
 
 <script src="shared.js"></script>
-<script type="module">
+<script>
 // ══════════════════════════════════════════
-//  ANIME.JS 4.x import
+//  CURSOR GLOW
 // ══════════════════════════════════════════
-import { animate, createTimeline, stagger, splitText } from 'https://cdn.jsdelivr.net/npm/animejs@4.0.2/lib/anime.esm.min.js';
+var cg = document.getElementById('cursorGlow');
+document.addEventListener('mousemove', function(e) {
+  cg.style.transform = 'translate(' + e.clientX + 'px, ' + e.clientY + 'px)';
+});
 
 // ══════════════════════════════════════════
 //  CANVAS PARTICLES
 // ══════════════════════════════════════════
-(function initParticles() {
-  const canvas = document.getElementById('particleCanvas');
-  const ctx = canvas.getContext('2d');
-  let W, H, particles = [];
-
-  function resize() {
-    W = canvas.width = window.innerWidth;
-    H = canvas.height = window.innerHeight;
-  }
+(function() {
+  var canvas = document.getElementById('particleCanvas');
+  var ctx = canvas.getContext('2d');
+  var W, H, particles = [];
+  function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
   resize();
   window.addEventListener('resize', resize);
-
-  class Particle {
-    constructor() { this.reset(true); }
-    reset(fromBottom) {
-      this.x = Math.random() * W;
-      this.y = fromBottom ? H + Math.random() * 100 : Math.random() * H;
-      this.size = Math.random() * 1.5 + .3;
-      this.speed = Math.random() * .4 + .15;
-      this.opacity = 0;
-      this.maxOpacity = Math.random() * .4 + .1;
-      this.fadein = true;
-      this.dx = (Math.random() - .5) * .3;
-    }
-    update() {
-      this.y -= this.speed;
-      this.x += this.dx;
-      if (this.fadein) {
-        this.opacity += .005;
-        if (this.opacity >= this.maxOpacity) this.fadein = false;
-      } else {
-        this.opacity -= .003;
-      }
-      if (this.y < -10 || this.opacity <= 0) this.reset(true);
-    }
-    draw() {
-      ctx.beginPath();
-      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(59,130,246,${this.opacity})`;
-      ctx.fill();
-    }
-  }
-
-  for (let i = 0; i < 80; i++) particles.push(new Particle());
-
+  function Particle() { this.reset(true); }
+  Particle.prototype.reset = function(fromBottom) {
+    this.x = Math.random() * W;
+    this.y = fromBottom ? H + Math.random() * 100 : Math.random() * H;
+    this.size = Math.random() * 1.5 + .3;
+    this.speed = Math.random() * .4 + .15;
+    this.opacity = 0;
+    this.maxOpacity = Math.random() * .35 + .08;
+    this.fadein = true;
+    this.dx = (Math.random() - .5) * .3;
+  };
+  Particle.prototype.update = function() {
+    this.y -= this.speed; this.x += this.dx;
+    if (this.fadein) { this.opacity += .005; if (this.opacity >= this.maxOpacity) this.fadein = false; }
+    else { this.opacity -= .003; }
+    if (this.y < -10 || this.opacity <= 0) this.reset(true);
+  };
+  Particle.prototype.draw = function() {
+    ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI*2);
+    ctx.fillStyle = 'rgba(59,130,246,' + this.opacity + ')'; ctx.fill();
+  };
+  for (var i = 0; i < 80; i++) particles.push(new Particle());
   function loop() {
     ctx.clearRect(0, 0, W, H);
-    particles.forEach(p => { p.update(); p.draw(); });
+    particles.forEach(function(p) { p.update(); p.draw(); });
     requestAnimationFrame(loop);
   }
   loop();
 })();
 
 // ══════════════════════════════════════════
-//  CURSOR GLOW
+//  LOADING ANIMATION (pure CSS transitions)
 // ══════════════════════════════════════════
-const cursorGlow = document.getElementById('cursorGlow');
-document.addEventListener('mousemove', e => {
-  cursorGlow.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
-});
+var _loadDone = false;
+var _onLoadDoneCallback = null;
 
-// ══════════════════════════════════════════
-//  LOADING SCREEN ANIMATION
-// ══════════════════════════════════════════
-function runLoadingAnimation(onDone) {
-  const bar     = document.getElementById('lsBar');
-  const pct     = document.getElementById('lsPct');
-  const fill    = document.getElementById('lsLogoFill');
-  const sub     = document.getElementById('lsSub');
-
-  // Animate subtitle in
-  animate(sub, {
-    opacity: [0, 1],
-    y: [8, 0],
-    duration: 600,
-    delay: 200,
-    ease: 'out(3)',
-  });
-
-  // Bar fill + percent counter
-  let progress = { val: 0 };
-  animate(progress, {
-    val: 100,
-    duration: 1800,
-    ease: 'out(2)',
-    delay: 100,
-    onUpdate: () => {
-      const v = Math.round(progress.val);
-      bar.style.width = v + '%';
-      pct.textContent = v + '%';
-      // Sync logo fill clip-path
-      fill.style.clipPath = `inset(0 ${100 - v}% 0 0)`;
-    },
-    onComplete: () => {
-      setTimeout(onDone, 300);
+function runLoadingBar(callback) {
+  var bar  = document.getElementById('lsBar');
+  var pct  = document.getElementById('lsPct');
+  var fill = document.getElementById('lsLogoFill');
+  var sub  = document.getElementById('lsSub');
+  var val  = 0;
+  sub.style.opacity = '1';
+  var start = null;
+  var duration = 1800;
+  function step(ts) {
+    if (!start) start = ts;
+    var progress = Math.min((ts - start) / duration, 1);
+    // ease out
+    var eased = 1 - Math.pow(1 - progress, 2);
+    val = Math.round(eased * 100);
+    bar.style.width = val + '%';
+    pct.textContent = val + '%';
+    fill.style.clipPath = 'inset(0 ' + (100 - val) + '% 0 0)';
+    if (progress < 1) {
+      requestAnimationFrame(step);
+    } else {
+      setTimeout(callback, 300);
     }
-  });
+  }
+  requestAnimationFrame(step);
 }
 
 // ══════════════════════════════════════════
-//  PAGE ENTRANCE ANIMATION
+//  PAGE ENTRANCE (CSS class-based)
 // ══════════════════════════════════════════
 function runPageEntrance() {
-  const root = document.getElementById('pageRoot');
-  root.classList.add('visible');
+  document.getElementById('pageRoot').classList.add('visible');
+  function delay(fn, ms) { setTimeout(fn, ms); }
 
-  const tl = createTimeline({ defaults: { ease: 'out(3)' } });
+  delay(function() { document.getElementById('heroEyebrow').classList.add('show'); }, 50);
+  delay(function() { document.getElementById('hw1').classList.add('show'); }, 150);
+  delay(function() { document.getElementById('hw2').classList.add('show'); }, 280);
+  delay(function() { document.getElementById('heroLine').classList.add('show'); }, 450);
+  delay(function() { document.getElementById('heroDesc').classList.add('show'); }, 580);
+  delay(function() { document.getElementById('mainCard').classList.add('show'); }, 350);
+  delay(function() { document.getElementById('pricingSection').classList.add('show'); }, 700);
+  delay(function() { document.getElementById('planStd').classList.add('show'); }, 850);
+  delay(function() {
+    var p = document.getElementById('planPro');
+    p.style.transitionDelay = '0s';
+    p.classList.add('show');
+  }, 980);
+}
 
-  // Hero eyebrow
-  tl.add('#heroEyebrow', {
-    opacity: [0, 1], y: [16, 0], duration: 600,
-  }, 0);
-
-  // Hero title words
-  const words = document.querySelectorAll('.hero-title .word-inner');
-  tl.add(words, {
-    y: ['100%', '0%'],
-    duration: 700,
-    ease: 'out(4)',
-    delay: stagger(120),
-  }, 80);
-
-  // Hero line
-  tl.add('#heroLine', {
-    width: ['0%', '200px'],
-    opacity: [0, 1],
-    duration: 600,
-  }, 500);
-
-  // Hero desc
-  tl.add('#heroDesc', {
-    opacity: [0, 1], y: [12, 0], duration: 500,
+// ══════════════════════════════════════════
+//  HIDE LOADING
+// ══════════════════════════════════════════
+function hideLoading() {
+  var el = document.getElementById('loadingScreen');
+  el.classList.add('hidden');
+  setTimeout(function() {
+    el.style.display = 'none';
+    runPageEntrance();
   }, 600);
-
-  // Card
-  tl.add('#mainCard', {
-    opacity: [0, 1],
-    y: [32, 0],
-    rotateX: [4, 0],
-    duration: 700,
-    ease: 'out(4)',
-  }, 400);
-
-  // Pricing section
-  tl.add('#pricingSection', {
-    opacity: [0, 1], y: [24, 0], duration: 600,
-  }, 700);
-
-  // Plan cards stagger
-  tl.add('.plan-card', {
-    opacity: [0, 1], y: [20, 0], scale: [.95, 1],
-    duration: 500,
-    delay: stagger(100),
-  }, 900);
-
-  // Payment card
-  tl.add('.payment-card', {
-    opacity: [0, 1], y: [12, 0], duration: 400,
-  }, 1100);
 }
 
 // ══════════════════════════════════════════
-//  BUTTON CLICK BURST ANIMATION
+//  ALERT / STEP helpers
 // ══════════════════════════════════════════
-function btnClickBurst(btn) {
-  animate(btn, {
-    scale: [1, .97, 1.02, 1],
-    duration: 350,
-    ease: 'out(3)',
-  });
-}
-
-document.getElementById('dcAuthBtn').addEventListener('mousedown', function() {
-  btnClickBurst(this);
-});
-
-// ══════════════════════════════════════════
-//  PLAN CARD HOVER TILT
-// ══════════════════════════════════════════
-document.querySelectorAll('.plan-card').forEach(card => {
-  card.addEventListener('mousemove', e => {
-    const r = card.getBoundingClientRect();
-    const x = (e.clientX - r.left) / r.width - .5;
-    const y = (e.clientY - r.top)  / r.height - .5;
-    card.style.transform = `translateY(-5px) scale(1.02) rotateY(${x * 8}deg) rotateX(${-y * 8}deg)`;
-  });
-  card.addEventListener('mouseleave', () => {
-    animate(card, {
-      rotateX: 0, rotateY: 0,
-      translateY: 0, scale: 1,
-      duration: 500, ease: 'out(3)',
-    });
-  });
-});
-
-// ══════════════════════════════════════════
-//  MAKE FUNCTIONS GLOBAL (called from HTML)
-// ══════════════════════════════════════════
-window._animeAnimate = animate;
-window._animeStagger = stagger;
-
-// Override showAlert for animation
-window.showAlert = function(msg, type='err') {
-  const el = document.getElementById('alertBox');
+function showAlert(msg, type) {
+  type = type || 'err';
+  var el = document.getElementById('alertBox');
   el.className = 'alert show ' + type;
   el.textContent = msg;
-  animate(el, { opacity: [0, 1], y: [-6, 0], duration: 300, ease: 'out(3)' });
-};
-window.hideAlert = function() {
-  document.getElementById('alertBox').className = 'alert';
-};
-window.goStep = function(name) {
-  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+}
+function hideAlert() { document.getElementById('alertBox').className = 'alert'; }
+function goStep(name) {
+  document.querySelectorAll('.step').forEach(function(s) { s.classList.remove('active'); });
   document.getElementById('step' + name).classList.add('active');
   hideAlert();
-};
+}
+
+// ══════════════════════════════════════════
+//  DISCORD OAUTH
+// ══════════════════════════════════════════
+function loginDiscord() {
+  var btn = document.getElementById('dcAuthBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="sp"></span> Перенаправление...';
+  var p = new URLSearchParams({
+    client_id: DISCORD_CLIENT_ID,
+    redirect_uri: DISCORD_REDIRECT,
+    response_type: 'token',
+    scope: DISCORD_SCOPE
+  });
+  window.location.href = 'https://discord.com/api/oauth2/authorize?' + p;
+}
+
+var pendingDC = null;
+
+async function handleDiscordCallback() {
+  var params = new URLSearchParams(window.location.hash.slice(1));
+  var token = params.get('access_token');
+  if (!token) { hideLoading(); return; }
+  history.replaceState(null, '', window.location.pathname);
+  showAlert('Получаем данные Discord...', 'info');
+  try {
+    var res = await fetchWithTimeout('https://discord.com/api/users/@me',
+      { headers: { Authorization: 'Bearer ' + token } }, 8000);
+    if (!res.ok) throw new Error('Discord API ' + res.status);
+    var dc = await res.json();
+    var avatarUrl = null;
+    if (dc.avatar) {
+      var ext = dc.avatar.startsWith('a_') ? 'gif' : 'png';
+      avatarUrl = 'https://cdn.discordapp.com/avatars/' + dc.id + '/' + dc.avatar + '.' + ext + '?size=512';
+    } else {
+      var idx = dc.discriminator && dc.discriminator !== '0'
+        ? parseInt(dc.discriminator) % 5
+        : Number(BigInt(dc.id) >> 22n) % 6;
+      avatarUrl = 'https://cdn.discordapp.com/embed/avatars/' + idx + '.png';
+    }
+    var db = await readDB();
+    var users = db.users, sha = db.sha;
+    var user = users.find(function(u) { return u.discordId === dc.id; });
+    if (user) {
+      user.avatar = avatarUrl;
+      user.lastLogin = new Date().toISOString();
+      await writeDB(users, sha);
+      saveSession(user);
+      hideAlert();
+      hideLoading();
+      goMyProfile();
+    } else {
+      pendingDC = { id: dc.id, email: dc.email || null, name: dc.global_name || dc.username, avatarUrl: avatarUrl };
+      hideAlert();
+      hideLoading();
+      document.getElementById('dcNick').value = pendingDC.name;
+      goStep('PickNick');
+    }
+  } catch(e) {
+    hideLoading();
+    showAlert('Ошибка Discord: ' + e.message);
+  }
+}
+
+async function finishDiscordReg() {
+  var nick = document.getElementById('dcNick').value.trim();
+  if (!nick) { showAlert('Введи ник'); return; }
+  if (!/^[a-zA-Z0-9_.[\]-]{2,36}$/.test(nick)) { showAlert('Ник: буквы, цифры, _ . - [] (2–36 символов)'); return; }
+  var btn = document.getElementById('dcBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="sp"></span>Создаём...';
+  try {
+    var db = await readDB();
+    var users = db.users, sha = db.sha;
+    if (users.find(function(u) { return u.nick.toLowerCase() === nick.toLowerCase(); })) {
+      showAlert('Этот ник уже занят'); return;
+    }
+    var u = { id: Date.now().toString(36), nick: nick, email: pendingDC.email || '',
+      discordId: pendingDC.id, avatar: pendingDC.avatarUrl, via: 'discord',
+      createdAt: new Date().toISOString(), lastLogin: new Date().toISOString() };
+    users.push(u);
+    await writeDB(users, sha);
+    saveSession(u);
+    pendingDC = null;
+    goMyProfile();
+  } catch(e) {
+    showAlert('Ошибка: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = 'Создать профиль &rarr;';
+  }
+}
 
 // ══════════════════════════════════════════
 //  INIT
 // ══════════════════════════════════════════
-window.hideLoading = function() {
-  const el = document.getElementById('loadingScreen');
-  animate(el, {
-    opacity: [1, 0],
-    scale: [1, 1.04],
-    duration: 500,
-    ease: 'out(3)',
-    onComplete: () => {
-      el.style.display = 'none';
-      runPageEntrance();
-    }
-  });
-};
+window.addEventListener('DOMContentLoaded', function() {
+  var emergency = setTimeout(hideLoading, 7000);
 
-window.addEventListener('DOMContentLoaded', async () => {
-  // Start loading animation immediately
-  runLoadingAnimation(async () => {
-    const emergency = setTimeout(() => hideLoading(), 6000);
+  runLoadingBar(async function() {
     try {
-      const saved = loadSession();
+      var saved = loadSession();
       if (saved && !window.location.hash.includes('access_token')) {
         clearTimeout(emergency);
         hideLoading();
@@ -847,113 +626,12 @@ window.addEventListener('DOMContentLoaded', async () => {
       }
       clearTimeout(emergency);
       hideLoading();
-    } catch (e) {
+    } catch(e) {
       clearTimeout(emergency);
       hideLoading();
     }
   });
 });
 </script>
-
-<script>
-// ══════════════════════════════════════════
-//  FUNCTIONAL JS (not using modules)
-// ══════════════════════════════════════════
-function loginDiscord() {
-  const btn = document.getElementById('dcAuthBtn');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="sp"></span> Перенаправление...';
-  const p = new URLSearchParams({
-    client_id: DISCORD_CLIENT_ID,
-    redirect_uri: DISCORD_REDIRECT,
-    response_type: 'token',
-    scope: DISCORD_SCOPE
-  });
-  window.location.href = 'https://discord.com/api/oauth2/authorize?' + p;
-}
-
-let pendingDC = null;
-
-async function handleDiscordCallback() {
-  const params = new URLSearchParams(window.location.hash.slice(1));
-  const token = params.get('access_token');
-  if (!token) { hideLoading(); return; }
-  history.replaceState(null, '', window.location.pathname);
-  showAlert('Получаем данные Discord...', 'info');
-  try {
-    const res = await fetchWithTimeout('https://discord.com/api/users/@me',
-      { headers: { Authorization: 'Bearer ' + token } }, 8000);
-    if (!res.ok) throw new Error('Discord API ' + res.status);
-    const dc = await res.json();
-    let avatarUrl = null;
-    if (dc.avatar) {
-      const ext = dc.avatar.startsWith('a_') ? 'gif' : 'png';
-      avatarUrl = 'https://cdn.discordapp.com/avatars/' + dc.id + '/' + dc.avatar + '.' + ext + '?size=512';
-    } else {
-      const idx = dc.discriminator && dc.discriminator !== '0'
-        ? parseInt(dc.discriminator) % 5
-        : Number(BigInt(dc.id) >> 22n) % 6;
-      avatarUrl = 'https://cdn.discordapp.com/embed/avatars/' + idx + '.png';
-    }
-    const { users, sha } = await readDB();
-    let user = users.find(u => u.discordId === dc.id);
-    if (user) {
-      user.avatar = avatarUrl;
-      user.lastLogin = new Date().toISOString();
-      await writeDB(users, sha);
-      saveSession(user);
-      hideAlert();
-      hideLoading();
-      goMyProfile();
-    } else {
-      pendingDC = { id: dc.id, email: dc.email || null, name: dc.global_name || dc.username, avatarUrl };
-      hideAlert();
-      hideLoading();
-      document.getElementById('dcNick').value = pendingDC.name;
-      goStep('PickNick');
-    }
-  } catch (e) {
-    hideLoading();
-    showAlert('Ошибка Discord: ' + e.message);
-  }
-}
-
-async function finishDiscordReg() {
-  const nick = document.getElementById('dcNick').value.trim();
-  if (!nick) { showAlert('Введи ник'); return; }
-  if (!/^[a-zA-Z0-9_.[\]-]{2,36}$/.test(nick)) {
-    showAlert('Ник: буквы, цифры, _ . - [] (2–36 символов)'); return;
-  }
-  const btn = document.getElementById('dcBtn');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="sp"></span>Создаём...';
-  try {
-    const { users, sha } = await readDB();
-    if (users.find(u => u.nick.toLowerCase() === nick.toLowerCase())) {
-      showAlert('Этот ник уже занят'); return;
-    }
-    const u = {
-      id: Date.now().toString(36), nick,
-      email: pendingDC.email || '',
-      discordId: pendingDC.id,
-      avatar: pendingDC.avatarUrl,
-      via: 'discord',
-      createdAt: new Date().toISOString(),
-      lastLogin: new Date().toISOString()
-    };
-    users.push(u);
-    await writeDB(users, sha);
-    saveSession(u);
-    pendingDC = null;
-    goMyProfile();
-  } catch (e) {
-    showAlert('Ошибка: ' + e.message);
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = 'Создать профиль &rarr;';
-  }
-}
-</script>
-
 </body>
 </html>
