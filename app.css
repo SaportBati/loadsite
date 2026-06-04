@@ -90,6 +90,7 @@ body{
 a{color:inherit}
 
 /* ---------- AMBIENT BACKGROUND ---------- */
+#dotGrid{position:fixed;inset:0;z-index:0;pointer-events:none}
 .bg-ambient{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
 .bg-ambient .dots{position:absolute;inset:0;background-image:radial-gradient(var(--dot) 1px,transparent 1px);background-size:26px 26px;opacity:.7}
 .bg-ambient .blob{position:absolute;border-radius:50%;filter:blur(70px);opacity:.55}

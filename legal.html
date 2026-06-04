@@ -1,288 +1,300 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Правовые документы — Load-Repoer</title>
+<title>Правовые документы — Load Report</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<script>(function(){try{var m=localStorage.getItem('lr_theme_mode')||'system';var d=m==='system'?(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'):m;document.documentElement.setAttribute('data-theme',d);}catch(e){}})();</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="shared.css">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="app.css">
 <style>
-.docs-wrap{position:relative;z-index:1;max-width:860px;margin:0 auto;padding:100px 24px 60px}
-.docs-nav{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:40px}
-.docs-nav a{padding:7px 16px;border-radius:8px;font-size:.8rem;font-weight:500;letter-spacing:.05em;text-transform:uppercase;background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--muted);text-decoration:none;transition:all .2s}
-.docs-nav a:hover,.docs-nav a.active{background:rgba(59,130,246,.12);border-color:rgba(59,130,246,.35);color:var(--blue)}
-.doc-section{display:none;animation:appear .4s cubic-bezier(.22,1,.36,1) both}
-.doc-section.show{display:block}
-.doc-title{font-family:'Bebas Neue',sans-serif;font-size:2.2rem;letter-spacing:.06em;background:linear-gradient(90deg,var(--blue),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px}
-.doc-date{font-size:.8rem;color:var(--muted);margin-bottom:32px}
-.doc-section h2{font-size:1rem;font-weight:600;color:var(--cyan);text-transform:uppercase;letter-spacing:.08em;margin:32px 0 12px;padding-bottom:6px;border-bottom:1px solid var(--border)}
-.doc-section h3{font-size:.9rem;font-weight:600;color:var(--text);margin:20px 0 8px}
-.doc-section p{font-size:.9rem;line-height:1.75;color:rgba(226,232,240,.8);margin-bottom:10px}
-.doc-section ul,ol{padding-left:20px;margin-bottom:10px}
-.doc-section li{font-size:.9rem;line-height:1.75;color:rgba(226,232,240,.8);margin-bottom:4px}
-.doc-section table{width:100%;border-collapse:collapse;margin:12px 0}
-.doc-section td,th{padding:10px 14px;border:1px solid var(--border);font-size:.85rem;text-align:left}
-.doc-section th{background:rgba(59,130,246,.08);color:var(--cyan);font-weight:600}
-.doc-section td{color:rgba(226,232,240,.8)}
-.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0}
-.contact-card{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:12px;padding:16px 20px}
-.contact-card .label{font-size:.7rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
-.contact-card .value{font-size:.9rem;color:var(--text)}
-.contact-card a{color:var(--blue);text-decoration:none}
-.highlight-box{background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.2);border-radius:12px;padding:16px 20px;margin:16px 0}
-.highlight-box p{margin:0;color:rgba(147,197,253,.9)}
+.docs-wrap{position:relative;z-index:1;max-width:880px;margin:0 auto;padding:104px 24px 60px}
+.docs-head{margin-bottom:30px}
+.docs-eyebrow{font-family:var(--font-mono);font-size:.7rem;font-weight:700;letter-spacing:.24em;text-transform:uppercase;color:var(--theme-color);margin-bottom:12px}
+.docs-h1{font-family:var(--font-disp);font-weight:700;font-size:clamp(2.4rem,5vw,3.4rem);letter-spacing:-.02em;color:var(--text);line-height:1}
+.docs-nav{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:36px}
+.docs-nav a{padding:9px 16px;border-radius:var(--r-sm);font-family:var(--font-body);font-size:.8rem;font-weight:600;letter-spacing:.02em;background:var(--surf);border:1px solid var(--border);color:var(--muted);text-decoration:none;transition:all .2s var(--ease);cursor:pointer}
+.docs-nav a:hover{transform:translateY(-2px);color:var(--text);border-color:var(--border-strong)}
+.docs-nav a.active{background:linear-gradient(135deg,var(--theme-color),var(--violet));border-color:transparent;color:#fff;box-shadow:0 10px 22px -12px var(--theme-glow)}
+.doc-section{display:none}
+.doc-section.show{display:block;animation:docIn .45s var(--ease)}
+@keyframes docIn{from{transform:translateY(10px)}to{transform:none}}
+.doc-card{background:var(--surf);border:1px solid var(--border);border-radius:var(--r-lg);padding:36px 40px;box-shadow:var(--shadow-card)}
+@media(max-width:600px){.doc-card{padding:26px 22px}}
+.doc-title{font-family:var(--font-disp);font-weight:700;font-size:2rem;letter-spacing:-.01em;color:var(--text);margin-bottom:6px}
+.doc-date{font-family:var(--font-mono);font-size:.76rem;color:var(--muted);margin-bottom:28px}
+.doc-section h2{font-family:var(--font-disp);font-size:1.15rem;font-weight:600;color:var(--text);letter-spacing:.01em;margin:30px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.doc-section h2:first-of-type{margin-top:0}
+.doc-section h3{font-size:.94rem;font-weight:700;color:var(--text);margin:20px 0 8px}
+.doc-section p{font-size:.92rem;line-height:1.8;color:var(--text-soft);margin-bottom:11px}
+.doc-section ul,.doc-section ol{padding-left:22px;margin-bottom:11px}
+.doc-section li{font-size:.92rem;line-height:1.8;color:var(--text-soft);margin-bottom:5px}
+.doc-section strong{color:var(--text);font-weight:700}
+.doc-section a{color:var(--theme-color);text-decoration:none}
+.doc-section a:hover{text-decoration:underline}
+.doc-section table{width:100%;border-collapse:collapse;margin:14px 0}
+.doc-section td,.doc-section th{padding:11px 15px;border:1px solid var(--border);font-size:.86rem;text-align:left}
+.doc-section th{background:rgba(var(--theme-color-rgb),.08);color:var(--theme-color);font-weight:700;font-family:var(--font-mono);font-size:.74rem;letter-spacing:.06em;text-transform:uppercase}
+.doc-section td{color:var(--text-soft)}
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:18px 0}
+.contact-card{background:var(--surf-sunken);border:1px solid var(--border-2);border-radius:var(--r-md);padding:16px 20px}
+.contact-card .label{font-family:var(--font-mono);font-size:.62rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+.contact-card .value{font-size:.9rem;color:var(--text);line-height:1.5}
+.highlight-box{background:rgba(var(--theme-color-rgb),.07);border:1px solid rgba(var(--theme-color-rgb),.22);border-radius:var(--r-md);padding:16px 20px;margin:18px 0}
+.highlight-box p{margin:0;color:var(--theme-color)}
 @media(max-width:600px){.contact-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-<div class="bg"><div class="grid-lines"></div><div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div><div class="noise"></div></div>
+
+<div class="bg-ambient"><div class="blob b1"></div><div class="blob b2"></div></div>
+<canvas id="dotGrid"></canvas>
 
 <nav class="nav">
-  <a class="nav-brand" href="index.html">LOAD-REPOER</a>
+  <a class="nav-brand" href="index.html"><span class="logo-mark">L</span>LOAD<b>REPORT</b></a>
   <div class="nav-right">
-    <a href="index.html" style="color:var(--muted);font-size:.85rem;text-decoration:none">← На главную</a>
+    <div data-theme-switch></div>
+    <a href="index.html" class="nav-link">← На главную</a>
   </div>
 </nav>
 
 <div class="docs-wrap">
+  <div class="docs-head">
+    <div class="docs-eyebrow">// Правовая информация</div>
+    <div class="docs-h1">Документы и условия</div>
+  </div>
+
   <div class="docs-nav">
-    <a href="#contacts"   class="active" onclick="show('contacts',this)">Контакты</a>
-    <a href="#oferta"     onclick="show('oferta',this)">Договор оферты</a>
-    <a href="#privacy"    onclick="show('privacy',this)">Политика персданных</a>
-    <a href="#refund"     onclick="show('refund',this)">Возврат и отмена</a>
-    <a href="#delivery"   onclick="show('delivery',this)">Условия оказания услуг</a>
-    <a href="#license"    onclick="show('license',this)">Лицензия</a>
+    <a href="#contacts" class="active" onclick="show(event,'contacts')">Контакты</a>
+    <a href="#oferta" onclick="show(event,'oferta')">Договор оферты</a>
+    <a href="#privacy" onclick="show(event,'privacy')">Политика персданных</a>
+    <a href="#refund" onclick="show(event,'refund')">Возврат и отмена</a>
+    <a href="#delivery" onclick="show(event,'delivery')">Условия услуг</a>
+    <a href="#license" onclick="show(event,'license')">Лицензия</a>
   </div>
 
   <!-- КОНТАКТЫ -->
   <div id="contacts" class="doc-section show">
-    <div class="doc-title">Контактная информация</div>
-    <div class="doc-date">Сервис Load-Repoer</div>
-
-    <div class="contact-grid">
-      <div class="contact-card">
-        <div class="label">Сервис</div>
-        <div class="value">Load-Repoer</div>
+    <div class="doc-card">
+      <div class="doc-title">Контактная информация</div>
+      <div class="doc-date">Сервис Load Report</div>
+      <div class="contact-grid">
+        <div class="contact-card"><div class="label">Сервис</div><div class="value">Load Report</div></div>
+        <div class="contact-card"><div class="label">Правовой статус</div><div class="value">Физическое лицо</div></div>
+        <div class="contact-card"><div class="label">Email</div><div class="value"><a href="/cdn-cgi/l/email-protection#c7a0b5a2a5a2a9acaea9aaa6b3b1a2beb1bea4a2b4aba6a4a8b1aef5f7f7f087a0aaa6aeabe9a4a8aa"><span class="__cf_email__" data-cfemail="8aedf8efe8efe4e1e3e4e7ebfefceff3fcf3e9eff9e6ebe9e5fce3b8bababdcaede7ebe3e6a4e9e5e7">[email&#160;protected]</span></a></div></div>
+        <div class="contact-card"><div class="label">Телефон</div><div class="value"><a href="tel:+79042455080">+7 (904) 245-50-80</a></div></div>
+        <div class="contact-card"><div class="label">Адрес</div><div class="value">г. Ижевск, Россия</div></div>
+        <div class="contact-card"><div class="label">Служба поддержки</div><div class="value"><a href="profile.html">Написать в поддержку на сайте →</a></div></div>
       </div>
-      <div class="contact-card">
-        <div class="label">Правовой статус</div>
-        <div class="value">Физическое лицо</div>
-      </div>
-      <div class="contact-card">
-        <div class="label">Email</div>
-        <div class="value"><a href="/cdn-cgi/l/email-protection#91f6e3f4f3f4fffaf8fffcf0e5e7f4e8e7e8f2f4e2fdf0f2fee7f8a3a1a1a6d1f6fcf0f8fdbff2fefc"><span class="__cf_email__" data-cfemail="cdaabfa8afa8a3a6a4a3a0acb9bba8b4bbb4aea8bea1acaea2bba4fffdfdfa8daaa0aca4a1e3aea2a0">[email&#160;protected]</span></a></div>
-      </div>
-      <div class="contact-card">
-        <div class="label">Телефон</div>
-        <div class="value"><a href="tel:+79042455080">+7 (904) 245-50-80</a></div>
-      </div>
-      <div class="contact-card">
-        <div class="label">Адрес</div>
-        <div class="value">г. Ижевск, Россия</div>
-      </div>
-      <div class="contact-card">
-        <div class="label">Служба поддержки</div>
-        <div class="value"><a href="mailto:grebenkinmatveyvyceslacovi2007@gmail.com">grebenkinmatveyvyceslacovi2007@gmail.com</a><br><a href="profile.html" style="color:var(--cyan)">Написать в поддержку на сайте →</a></div>
-      </div>
-    </div>
-
-    <h2>Время работы поддержки</h2>
-    <p>Служба поддержки работает ежедневно. Ответ на обращения предоставляется в течение 24 часов с момента получения запроса.</p>
-
-    <div class="highlight-box">
-      <p>По всем вопросам, связанным с оплатой, активацией подписки или техническими проблемами — пишите на email или звоните по телефону выше.</p>
+      <h2>Время работы поддержки</h2>
+      <p>Служба поддержки работает ежедневно. Ответ на обращения предоставляется в течение 24 часов с момента получения запроса.</p>
+      <div class="highlight-box"><p>По всем вопросам, связанным с оплатой, активацией подписки или техническими проблемами — пишите на email или звоните по телефону выше.</p></div>
     </div>
   </div>
 
   <!-- ДОГОВОР ОФЕРТЫ -->
   <div id="oferta" class="doc-section">
-    <div class="doc-title">Договор публичной оферты</div>
-    <div class="doc-date">Редакция от 14 марта 2025 г.</div>
-
-    <h2>1. Общие положения</h2>
-    <p>1.1. Настоящий документ является публичной офертой физического лица, осуществляющего деятельность под наименованием <strong>Load-Repoer</strong> (далее — «Исполнитель»), и содержит все существенные условия договора на оказание услуг доступа к программному инструменту.</p>
-    <p>1.2. Акцептом настоящей оферты является совершение Пользователем оплаты услуги на сайте <strong>loadrepr.ru</strong>.</p>
-    <p>1.3. С момента акцепта оферты Пользователь считается ознакомленным и согласным со всеми условиями настоящего договора.</p>
-
-    <h2>2. Предмет договора</h2>
-    <p>2.1. Исполнитель предоставляет Пользователю доступ к сервису <strong>Load-Repoer</strong> — веб-инструменту для отслеживания игровой статистики в онлайн-игре Arizona Role Play (платформа SA:MP).</p>
-    <p>2.2. Услуга предоставляется в виде активации подписки на учётную запись Пользователя в течение выбранного периода.</p>
-    <p>2.3. Услуга не является программным обеспечением для модификации или взлома игровых процессов.</p>
-
-    <h2>3. Стоимость и порядок оплаты</h2>
-    <table>
-      <tr><th>Тариф</th><th>Срок</th><th>Стоимость</th></tr>
-      <tr><td>Стандартный</td><td>30 дней</td><td>100 ₽</td></tr>
-      <tr><td>Навсегда</td><td>Бессрочно</td><td>300 ₽</td></tr>
-    </table>
-    <p>3.1. Оплата производится в рублях РФ через платёжные системы, представленные на сайте.</p>
-    <p>3.2. Доступ активируется автоматически после подтверждения платежа.</p>
-
-    <h2>4. Права и обязанности сторон</h2>
-    <h3>Исполнитель обязан:</h3>
-    <ul>
-      <li>Обеспечить доступ к сервису в течение оплаченного периода</li>
-      <li>Обеспечить техническую поддержку пользователей</li>
-      <li>Уведомлять о плановых технических работах</li>
-    </ul>
-    <h3>Пользователь обязан:</h3>
-    <ul>
-      <li>Использовать сервис только в личных некоммерческих целях</li>
-      <li>Не передавать доступ к аккаунту третьим лицам</li>
-      <li>Соблюдать правила платформы Arizona Role Play</li>
-    </ul>
-
-    <h2>5. Ответственность</h2>
-    <p>5.1. Исполнитель не несёт ответственности за действия третьих лиц, а также за сбои в работе сервиса, вызванные обстоятельствами непреодолимой силы.</p>
-    <p>5.2. Совокупная ответственность Исполнителя ограничена суммой, уплаченной Пользователем за текущий период подписки.</p>
-
-    <h2>6. Срок действия</h2>
-    <p>6.1. Оферта действует бессрочно до момента её отзыва Исполнителем.</p>
-    <p>6.2. Исполнитель вправе изменять условия оферты, уведомив Пользователей путём размещения новой редакции на сайте.</p>
-
-    <h2>7. Контакты</h2>
-    <p>Email: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="2a4d584f484f44414344474b5e5c4f535c53494f59464b49455c43181a1a1d6a4d474b434604494547">[email&#160;protected]</a><br>Телефон: +7 (904) 245-50-80<br>Адрес: г. Ижевск, Россия</p>
+    <div class="doc-card">
+      <div class="doc-title">Договор публичной оферты</div>
+      <div class="doc-date">Редакция от 14 марта 2025 г.</div>
+      <h2>1. Общие положения</h2>
+      <p>1.1. Настоящий документ является публичной офертой физического лица, осуществляющего деятельность под наименованием <strong>Load Report</strong> (далее — «Исполнитель»), и содержит все существенные условия договора на оказание услуг доступа к программному инструменту.</p>
+      <p>1.2. Акцептом настоящей оферты является совершение Пользователем оплаты услуги на сайте <strong>loadrepr.ru</strong>.</p>
+      <p>1.3. С момента акцепта оферты Пользователь считается ознакомленным и согласным со всеми условиями настоящего договора.</p>
+      <h2>2. Предмет договора</h2>
+      <p>2.1. Исполнитель предоставляет Пользователю доступ к сервису <strong>Load Report</strong> — веб-инструменту для отслеживания игровой статистики в онлайн-игре Arizona Role Play (платформа SA:MP).</p>
+      <p>2.2. Услуга предоставляется в виде активации подписки на учётную запись Пользователя в течение выбранного периода.</p>
+      <p>2.3. Услуга не является программным обеспечением для модификации или взлома игровых процессов.</p>
+      <h2>3. Стоимость и порядок оплаты</h2>
+      <table>
+        <tr><th>Тариф</th><th>Срок</th><th>Стоимость</th></tr>
+        <tr><td>Стандартный</td><td>30 дней</td><td>300 ₽</td></tr>
+        <tr><td>Навсегда</td><td>Бессрочно</td><td>500 ₽</td></tr>
+      </table>
+      <p>3.1. Оплата производится в рублях РФ через платёжные системы, представленные на сайте.</p>
+      <p>3.2. Доступ активируется автоматически после подтверждения платежа.</p>
+      <h2>4. Права и обязанности сторон</h2>
+      <h3>Исполнитель обязан:</h3>
+      <ul>
+        <li>Обеспечить доступ к сервису в течение оплаченного периода</li>
+        <li>Обеспечить техническую поддержку пользователей</li>
+        <li>Уведомлять о плановых технических работах</li>
+      </ul>
+      <h3>Пользователь обязан:</h3>
+      <ul>
+        <li>Использовать сервис только в личных некоммерческих целях</li>
+        <li>Не передавать доступ к аккаунту третьим лицам</li>
+        <li>Соблюдать правила платформы Arizona Role Play</li>
+      </ul>
+      <h2>5. Ответственность</h2>
+      <p>5.1. Исполнитель не несёт ответственности за действия третьих лиц, а также за сбои в работе сервиса, вызванные обстоятельствами непреодолимой силы.</p>
+      <p>5.2. Совокупная ответственность Исполнителя ограничена суммой, уплаченной Пользователем за текущий период подписки.</p>
+      <h2>6. Срок действия</h2>
+      <p>6.1. Оферта действует бессрочно до момента её отзыва Исполнителем.</p>
+      <p>6.2. Исполнитель вправе изменять условия оферты, уведомив Пользователей путём размещения новой редакции на сайте.</p>
+      <h2>7. Контакты</h2>
+      <p>Email: <a href="/cdn-cgi/l/email-protection#f196839493949f9a989f9c908587948887889294829d90929e8798c3c1c1c6b1969c90989ddf929e9c"><span class="__cf_email__" data-cfemail="ea8d988f888f84818384878b9e9c8f939c93898f99868b89859c83d8dadaddaa8d878b8386c4898587">[email&#160;protected]</span></a><br>Телефон: +7 (904) 245-50-80<br>Адрес: г. Ижевск, Россия</p>
+    </div>
   </div>
 
   <!-- ПОЛИТИКА ПЕРСДАННЫХ -->
   <div id="privacy" class="doc-section">
-    <div class="doc-title">Политика конфиденциальности</div>
-    <div class="doc-date">Редакция от 14 марта 2025 г.</div>
-
-    <h2>1. Общие положения</h2>
-    <p>1.1. Настоящая Политика конфиденциальности описывает порядок сбора, хранения, использования и защиты персональных данных пользователей сервиса <strong>Load-Repoer</strong> (loadrepr.ru).</p>
-    <p>1.2. Используя сервис, Пользователь даёт согласие на обработку своих персональных данных в соответствии с настоящей Политикой.</p>
-
-    <h2>2. Какие данные мы собираем</h2>
-    <ul>
-      <li>Discord ID и публичные данные профиля Discord (имя, аватар)</li>
-      <li>Адрес электронной почты (при авторизации через Discord)</li>
-      <li>Игровой никнейм в Arizona Role Play</li>
-      <li>Статистика использования сервиса (внутриигровые показатели)</li>
-      <li>Дата регистрации и последнего входа</li>
-    </ul>
-
-    <h2>3. Как мы используем данные</h2>
-    <ul>
-      <li>Идентификация пользователя в системе</li>
-      <li>Отображение статистики и профиля</li>
-      <li>Проверка активности подписки</li>
-      <li>Связь с пользователем по вопросам поддержки</li>
-    </ul>
-
-    <h2>4. Хранение данных</h2>
-    <p>4.1. Данные хранятся на серверах Cloudflare (США/ЕС) с применением шифрования.</p>
-    <p>4.2. Данные хранятся в течение всего времени существования учётной записи и 90 дней после её удаления.</p>
-
-    <h2>5. Передача третьим лицам</h2>
-    <p>5.1. Мы не продаём и не передаём персональные данные третьим лицам, за исключением случаев, предусмотренных законодательством РФ.</p>
-    <p>5.2. Для авторизации используется сервис Discord (discord.com). На него распространяется политика конфиденциальности Discord.</p>
-
-    <h2>6. Права пользователя</h2>
-    <p>Пользователь вправе в любой момент:</p>
-    <ul>
-      <li>Запросить информацию о хранимых данных</li>
-      <li>Потребовать исправления или удаления данных</li>
-      <li>Отозвать согласие на обработку данных</li>
-    </ul>
-    <p>Для реализации прав — обратитесь на email: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="3156435453545f5a585f5c504547544847485254425d50525e47580301010671565c50585d1f525e5c">[email&#160;protected]</a></p>
-
-    <h2>7. Cookies</h2>
-    <p>Сайт использует localStorage браузера для хранения сессии пользователя. Данные хранятся локально на устройстве пользователя.</p>
-
-    <h2>8. Контакты</h2>
-    <p>По вопросам обработки персональных данных:<br>Email: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="197e6b7c7b7c7772707774786d6f7c606f607a7c6a75787a766f702b29292e597e74787075377a7674">[email&#160;protected]</a><br>Телефон: +7 (904) 245-50-80</p>
+    <div class="doc-card">
+      <div class="doc-title">Политика конфиденциальности</div>
+      <div class="doc-date">Редакция от 14 марта 2025 г.</div>
+      <h2>1. Общие положения</h2>
+      <p>1.1. Настоящая Политика конфиденциальности описывает порядок сбора, хранения, использования и защиты персональных данных пользователей сервиса <strong>Load Report</strong> (loadrepr.ru).</p>
+      <p>1.2. Используя сервис, Пользователь даёт согласие на обработку своих персональных данных в соответствии с настоящей Политикой.</p>
+      <h2>2. Какие данные мы собираем</h2>
+      <ul>
+        <li>Discord ID и публичные данные профиля Discord (имя, аватар)</li>
+        <li>Адрес электронной почты (при авторизации через Discord)</li>
+        <li>Игровой никнейм в Arizona Role Play</li>
+        <li>Статистика использования сервиса (внутриигровые показатели)</li>
+        <li>Дата регистрации и последнего входа</li>
+      </ul>
+      <h2>3. Как мы используем данные</h2>
+      <ul>
+        <li>Идентификация пользователя в системе</li>
+        <li>Отображение статистики и профиля</li>
+        <li>Проверка активности подписки</li>
+        <li>Связь с пользователем по вопросам поддержки</li>
+      </ul>
+      <h2>4. Хранение данных</h2>
+      <p>4.1. Данные хранятся на серверах Cloudflare (США/ЕС) с применением шифрования.</p>
+      <p>4.2. Данные хранятся в течение всего времени существования учётной записи и 90 дней после её удаления.</p>
+      <h2>5. Передача третьим лицам</h2>
+      <p>5.1. Мы не продаём и не передаём персональные данные третьим лицам, за исключением случаев, предусмотренных законодательством РФ.</p>
+      <p>5.2. Для авторизации используется сервис Discord (discord.com). На него распространяется политика конфиденциальности Discord.</p>
+      <h2>6. Права пользователя</h2>
+      <p>Пользователь вправе в любой момент:</p>
+      <ul>
+        <li>Запросить информацию о хранимых данных</li>
+        <li>Потребовать исправления или удаления данных</li>
+        <li>Отозвать согласие на обработку данных</li>
+      </ul>
+      <p>Для реализации прав — обратитесь на email: <a href="/cdn-cgi/l/email-protection#6b0c190e090e05000205060a1f1d0e121d12080e18070a08041d02595b5b5c2b0c060a020745080406"><span class="__cf_email__" data-cfemail="197e6b7c7b7c7772707774786d6f7c606f607a7c6a75787a766f702b29292e597e74787075377a7674">[email&#160;protected]</span></a></p>
+      <h2>7. Cookies</h2>
+      <p>Сайт использует localStorage браузера для хранения сессии пользователя. Данные хранятся локально на устройстве пользователя.</p>
+      <h2>8. Контакты</h2>
+      <p>По вопросам обработки персональных данных:<br>Email: <a href="/cdn-cgi/l/email-protection#583f2a3d3a3d3633313635392c2e3d212e213b3d2b34393b372e316a68686f183f35393134763b3735"><span class="__cf_email__" data-cfemail="7116031413141f1a181f1c100507140807081214021d10121e07184341414631161c10181d5f121e1c">[email&#160;protected]</span></a><br>Телефон: +7 (904) 245-50-80</p>
+    </div>
   </div>
 
   <!-- ВОЗВРАТ -->
   <div id="refund" class="doc-section">
-    <div class="doc-title">Условия возврата и отмены</div>
-    <div class="doc-date">Редакция от 14 марта 2025 г.</div>
-
-    <h2>1. Право на возврат</h2>
-    <p>1.1. Пользователь вправе запросить возврат денежных средств в течение <strong>2 (двух) календарных дней</strong> с момента оплаты.</p>
-    <p>1.2. Возврат осуществляется при условии, что сервис не использовался или использовался менее 24 часов с момента активации.</p>
-
-    <h2>2. Основания для возврата</h2>
-    <ul>
-      <li>Техническая неисправность сервиса, не устранённая в течение 48 часов</li>
-      <li>Случайная или ошибочная оплата</li>
-      <li>Оплата произведена, но доступ не был активирован</li>
-    </ul>
-
-    <h2>3. Основания для отказа в возврате</h2>
-    <ul>
-      <li>Прошло более 2 календарных дней с момента оплаты</li>
-      <li>Подписка активно использовалась более 24 часов</li>
-      <li>Нарушение Пользователем условий договора оферты</li>
-    </ul>
-
-    <h2>4. Порядок возврата</h2>
-    <p>4.1. Для запроса возврата необходимо написать на email: <a href="/cdn-cgi/l/email-protection#3453465156515a5f5d5a59554042514d424d5751475855575b425d06040403745359555d581a575b59" style="color:var(--blue)"><span class="__cf_email__" data-cfemail="7f180d1a1d1a11141611121e0b091a0609061c1a0c131e1c1009164d4f4f483f18121e1613511c1012">[email&#160;protected]</span></a></p>
-    <p>4.2. В письме укажите: никнейм, дату и сумму оплаты, причину возврата.</p>
-    <p>4.3. Возврат осуществляется тем же способом, которым была произведена оплата, в течение 10 рабочих дней.</p>
-
-    <h2>5. Отмена подписки</h2>
-    <p>5.1. Подписка не продлевается автоматически. По истечении срока доступ прекращается без дополнительных списаний.</p>
-    <p>5.2. При тарифе «Навсегда» отмена не предусмотрена по истечении 2-дневного периода возврата.</p>
+    <div class="doc-card">
+      <div class="doc-title">Условия возврата и отмены</div>
+      <div class="doc-date">Редакция от 14 марта 2025 г.</div>
+      <h2>1. Право на возврат</h2>
+      <p>1.1. Пользователь вправе запросить возврат денежных средств в течение <strong>2 (двух) календарных дней</strong> с момента оплаты.</p>
+      <p>1.2. Возврат осуществляется при условии, что сервис не использовался или использовался менее 24 часов с момента активации.</p>
+      <h2>2. Основания для возврата</h2>
+      <ul>
+        <li>Техническая неисправность сервиса, не устранённая в течение 48 часов</li>
+        <li>Случайная или ошибочная оплата</li>
+        <li>Оплата произведена, но доступ не был активирован</li>
+      </ul>
+      <h2>3. Основания для отказа в возврате</h2>
+      <ul>
+        <li>Прошло более 2 календарных дней с момента оплаты</li>
+        <li>Подписка активно использовалась более 24 часов</li>
+        <li>Нарушение Пользователем условий договора оферты</li>
+      </ul>
+      <h2>4. Порядок возврата</h2>
+      <p>4.1. Для запроса возврата необходимо написать на email: <a href="/cdn-cgi/l/email-protection#95f2e7f0f7f0fbfefcfbf8f4e1e3f0ece3ecf6f0e6f9f4f6fae3fca7a5a5a2d5f2f8f4fcf9bbf6faf8"><span class="__cf_email__" data-cfemail="83e4f1e6e1e6ede8eaedeee2f7f5e6faf5fae0e6f0efe2e0ecf5eab1b3b3b4c3e4eee2eaefade0ecee">[email&#160;protected]</span></a></p>
+      <p>4.2. В письме укажите: никнейм, дату и сумму оплаты, причину возврата.</p>
+      <p>4.3. Возврат осуществляется тем же способом, которым была произведена оплата, в течение 10 рабочих дней.</p>
+      <h2>5. Отмена подписки</h2>
+      <p>5.1. Подписка не продлевается автоматически. По истечении срока доступ прекращается без дополнительных списаний.</p>
+      <p>5.2. При тарифе «Навсегда» отмена не предусмотрена по истечении 2-дневного периода возврата.</p>
+    </div>
   </div>
 
   <!-- УСЛОВИЯ УСЛУГ -->
   <div id="delivery" class="doc-section">
-    <div class="doc-title">Условия оказания услуг</div>
-    <div class="doc-date">Редакция от 14 марта 2025 г.</div>
-
-    <h2>Описание услуги</h2>
-    <p>Load-Repoer — сервис для отслеживания и отображения игровой статистики участников сервера Arizona Role Play (SA:MP). Сервис предоставляет доступ к личному профилю, истории сессий и аналитике.</p>
-
-    <h2>Способ оказания услуги</h2>
-    <p>Услуга предоставляется <strong>в цифровом виде</strong> через сайт loadrepr.ru. Физическая доставка товаров не осуществляется.</p>
-
-    <h2>Срок активации</h2>
-    <table>
-      <tr><th>Событие</th><th>Срок</th></tr>
-      <tr><td>Активация после оплаты</td><td>Автоматически, до 5 минут</td></tr>
-      <tr><td>Ответ поддержки</td><td>До 24 часов</td></tr>
-      <tr><td>Решение технических проблем</td><td>До 48 часов</td></tr>
-    </table>
-
-    <h2>Регионы</h2>
-    <p>Сервис доступен для пользователей из любой точки мира. Оплата принимается в рублях РФ.</p>
-
-    <h2>Тарифные планы</h2>
-    <table>
-      <tr><th>Тариф</th><th>Срок действия</th><th>Стоимость</th><th>Что включено</th></tr>
-      <tr><td>Стандартный</td><td>30 дней</td><td>100 ₽</td><td>Полный доступ к сервису</td></tr>
-      <tr><td>Навсегда</td><td>Бессрочно</td><td>300 ₽</td><td>Полный доступ без ограничений</td></tr>
-    </table>
-
-    <h2>Требования</h2>
-    <ul>
-      <li>Наличие аккаунта Discord для авторизации</li>
-      <li>Наличие игрового никнейма на сервере Arizona Role Play</li>
-      <li>Современный браузер с поддержкой JavaScript</li>
-    </ul>
+    <div class="doc-card">
+      <div class="doc-title">Условия оказания услуг</div>
+      <div class="doc-date">Редакция от 14 марта 2025 г.</div>
+      <h2>Описание услуги</h2>
+      <p>Load Report — сервис для отслеживания и отображения игровой статистики участников сервера Arizona Role Play (SA:MP). Сервис предоставляет доступ к личному профилю, истории сессий и аналитике.</p>
+      <h2>Способ оказания услуги</h2>
+      <p>Услуга предоставляется <strong>в цифровом виде</strong> через сайт loadrepr.ru. Физическая доставка товаров не осуществляется.</p>
+      <h2>Срок активации</h2>
+      <table>
+        <tr><th>Событие</th><th>Срок</th></tr>
+        <tr><td>Активация после оплаты</td><td>Автоматически, до 5 минут</td></tr>
+        <tr><td>Ответ поддержки</td><td>До 24 часов</td></tr>
+        <tr><td>Решение технических проблем</td><td>До 48 часов</td></tr>
+      </table>
+      <h2>Регионы</h2>
+      <p>Сервис доступен для пользователей из любой точки мира. Оплата принимается в рублях РФ.</p>
+      <h2>Тарифные планы</h2>
+      <table>
+        <tr><th>Тариф</th><th>Срок действия</th><th>Стоимость</th><th>Что включено</th></tr>
+        <tr><td>Стандартный</td><td>30 дней</td><td>300 ₽</td><td>Полный доступ к сервису</td></tr>
+        <tr><td>Навсегда</td><td>Бессрочно</td><td>500 ₽</td><td>Полный доступ без ограничений</td></tr>
+      </table>
+      <h2>Требования</h2>
+      <ul>
+        <li>Наличие аккаунта Discord для авторизации</li>
+        <li>Наличие игрового никнейма на сервере Arizona Role Play</li>
+        <li>Современный браузер с поддержкой JavaScript</li>
+      </ul>
+    </div>
   </div>
 
   <!-- ЛИЦЕНЗИЯ -->
   <div id="license" class="doc-section">
-    <div class="doc-title">Лицензия и права</div>
-    <div class="doc-date">Редакция от 14 марта 2025 г.</div>
+    <div class="doc-card">
+      <div class="doc-title">Лицензия и права</div>
+      <div class="doc-date">Редакция от 14 марта 2025 г.</div>
+      <h2>Объект лицензии</h2>
+      <p>Load Report является самостоятельно разработанным сервисом. Все программные компоненты, дизайн и алгоритмы сервиса являются интеллектуальной собственностью владельца сервиса.</p>
+      <h2>Предоставляемые права</h2>
+      <p>Пользователю предоставляется простая (неисключительная) лицензия на использование сервиса в личных некоммерческих целях на условиях подписки.</p>
+      <h2>Ограничения</h2>
+      <ul>
+        <li>Запрещается копировать, воспроизводить или распространять элементы сервиса</li>
+        <li>Запрещается использовать сервис в коммерческих целях без письменного согласия правообладателя</li>
+        <li>Запрещается декомпилировать или производить реверс-инжиниринг программных компонентов</li>
+        <li>Запрещается передавать права пользования третьим лицам</li>
+      </ul>
+      <h2>Отношение к платформам</h2>
+      <p>Load Report является независимым сервисом и не аффилирован с проектом Arizona Role Play, SA:MP или Rockstar Games. Все упоминания игровых брендов используются исключительно в информационных целях.</p>
+    </div>
+  </div>
 
-    <h2>Объект лицензии</h2>
-    <p>Load-Repoer является самостоятельно разработанным сервисом. Все программные компоненты, дизайн и алгоритмы сервиса являются интеллектуальной собственностью владельца сервиса.</p>
+</div>
 
-    <h2>Предоставляемые права</h2>
-    <p>Пользователю предоставляется простая (неисключительная) лицензия на использование сервиса в личных некоммерческих целях на условиях подписки.</p>
+<footer class="site-footer">
+  <div class="footer-copy">© 2025 Load Report · г. Ижевск</div>
+</footer>
 
-    <h2>Ограничения</h2>
-    <ul>
-      <li>Запрещается копировать, воспроизводить или распространять элементы сервиса</li>
-      <li>Запрещается использовать сервис в коммерческих целях без письменного согласия правообладателя</li>
-      <li>Запрещается декомпилировать или производить реверс-инжиниринг программных компонентов</li>
-      <li>Запрещается передавать права пользования третьим лицам</li>
-    </ul>
-
-    <h2>Отношение к платформам</h2>
-    <p>Load-Repoer является независимым сервисом и не аффилирован с проектом Arizona Role Play, SA:MP или Rockstar Games. Все упоминания игровых брендов используются исключительно в и�
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="theme.js"></script>
+<script>
+function show(e, id){
+  if(e) e.preventDefault();
+  document.querySelectorAll('.doc-section').forEach(function(s){s.classList.remove('show');});
+  document.querySelectorAll('.docs-nav a').forEach(function(a){a.classList.remove('active');});
+  var sec=document.getElementById(id); if(sec) sec.classList.add('show');
+  if(e&&e.currentTarget) e.currentTarget.classList.add('active');
+  history.replaceState(null,'','#'+id);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+// open section from hash on load
+(function(){
+  var h=(location.hash||'').replace('#','');
+  if(h&&document.getElementById(h)){
+    document.querySelectorAll('.doc-section').forEach(function(s){s.classList.remove('show');});
+    document.querySelectorAll('.docs-nav a').forEach(function(a){a.classList.remove('active');});
+    document.getElementById(h).classList.add('show');
+    var link=document.querySelector('.docs-nav a[href="#'+h+'"]'); if(link)link.classList.add('active');
+  }
+})();
+</script>
+</body>
+</html>
