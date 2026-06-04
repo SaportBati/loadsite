@@ -130,22 +130,34 @@ function hexToRgb(hex) {
   } : {r: 59, g: 130, b: 246};
 }
 
-// NOTE: light/dark page tokens are owned by app.css + theme.js.
-// applyThemeColor only sets the ACCENT colour (per-user subscription colour),
-// it must NOT override --bg/--text/--muted etc anymore.
 function applyThemeColor(hex) {
-  if(!hex) hex = '#5B4BE8';
+  if(!hex) hex = '#3b82f6';
   const rgb = hexToRgb(hex);
   const root = document.documentElement;
+  
+  // Base accent
   root.style.setProperty('--theme-color', hex);
   root.style.setProperty('--theme-color-rgb', `${rgb.r}, ${rgb.g}, ${rgb.b}`);
-  root.style.setProperty('--theme-glow', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.35)`);
+  
+  // Backgrounds (Very dark version of theme color)
+  root.style.setProperty('--bg', `rgb(${Math.floor(rgb.r * 0.04)}, ${Math.floor(rgb.g * 0.05)}, ${Math.floor(rgb.b * 0.08)})`);
+  root.style.setProperty('--bg2', `rgb(${Math.floor(rgb.r * 0.06)}, ${Math.floor(rgb.g * 0.08)}, ${Math.floor(rgb.b * 0.12)})`);
+  
+  // Surface & Borders
+  root.style.setProperty('--surf', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.04)`);
+  root.style.setProperty('--border', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.15)`);
+  root.style.setProperty('--theme-glow', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.4)`);
+  
+  // Text & Accents
+  root.style.setProperty('--text', `rgb(${Math.min(255, 200 + rgb.r * 0.2)}, ${Math.min(255, 210 + rgb.g * 0.2)}, ${Math.min(255, 230 + rgb.b * 0.1)})`);
+  root.style.setProperty('--muted', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.5)`);
 }
 
-// Apply accent on load if session has a custom colour
+// Apply theme on load if session exists
 (function(){
   const u = loadSession();
   if(u && u.themeColor) applyThemeColor(u.themeColor);
+  else applyThemeColor('#3b82f6');
 })();
 function loadSession(){try{return JSON.parse(localStorage.getItem('lr_user'));}catch{return null;}}
 function clearSession(){localStorage.removeItem('lr_user');}
